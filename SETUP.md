@@ -4,6 +4,19 @@
 - Python 3.11+
 - pip (Python package installer)
 
+## Environment Variables
+For security, the application's `SECRET_KEY` is loaded from an environment variable.
+
+- **`MARITIME_SECRET_KEY`**: This is a critical security setting for Flask. It's used to sign session cookies and other security-related tokens.
+  - **For Production**: You MUST set this to a strong, unique, and random string. Keep it secret!
+    You can generate one using Python:
+    ```python
+    import secrets
+    print(secrets.token_hex(32))
+    ```
+    Then set it as an environment variable in your production environment.
+  - **For Development**: If `MARITIME_SECRET_KEY` is not set, the application will automatically generate a temporary secret key each time it starts and print a warning to the console. This is convenient for development but **NOT SUITABLE FOR PRODUCTION**.
+
 ## Installation Steps
 
 1. **Install Dependencies**
