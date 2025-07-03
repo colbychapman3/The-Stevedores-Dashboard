@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maritime Operations Calendar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .calendar-day {
+            min-height: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+        .calendar-day:hover {
+            background-color: #f9fafb;
+        }
+        .calendar-day:last-child {
+            border-right: none;
+        }
+        .ship-event {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            margin: 1px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ship-event:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+        .ship-event.current {
+            background-color: #10b981;
+            color: white;
+        }
+        .ship-event.past {
+            background-color: #6b7280;
+            color: white;
+        }
+        .ship-event.future {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .ship-event.loading {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .ship-event.discharge {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        /* Ensure proper grid layout */
+        #calendarGrid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        
+        /* Remove borders from last column */
+        #calendarGrid > div:nth-child(7n) {
+            border-right: none;
+        }
+        
+        /* Remove borders from last row */
+        #calendarGrid > div:nth-last-child(-n+7) {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-calendar-alt text-blue-600 mr-3"></i>Maritime Operations Calendar
+                    </h1>
+                    <p class="text-gray-600 mt-2">Colonel Island, Brunswick GA - View past, current, and future ship operations</p>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="goToMasterDashboard()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Master Dashboard
+                    </button>
+                    <button onclick="createNewOperation()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>New Operation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="previousMonth()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                    <i class="fas fa-chevron-left mr-2"></i>Previous
+                </button>
+                <h2 id="currentMonth" class="text-2xl font-bold text-gray-900"></h2>
+                <button onclick="nextMonth()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                    Next<i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Legend -->
+            <div class="flex flex-wrap gap-4 mb-6">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                    <span class="text-sm text-gray-700">Current Operations</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+                    <span class="text-sm text-gray-700">Future Operations</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-gray-500 rounded mr-2"></div>
+                    <span class="text-sm text-gray-700">Past Operations</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                    <span class="text-sm text-gray-700">Loading</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                    <span class="text-sm text-gray-700">Discharge</span>
+                </div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div id="calendarGrid" class="grid grid-cols-7 gap-0 border border-gray-300 rounded-lg overflow-hidden">
+                <!-- Day Headers -->
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Sun</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Mon</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Tue</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Wed</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Thu</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Fri</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b">Sat</div>
+            </div>
+        </div>
+
+        <!-- Ship Details Modal -->
+        <div id="shipModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">Ship Operation Details</h3>
+                            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div id="modalContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let ships = [];
+
+        // Initialize calendar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadShipData();
+            renderCalendar();
+        });
+
+        function loadShipData() {
+            // Load ship data from backend
+            fetch('/api/ships')
+                .then(response => response.json())
+                .then(data => {
+                    ships = data.ships || [];
+                    renderCalendar();
+                })
+                .catch(error => {
+                    console.error('Error loading ship data:', error);
+                    // Use sample data for demonstration
+                    ships = generateSampleData();
+                    renderCalendar();
+                });
+        }
+
+        function generateSampleData() {
+            const today = new Date();
+            return [
+                {
+                    id: 1,
+                    vesselName: "Atlantic Voyager",
+                    operationDate: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    operationType: "Discharge Only",
+                    berth: "Berth 1",
+                    status: "Complete",
+                    totalVehicles: 850,
+                    autoTeamLead: "Colby Chapman",
+                    heavyTeamLead: "Spencer Wilkins"
+                },
+                {
+                    id: 2,
+                    vesselName: "Pacific Star",
+                    operationDate: today.toISOString().split('T')[0],
+                    operationType: "Loading Only",
+                    berth: "Berth 2",
+                    status: "Active",
+                    totalVehicles: 1200,
+                    autoTeamLead: "Cole Bailey",
+                    heavyTeamLead: "Bruce Banner"
+                },
+                {
+                    id: 3,
+                    vesselName: "Nordic Express",
+                    operationDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    operationType: "Discharge + Loading",
+                    berth: "Berth 3",
+                    status: "Scheduled",
+                    totalVehicles: 950,
+                    autoTeamLead: "Colby Chapman",
+                    heavyTeamLead: "Spencer Wilkins"
+                }
+            ];
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Update month header
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+            document.getElementById('currentMonth').textContent = `${monthNames[month]} ${year}`;
+
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            
+            // Clear existing calendar days (keep headers)
+            const headers = calendarGrid.querySelectorAll('.bg-gray-100');
+            calendarGrid.innerHTML = '';
+            headers.forEach(header => calendarGrid.appendChild(header));
+
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day bg-gray-50 border-r border-b';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day bg-white p-2 border-r border-b';
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'font-semibold text-gray-900 mb-1';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+
+                // Add ship events for this day
+                const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayShips = ships.filter(ship => ship.operationDate === currentDateStr);
+                
+                dayShips.forEach(ship => {
+                    const shipEvent = document.createElement('div');
+                    shipEvent.className = `ship-event ${getShipStatusClass(ship)}`;
+                    shipEvent.textContent = `${ship.vesselName} - ${ship.berth}`;
+                    shipEvent.onclick = () => showShipDetails(ship);
+                    dayElement.appendChild(shipEvent);
+                });
+
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Fill remaining cells to complete the 6-week grid
+            const totalCells = 42; // 6 weeks × 7 days
+            const currentCells = 7 + startingDayOfWeek + daysInMonth; // headers + empty + days
+            for (let i = currentCells; i < totalCells + 7; i++) { // +7 for headers
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day bg-gray-50 border-r border-b';
+                calendarGrid.appendChild(emptyDay);
+            }
+        }
+
+        function getShipStatusClass(ship) {
+            const today = new Date().toISOString().split('T')[0];
+            const shipDate = ship.operationDate;
+            
+            if (shipDate < today) return 'past';
+            if (shipDate === today) {
+                if (ship.operationType.includes('Loading')) return 'loading';
+                if (ship.operationType.includes('Discharge')) return 'discharge';
+                return 'current';
+            }
+            return 'future';
+        }
+
+        function showShipDetails(ship) {
+            const modal = document.getElementById('shipModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Vessel Name</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.vesselName}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Operation Date</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.operationDate}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Operation Type</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.operationType}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Berth Location</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.berth}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.status}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Total Vehicles</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.totalVehicles?.toLocaleString() || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Auto Team Lead</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.autoTeamLead || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Heavy Team Lead</label>
+                            <p class="text-lg font-semibold text-gray-900">${ship.heavyTeamLead || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-4 mt-6">
+                        <button onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                            Close
+                        </button>
+                        <button onclick="viewDetailedDashboard('${ship.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                            View Dashboard
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('shipModal').classList.add('hidden');
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function goToMasterDashboard() {
+            window.location.href = '/master';
+        }
+
+        function createNewOperation() {
+            window.location.href = '/';
+        }
+
+        function viewDetailedDashboard(shipId) {
+            // Navigate to detailed dashboard for specific ship
+            window.location.href = `/?ship=${shipId}`;
+        }
+    </script>
+</body>
+</html>
+

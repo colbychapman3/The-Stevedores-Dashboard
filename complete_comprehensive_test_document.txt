@@ -1,0 +1,159 @@
+COMPREHENSIVE MARITIME VESSEL OPERATION DOCUMENT - COMPLETE AUTO-FILL
+===========================================================================
+
+VESSEL INFORMATION
+==================
+Vessel Name: Atlantic Pioneer
+Vessel Type: Auto Carrier
+Port: Colonel Island
+Operation Date: 2025-07-15
+Berth Location: Berth 2
+Stevedoring Company: APS Stevedoring
+Operation Type: Discharge + Loading
+
+STEVEDORE TEAM ASSIGNMENTS
+===========================
+Operation Manager: John Smith
+
+Auto Operations Team:
+- Lead Supervisor: Colby Chapman
+- Assistant Supervisor: Cole Bailey
+
+High & Heavy Team:
+- Lead Supervisor: Spencer Wilkins
+- Assistant Supervisor: Bruce Banner
+
+CARGO CONFIGURATION - DISCHARGE
+================================
+Total Automobiles to Discharge: 2847
+Heavy Equipment to Discharge: 156
+
+Vehicle Brand Breakdown:
+- Mercedes-Benz (MB): 892 vehicles
+- BMW: 654 vehicles
+- Land Rover (LR): 445 vehicles
+- Rolls-Royce (RR): 123 vehicles
+- Audi: 287 vehicles
+- Porsche: 156 vehicles
+- MINI: 234 vehicles
+- Jaguar: 96 vehicles
+
+CARGO CONFIGURATION - LOADING
+==============================
+BRV Loading Target: 450 vehicles
+ZEE Loading Target: 320 vehicles
+SOU Loading Target: 280 vehicles
+Electric Vehicles: 103 vehicles
+Static Cargo Units: 24 units
+Cargo Brand/Type: Mercedes-Benz Premium
+
+ZONE DISCHARGE ALLOCATIONS
+===========================
+Zone A - Vehicles: 1200 vehicles
+Zone A - Description: North Terminal Premium Processing
+Zone B - Vehicles: 950 vehicles
+Zone B - Description: South Terminal Standard Processing
+Zone C - Vehicles: 697 vehicles
+Zone C - Description: Central Processing and Inspection Area
+
+OPERATIONAL PARAMETERS
+======================
+Expected Rate: 125.5 cars/hour
+Total Drivers: 21 drivers
+Shift Start Time: 07:00 AM
+Shift End Time: 19:00 PM
+Break Duration: 60 minutes
+Target Completion: 2025-07-15T18:30
+
+TICO TRANSPORTATION
+===================
+Number of Vans: 4 (7 drivers each)
+Number of Station Wagons: 2 (5 drivers each)
+Total Vehicle Capacity: 38 drivers
+
+Vehicle ID Numbers:
+Van 1 ID: V102
+Van 2 ID: V202
+Van 3 ID: V210
+Van 4 ID: V167
+
+Station Wagon IDs:
+Station Wagon 1 ID: W301
+Station Wagon 2 ID: W405
+
+PERFORMANCE ESTIMATES
+=====================
+Estimated Duration: 23 hours
+Break Time: 60 minutes
+Driver Transportation: Sufficient vehicle capacity (38 capacity for 21 drivers)
+
+ADDITIONAL OPERATIONAL DETAILS
+===============================
+Weather Conditions: Clear skies, light winds
+Tide Information: High tide at 14:30, Low tide at 02:15
+Security Level: Standard security protocols
+Environmental Compliance: Green certified operation
+Safety Protocol: Level 2 - Enhanced safety measures
+Quality Control: ISO 9001 certified processes
+
+CONTACT INFORMATION
+===================
+Port Authority: Brunswick Port Authority
+Emergency Contact: +1-912-555-0123
+Operations Coordinator: Sarah Johnson
+Quality Control Inspector: Mike Rodriguez
+Harbor Master: Captain James Wilson
+Customs Officer: Agent Patricia Davis
+
+EQUIPMENT SPECIFICATIONS
+=========================
+Crane Capacity: 45 tons maximum lift
+Forklift Count: 8 units operational
+Ramp Configuration: 4 ramps fully operational
+Lighting: Full LED illumination system
+Communication: VHF Channel 16 primary, Channel 12 backup
+Fuel Station: Diesel and gasoline available on-site
+
+DOCUMENTATION REQUIREMENTS
+============================
+Bill of Lading: BOL-2025-0715-001
+Customs Declaration: CD-ATL-2025-156
+Environmental Permit: EP-GA-2025-789
+Safety Certification: SC-COL-2025-234
+Insurance Certificate: IC-MAR-2025-445
+Vessel Registration: VR-US-2025-678
+
+CARGO HANDLING SPECIFICATIONS
+==============================
+Loading Sequence: Priority vehicles first, standard vehicles second
+Damage Prevention: Full vehicle inspection before and after handling
+Special Handling: Electric vehicles require special charging protocols
+Hazardous Materials: None declared for this operation
+Temperature Control: Climate-controlled storage for luxury vehicles
+
+TEAM PERFORMANCE METRICS
+=========================
+Auto Operations Team Efficiency: 95% target
+High & Heavy Team Efficiency: 88% target
+Overall Operation Efficiency: 92% target
+Safety Incident Target: Zero incidents
+Quality Score Target: 98% customer satisfaction
+
+FINANCIAL INFORMATION
+======================
+Operation Cost Estimate: $45,000
+Revenue Projection: $78,000
+Profit Margin: 42%
+Payment Terms: Net 30 days
+Currency: USD
+
+LOGISTICS COORDINATION
+======================
+Truck Scheduling: 45 trucks scheduled for pickup
+Rail Coordination: 3 rail cars for heavy equipment
+Warehouse Allocation: Building 7 and Building 12
+Parking Allocation: Lots A, B, and C reserved
+
+This comprehensive document contains all necessary information to auto-fill every field in the maritime operations dashboard wizard system, including vessel information, team assignments, cargo configuration, operational parameters, TICO transportation with vehicle IDs, zone tracking, and all additional operational details.
+
+
