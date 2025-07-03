@@ -3,12 +3,12 @@ import os
 import re
 import json
 from werkzeug.utils import secure_filename
-import PyPDF2
+from pypdf import PdfReader
 
 file_processor_bp = Blueprint('file_processor', __name__)
 
 # Configure upload settings
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'uploads'))
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'csv'}
 MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
 
@@ -19,10 +19,10 @@ def extract_text_from_pdf(file_path):
     """Extract text from PDF file"""
     try:
         with open(file_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
+            pdf_reader = PdfReader(file)
             text = ""
             for page in pdf_reader.pages:
-                text += page.extract_text()
+                text += page.extract_text() or ""
         return text
     except Exception as e:
         return f"Error reading PDF: {str(e)}"
@@ -570,12 +570,11 @@ def upload_file():
         return jsonify({'error': 'File type not supported'}), 400
     
     # Create upload directory if it doesn't exist
-    upload_dir = os.path.join(os.getcwd(), UPLOAD_FOLDER)
-    os.makedirs(upload_dir, exist_ok=True)
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     
     # Save file
     filename = secure_filename(file.filename)
-    file_path = os.path.join(upload_dir, filename)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
     
     return jsonify({
@@ -627,4 +626,3 @@ def extract_data():
 def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'service': 'maritime-file-processor'})
-
