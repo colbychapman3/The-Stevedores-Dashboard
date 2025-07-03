@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Tide Tables - Stevedores Dashboard{% endblock %}
+
+{% block content %}
+<h2>Tide Tables</h2>
+<p>Tidal predictions for the port. Essential for safe navigation and berthing operations.</p>
+<p><em>(Content ideally fetched dynamically or from a regularly updated source. This page should be available offline if cached.)</em></p>
+
+<div>
+    <h3>Today's Tides (Example Data):</h3>
+    <ul>
+        <li>Low Tide: 03:15 AM - 0.8m</li>
+        <li>High Tide: 09:30 AM - 3.2m</li>
+        <li>Low Tide: 03:45 PM - 0.9m</li>
+        <li>High Tide: 10:00 PM - 3.5m</li>
+    </ul>
+
+    <h3>Tomorrow's Tides (Example Data):</h3>
+    <ul>
+        <li>Low Tide: 04:05 AM - 0.7m</li>
+        <li>High Tide: 10:20 AM - 3.3m</li>
+        <li>Low Tide: 04:35 PM - 0.8m</li>
+        <li>High Tide: 10:45 PM - 3.6m</li>
+    </ul>
+    <p><em>Source: Local Port Authority / Hydrographic Office (Data updated: YYYY-MM-DD HH:MM)</em></p>
+</div>
+{% endblock %}

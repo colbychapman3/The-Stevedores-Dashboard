@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Offline - Stevedores Dashboard{% endblock %}
+
+{% block head_extra %}
+<style>
+  .offline-container {
+    text-align: center;
+    padding: 20px;
+    margin-top: 50px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  .offline-container h1 {
+    color: #1e3a8a;
+  }
+  .offline-container ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  .offline-container li {
+    margin-bottom: 10px;
+  }
+  .offline-container button {
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+  }
+  .offline-container button:hover {
+    background-color: #1e3a8a;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="offline-container">
+  <h1>🚢 You're Offline</h1>
+  <p>It seems your internet connection is currently unavailable.</p>
+  <p>Don't worry - you can still access some features:</p>
+  <ul>
+    <li>✅ View cached ship schedules (if previously visited)</li>
+    <li>✅ Update vessel status (will sync automatically when you're back online)</li>
+    <li>✅ Access cached safety protocols (if previously visited)</li>
+    <li>✅ View cached emergency contacts (if previously visited)</li>
+  </ul>
+  <p>Please check your connection or try again.</p>
+  <button onclick="location.reload()">Try Again</button>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+  // Optional: Add any specific JS for the offline page here
+  console.log("Offline page loaded.");
+</script>
+{% endblock %}

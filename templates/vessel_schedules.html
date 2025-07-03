@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Vessel Schedules - Stevedores Dashboard{% endblock %}
+
+{% block content %}
+<h2>Vessel Schedules</h2>
+<p>This page displays current and upcoming vessel schedules, including arrival and departure times, and assigned berths.</p>
+<p><em>(Content to be implemented dynamically. This page should be available offline if cached.)</em></p>
+
+<div>
+    <h3>Today's Arrivals/Departures:</h3>
+    <ul>
+        <li><strong>MV Sea Serpent:</strong> Arrived 08:00 - Berth 1 - Loading General Cargo - Departs 17:00</li>
+        <li><strong>MV Coastal Runner:</strong> Expected 14:00 - Berth 3 - Unloading Containers</li>
+        <li><strong>MV Old Dominion:</strong> Departed 10:30 - From Berth 2</li>
+    </ul>
+    <h3>Upcoming (Next 24 hours):</h3>
+    <ul>
+        <li><strong>MV StarLinker:</strong> Expected Tomorrow 06:00 - Berth 1 - Bulk Grain</li>
+    </ul>
+</div>
+{% endblock %}

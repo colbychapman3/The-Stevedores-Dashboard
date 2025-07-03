@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Ship Status - Stevedores Dashboard{% endblock %}
+
+{% block content %}
+<h2>Ship Status Updates</h2>
+<p>This page will allow users to view and update ship loading/unloading status.</p>
+<p><em>(Content to be implemented)</em></p>
+
+ ფორმა Placeholder for ship status form -->
+<form id="ship-status-form">
+    <div>
+        <label for="ship-name">Ship Name:</label>
+        <input type="text" id="ship-name" name="ship-name" required>
+    </div>
+    <div>
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+            <option value="docked">Docked</option>
+            <option value="loading">Loading</option>
+            <option value="unloading">Unloading</option>
+            <option value="departed">Departed</option>
+        </select>
+    </div>
+    <div>
+        <label for="notes">Notes:</label>
+        <textarea id="notes" name="notes"></textarea>
+    </div>
+    <button type="submit">Update Status</button>
+</form>
+
+<div id="offline-notification" style="display:none; color: green; margin-top:10px;"></div>
+
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+// Basic script for handling ship status update (can be expanded for offline)
+document.getElementById('ship-status-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const shipName = document.getElementById('ship-name').value;
+    const status = document.getElementById('status').value;
+    const notes = document.getElementById('notes').value;
+    const shipData = { shipName, status, notes, timestamp: new Date().toISOString() };
+
+    if (navigator.onLine) {
+        // Send data to server
+        fetch("{{ url_for('api_ship_status') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(shipData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+            alert('Status updated successfully!');
+            // Potentially clear form or give other feedback
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            alert('Error updating status. Check console.');
+            // Implement offline save here as a fallback
+            updateShipStatusOffline(shipData);
+        });
+    } else {
+        // Handle offline: store data and register sync
+        updateShipStatusOffline(shipData);
+    }
+});
+
+function showOfflineNotification(message) {
+    const notificationElement = document.getElementById('offline-notification');
+    if (notificationElement) {
+        notificationElement.textContent = message;
+        notificationElement.style.display = 'block';
+        setTimeout(() => { notificationElement.style.display = 'none'; }, 5000); // Hide after 5s
+    }
+}
+
+async function updateShipStatusOffline(shipData) {
+    console.log('Attempting to save ship data offline:', shipData);
+    // Ensure OfflineStorage class is available (it's in main.js)
+    if ('indexedDB' in window && typeof OfflineStorage !== 'undefined') {
+        try {
+            const storage = new OfflineStorage(); // Create instance
+            // No need to add 'id: Date.now()', as 'id' is auto-incrementing keyPath
+            const storedId = await storage.storeShipUpdate(shipData);
+            console.log(`Data stored offline with generated ID: ${storedId}`);
+            showOfflineNotification('Status saved offline - will sync when connected.');
+
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                navigator.serviceWorker.ready.then(registration => {
+                    return registration.sync.register('ship-status-sync');
+                }).then(() => {
+                    console.log('Background sync registered for ship-status-sync');
+                }).catch(err => {
+                    console.error('Background sync registration failed:', err);
+                });
+            } else {
+                console.warn('Background Sync not supported.');
+            }
+        } catch (error) {
+            console.error('Error storing ship update offline with IndexedDB:', error);
+            showOfflineNotification('Failed to save status offline.');
+        }
+    } else {
+        // Fallback if IndexedDB or OfflineStorage class is not available (e.g., localstorage)
+        // This part needs the OfflineStorage class to be defined and accessible.
+        // For now, just log it.
+        console.warn('OfflineStorage or IndexedDB not available. Data not saved offline.');
+        showOfflineNotification('Offline storage not available. Data not saved.');
+    }
+}
+
+// The OfflineStorage class would need to be included in a global JS file or here.
+// For now, this function will only work if OfflineStorage is defined elsewhere (e.g. main.js)
+// and `static/js/main.js` includes the OfflineStorage class definition.
+</script>
+{% endblock %}
