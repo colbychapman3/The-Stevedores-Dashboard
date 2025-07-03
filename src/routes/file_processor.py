@@ -311,9 +311,25 @@ def upload_file():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
-    
+
+    # Validate file extension
     if not allowed_file(file.filename):
-        return jsonify({'error': 'File type not supported'}), 400
+        return jsonify({'error': f"File type not allowed. Allowed extensions: {', '.join(ALLOWED_EXTENSIONS)}"}), 400
+
+    # Validate file size before saving
+    # Note: Flask's request object might load small files into memory.
+    # For large files, file.seek and file.tell can be used, but it's tricky
+    # if the file is already streamed. MAX_CONTENT_LENGTH in Flask app config
+    # is a better way to handle overall request size. This is an additional check.
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    file.seek(0) # Reset stream position
+
+    if file_length == 0:
+        return jsonify({'error': 'File is empty'}), 400
+
+    if file_length > MAX_FILE_SIZE:
+        return jsonify({'error': f"File exceeds maximum size of {MAX_FILE_SIZE // (1024*1024)}MB"}), 413 # Payload Too Large
     
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     

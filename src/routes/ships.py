@@ -16,8 +16,11 @@ def load_ships():
         if os.path.exists(ships_file):
             with open(ships_file, 'r') as f:
                 ships_data = json.load(f)
+    except (IOError, json.JSONDecodeError) as e:
+        print(f"Error loading ships data from {ships_file}: {e}")
+        ships_data = []
     except Exception as e:
-        print(f"Error loading ships data: {e}")
+        print(f"An unexpected error occurred while loading ships data: {e}")
         ships_data = []
 
 def save_ships():
@@ -26,8 +29,10 @@ def save_ships():
         os.makedirs(os.path.dirname(ships_file), exist_ok=True)
         with open(ships_file, 'w') as f:
             json.dump(ships_data, f, indent=2)
+    except IOError as e:
+        print(f"Error saving ships data to {ships_file}: {e}")
     except Exception as e:
-        print(f"Error saving ships data: {e}")
+        print(f"An unexpected error occurred while saving ships data: {e}")
 
 # Load ships data on module import
 load_ships()
@@ -230,10 +235,16 @@ def get_analytics():
     filtered_ships = []
     for ship in ships_data:
         try:
-            ship_date = datetime.fromisoformat(ship.get('operationDate', ship.get('createdAt', '')))
-            if start_date <= ship_date <= end_date:
-                filtered_ships.append(ship)
-        except:
+            ship_date_str = ship.get('operationDate', ship.get('createdAt', ''))
+            if ship_date_str: # Ensure the date string is not empty
+                ship_date = datetime.fromisoformat(ship_date_str)
+                if start_date <= ship_date <= end_date:
+                    filtered_ships.append(ship)
+        except ValueError as e:
+            print(f"Error parsing date for ship ID {ship.get('id')}: {ship_date_str}. Error: {e}")
+            continue
+        except Exception as e:
+            print(f"An unexpected error occurred while filtering ship ID {ship.get('id')}: {e}")
             continue
     
     # Calculate analytics
@@ -250,9 +261,15 @@ def get_analytics():
             try:
                 start_time = datetime.strptime(ship['shiftStart'], '%H:%M')
                 end_time = datetime.strptime(ship['shiftEnd'], '%H:%M')
-                shift_hours = (end_time - start_time).seconds / 3600
-            except:
-                pass
+                if end_time < start_time: # Handles overnight shifts
+                    end_time += timedelta(days=1)
+                shift_hours = (end_time - start_time).total_seconds() / 3600
+            except ValueError as e:
+                print(f"Error parsing shift times for ship ID {ship.get('id')}: {ship.get('shiftStart')}-{ship.get('shiftEnd')}. Error: {e}")
+                # Keep default shift_hours if parsing fails
+            except Exception as e:
+                print(f"An unexpected error occurred calculating shift hours for ship ID {ship.get('id')}: {e}")
+                # Keep default shift_hours
         
         total_hours += shift_hours
         

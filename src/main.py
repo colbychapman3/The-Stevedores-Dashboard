@@ -3,31 +3,24 @@ import sys
 # DON'T CHANGE THIS !!!
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-import secrets # For generating a default secret key
 from flask import Flask, send_from_directory, render_template # Added render_template
 from flask_cors import CORS
 from src.models.user import db
 from src.routes.user import user_bp
 from src.routes.file_processor import file_processor_bp
 from src.routes.ships import ships_bp
+from src.config import SECRET_KEY, MAX_CONTENT_LENGTH, SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS, BASE_DIR
 
 # Define base directory for robust path construction
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Moved to config.py
 
 STATIC_FOLDER_PATH = os.path.join(BASE_DIR, 'static')
 TEMPLATE_FOLDER_PATH = os.path.join(BASE_DIR, 'templates')
 
 app = Flask(__name__, template_folder=TEMPLATE_FOLDER_PATH, static_folder=STATIC_FOLDER_PATH)
 
-# Load secret key from environment variable or use a default (less secure, for development only)
-SECRET_KEY_VALUE = os.environ.get('MARITIME_SECRET_KEY')
-if not SECRET_KEY_VALUE:
-    print("WARNING: MARITIME_SECRET_KEY environment variable not set. Using default development key.", file=sys.stderr)
-    print("WARNING: For production, set a strong, unique MARITIME_SECRET_KEY environment variable.", file=sys.stderr)
-    SECRET_KEY_VALUE = secrets.token_hex(32) # Generate a random key for development if not set
-
-app.config['SECRET_KEY'] = SECRET_KEY_VALUE
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Enable CORS for all routes
 CORS(app)
@@ -36,8 +29,8 @@ app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(file_processor_bp)
 app.register_blueprint(ships_bp)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'database', 'app.db')}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 db.init_app(app)
 
 with app.app_context():
@@ -68,4 +61,4 @@ def analytics_view():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='https://10e08f0b8d-80.preview.abacusai.app', port=port, debug=False)
