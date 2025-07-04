@@ -208,3 +208,28 @@ For support, please contact:
 
 **The Stevedores Dashboard** - Streamlining Maritime Operations, One Vessel at a Time 🚢
 
+
+## 📱 PWA Features
+
+This Stevedores Dashboard is now a fully functional Progressive Web App (PWA) with:
+
+- **Installable**: Can be installed on mobile devices like a native app
+- **Offline Capable**: Works offline with cached content via service worker
+- **Responsive**: Optimized for all screen sizes from mobile to desktop
+- **Fast Loading**: Cached resources for improved performance
+
+### Installation
+1. Visit the deployed application URL
+2. On mobile: Tap "Add to Home Screen" when prompted
+3. On desktop: Click the install icon in the address bar
+4. The app will install and behave like a native application
+
+### Pages Available
+- **Dashboard**: Main overview with key metrics
+- **Ships**: Fleet management and tracking
+- **Containers**: Container inventory and status
+- **Crew**: Workforce management and scheduling
+- **Analytics**: Detailed performance analytics
+- **Calendar**: Schedule and timeline view
+
+All pages are fully responsive and work offline once cached.
