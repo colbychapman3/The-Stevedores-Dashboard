@@ -69,6 +69,7 @@ The-Stevedores-Dashboard/
 ├── src/
 │   ├── main.py                 # Main Flask application
 │   ├── models/                 # Database models
+│   │   └── user.py            # User database model
 │   └── routes/                 # API endpoints
 │       ├── file_processor.py   # Document processing
 │       ├── ships.py           # Ship operations
@@ -77,9 +78,11 @@ The-Stevedores-Dashboard/
 │   ├── index.html             # Main wizard interface
 │   ├── master-dashboard.html  # Multi-ship dashboard
 │   ├── calendar.html          # Calendar view
-│   └── analytics.html         # Analytics dashboard
+│   ├── analytics.html         # Analytics dashboard
+│   ├── manifest.json          # PWA manifest
+│   └── sw.js                  # Service worker
 ├── uploads/                   # Document upload directory
-├── database/                  # SQLite database
+├── database/                  # SQLite database and JSON files
 ├── requirements.txt           # Python dependencies
 ├── main.py                   # Application entry point
 └── README.md                 # This file
