@@ -455,7 +455,8 @@
                 </div>
                 <div class="flex justify-between mt-8">
                     <button onclick="prevStep(3)" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Previous
+                        ```text
+<i class="fas fa-arrow-left mr-2"></i>Previous
                     </button>
                     <button onclick="nextStep(3)" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition duration-200">
                         Next <i class="fas fa-arrow-right ml-2"></i>
@@ -611,7 +612,42 @@
             safeSetValue('autoOpsAssistant', data.autoOperationsAssistant);
             safeSetValue('heavyOpsLead', data.heavyHeavyLead);
             safeSetValue('heavyOpsAssistant', data.heavyHeavyAssistant);
-            safeSetValue('berthLocation', data.berthLocation);
+            // Populate berth and operation details
+            if (data.berthLocation) {
+                const berthSelect = document.getElementById('berthLocation');
+                if (berthSelect) {
+                    // Try to match the extracted berth to available options
+                    const berthValue = data.berthLocation;
+                    const options = Array.from(berthSelect.options);
+
+                    // First try exact match
+                    let matchFound = false;
+                    for (let option of options) {
+                        if (option.value === berthValue || option.text === berthValue) {
+                            berthSelect.value = option.value;
+                            matchFound = true;
+                            break;
+                        }
+                    }
+
+                    // If no exact match, try partial match for berth numbers
+                    if (!matchFound) {
+                        for (let option of options) {
+                            if (option.value.includes('Berth') && berthValue.includes(option.value.replace('Berth ', ''))) {
+                                berthSelect.value = option.value;
+                                matchFound = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Log for debugging
+                    if (!matchFound) {
+                        console.log('Could not match berth location:', berthValue, 'Available options:', options.map(o => o.value));
+                    }
+                }
+            }
+            safeSetValue('operationType', data.operationType);
             safeSetValue('operationManager', data.operationManager);
 
             // Populate Step 2 fields
@@ -634,7 +670,7 @@
             safeSetValue('shiftStart', data.shiftStart);
             safeSetValue('shiftEnd', data.shiftEnd);
             safeSetValue('breakDuration', data.breakDuration);
-            
+
             if (data.numVans) {
                 safeSetValue('numVans', data.numVans);
                 generateVehicleIdFields();

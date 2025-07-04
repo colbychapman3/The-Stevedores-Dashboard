@@ -357,23 +357,44 @@ def parse_maritime_data(text):
                 data['operationManager'] = match.group(1).strip()
             break
 
-    # Berth location patterns
+    # Berth location patterns - enhanced for better extraction
     berth_patterns = [
         r'berth\s*location[:\s]+([A-Za-z0-9\s]+)',
         r'berth[:\s]+([123])',
         r'berth\s*([123])',
-        r'assigned.*berth[:\s]*([123])'
+        r'assigned.*berth[:\s]*([123])',
+        r'berth\s*assignment[:\s]+([A-Za-z0-9\s]+)',
+        r'dock[:\s]+([123])',
+        r'pier[:\s]+([123])',
+        r'terminal\s*berth[:\s]+([123])',
+        r'vessel.*berth[:\s]+([123])',
+        r'ship.*berth[:\s]+([123])'
     ]
 
     for pattern in berth_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            berth_num = match.group(1).strip()
-            if berth_num in ['1', '2', '3']:
-                data['berthLocation'] = f'Berth {berth_num}'
-            elif 'berth' in berth_num.lower():
-                data['berthLocation'] = berth_num
-            break
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            for match in matches:
+                berth_identifier = str(match).strip()
+                # Handle single digit berth numbers
+                if berth_identifier in ['1', '2', '3']:
+                    data['berthLocation'] = f'Berth {berth_identifier}'
+                    break
+                # Handle full berth names
+                elif 'berth' in berth_identifier.lower() and any(num in berth_identifier for num in ['1', '2', '3']):
+                    data['berthLocation'] = berth_identifier.title()
+                    break
+                # Handle other dock/pier references
+                elif len(berth_identifier) > 0 and any(num in berth_identifier for num in ['1', '2', '3']):
+                    # Extract the number and format as Berth X
+                    for num in ['1', '2', '3']:
+                        if num in berth_identifier:
+                            data['berthLocation'] = f'Berth {num}'
+                            break
+                    if 'berthLocation' in data:
+                        break
+            if 'berthLocation' in data:
+                break
 
     # Extract all additional operational parameters
 
