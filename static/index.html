@@ -662,8 +662,12 @@
             safeSetValue('heavyOpsLead', data.heavyHeavyLead);
             safeSetValue('heavyOpsAssistant', data.heavyHeavyAssistant);
             
-            // Berth location
-            safeSetSelect('berthLocation', data.berthLocation);
+            // Berth location - try multiple possible field names
+            const berthValue = data.berthLocation || data.berth || data.berthAssignment;
+            if (berthValue) {
+                console.log('Setting berth location:', berthValue);
+                safeSetSelect('berthLocation', berthValue);
+            }
             safeSetValue('operationManager', data.operationManager);
 
             // Populate Step 2 fields - use multiple possible field names

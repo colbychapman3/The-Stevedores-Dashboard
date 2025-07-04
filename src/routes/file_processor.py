@@ -22,14 +22,14 @@ def extract_text_from_pdf(file_path):
             pdf_reader = PdfReader(file)
             text = ""
             total_pages = len(pdf_reader.pages)
-            
+
             for page_num, page in enumerate(pdf_reader.pages, 1):
                 page_text = page.extract_text() or ""
                 # Add page separator for better parsing
                 text += f"\n=== PAGE {page_num} OF {total_pages} ===\n"
                 text += page_text
                 text += f"\n=== END PAGE {page_num} ===\n"
-                
+
         return text
     except Exception as e:
         return f"Error reading PDF: {str(e)}"
@@ -52,7 +52,7 @@ def extract_data_from_csv(file_path):
 def parse_maritime_data(text):
     """Parse maritime-specific data from extracted text - handles multi-page documents"""
     data = {}
-    
+
     # Clean up the text for better parsing across page boundaries
     # Remove page markers but keep the content
     clean_text = re.sub(r'=== PAGE \d+ OF \d+ ===\n?', ' ', text)
@@ -410,6 +410,11 @@ def parse_maritime_data(text):
             if 'berthLocation' in data:
                 break
 
+    # Also set alternative field names for berth
+    if 'berthLocation' in data:
+        data['berth'] = data['berthLocation']
+        data['berthAssignment'] = data['berthLocation']
+
     # Extract all additional operational parameters
 
     # Expected Rate patterns
@@ -715,7 +720,7 @@ def parse_maritime_data(text):
         r'brand[/\s]*type[:\s]+([A-Za-z\s\-]+)'
     ]
 
-    for pattern in cargo_type_patterns:
+    forpattern in cargo_type_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['cargoType'] = match.group(1).strip()
