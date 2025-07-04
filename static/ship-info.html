@@ -527,13 +527,6 @@
                     <div class="max-w-4xl max-h-full p-4">
                         <img src="${photo.src}" alt="${photo.name}" class="max-w-full max-h-full object-contain">
                         <div class="text-center mt-4">
-                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Close</button>
-                        </div>
-                    </div>
-                `;
-                    <div class="max-w-4xl max-h-full p-4">
-                        <img src="${photo.src}" alt="${photo.name}" class="max-w-full max-h-full object-contain">
-                        <div class="text-center mt-4">
                             <button onclick="this.closest('.fixed').remove()" class="bg-white text-black px-4 py-2 rounded-lg">Close</button>
                         </div>
                     </div>
@@ -609,8 +602,6 @@
             .catch(error => {
                 document.getElementById('shipUploadStatus').classList.add('hidden');
                 alert('Error processing document: ' + error.message);
-                console.error('Error:', error);
-            });rror.message);
                 console.error('Error:', error);
             });
         }
