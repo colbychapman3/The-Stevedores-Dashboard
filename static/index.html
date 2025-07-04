@@ -575,6 +575,21 @@
                 if (data.success) {
                     document.getElementById('uploadSuccess').classList.remove('hidden');
                     extractedData = data.parsed_data;
+                    
+                    // Debug logging
+                    console.log('Extraction successful!');
+                    console.log('Parsed data:', data.parsed_data);
+                    console.log('Debug info:', data.debug_info);
+                    
+                    // Show debug info to user
+                    if (Object.keys(data.parsed_data).length === 0) {
+                        alert(`No data extracted from document. 
+Text length: ${data.debug_info?.text_length || 'unknown'}
+First 200 chars: ${data.debug_info?.first_200_chars || 'N/A'}
+
+This might indicate the document format is not recognized. Please check the console for more details.`);
+                    }
+                    
                     populateFormFields(data.parsed_data);
                 } else {
                     throw new Error(data.error || 'Extraction failed');

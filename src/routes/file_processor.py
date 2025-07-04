@@ -60,13 +60,18 @@ def parse_maritime_data(text):
     # Normalize whitespace
     clean_text = re.sub(r'\s+', ' ', clean_text)
 
-    # Vessel name patterns - search entire document
+    # More comprehensive vessel name patterns
     vessel_patterns = [
-        r'vessel\s*name[:\s]+([A-Za-z0-9\s]+)',
-        r'ship\s*name[:\s]+([A-Za-z0-9\s]+)',
-        r'mv\s+([A-Za-z0-9\s]+)',
-        r'm/v\s+([A-Za-z0-9\s]+)',
-        r'vessel[:\s]+([A-Za-z0-9\s]+)'
+        r'vessel\s*name[:\s\-=]+([A-Za-z0-9\s\-\.]+)',
+        r'ship\s*name[:\s\-=]+([A-Za-z0-9\s\-\.]+)',
+        r'mv\s+([A-Za-z0-9\s\-\.]+)',
+        r'm/v\s+([A-Za-z0-9\s\-\.]+)',
+        r'vessel[:\s\-=]+([A-Za-z0-9\s\-\.]+)',
+        r'name\s*of\s*vessel[:\s\-=]+([A-Za-z0-9\s\-\.]+)',
+        r'ship[:\s\-=]+([A-Za-z0-9\s\-\.]+)',
+        r'vessel\s*:\s*([A-Za-z0-9\s\-\.]+)',
+        r'([A-Z][A-Z\s]{2,20})\s*(?:vessel|ship)',
+        r'(?:the\s+)?([A-Z][A-Za-z\s]{5,30})\s*(?:auto\s*carrier|roro|vessel)'
     ]
 
     for pattern in vessel_patterns:
@@ -82,19 +87,22 @@ def parse_maritime_data(text):
             if 'vesselName' in data:
                 break
 
-    # Vessel type patterns - search cleaned text
+    # Enhanced vessel type patterns
     vessel_type_patterns = [
-        r'vessel\s*type[:\s]+([A-Za-z\s-]+)',
-        r'ship\s*type[:\s]+([A-Za-z\s-]+)',
-        r'type[:\s]+(auto\s*carrier|roro|ro-ro|container|multi-purpose)',
+        r'vessel\s*type[:\s\-=]+([A-Za-z\s\-]+)',
+        r'ship\s*type[:\s\-=]+([A-Za-z\s\-]+)',
+        r'type[:\s\-=]+(auto\s*carrier|roro|ro-ro|container|multi-purpose|car\s*carrier)',
+        r'(auto\s*carrier|roro|ro-ro|container\s*ship|multi-purpose|car\s*carrier)',
+        r'vehicle\s*carrier',
+        r'automobile\s*carrier'
     ]
 
     for pattern in vessel_type_patterns:
         matches = re.findall(pattern, clean_text, re.IGNORECASE)
         if matches:
             for match in matches:
-                vessel_type = match.strip().lower()
-                if 'auto' in vessel_type or 'car' in vessel_type:
+                vessel_type = str(match).strip().lower()
+                if 'auto' in vessel_type or 'car' in vessel_type or 'vehicle' in vessel_type:
                     data['vesselType'] = 'Auto Carrier'
                     break
                 elif 'roro' in vessel_type or 'ro-ro' in vessel_type:
@@ -109,15 +117,20 @@ def parse_maritime_data(text):
             if 'vesselType' in data:
                 break
 
-    # Port patterns - search cleaned text
+    # Enhanced port patterns
     port_patterns = [
-        r'port[:\s]+([A-Za-z\s]+)',
-        r'destination[:\s]+([A-Za-z\s]+)',
-        r'berth[:\s]+([A-Za-z0-9\s]+)',
+        r'port[:\s\-=]+([A-Za-z\s]+)',
+        r'destination[:\s\-=]+([A-Za-z\s]+)',
+        r'berth[:\s\-=]+([A-Za-z0-9\s]+)',
+        r'location[:\s\-=]+([A-Za-z\s]+)',
+        r'terminal[:\s\-=]+([A-Za-z\s]+)',
         r'colonel\s*island',
         r'brunswick',
         r'savannah',
-        r'charleston'
+        r'charleston',
+        r'(colonel\s*island|brunswick|savannah|charleston)',
+        r'discharge\s*port[:\s\-=]+([A-Za-z\s]+)',
+        r'loading\s*port[:\s\-=]+([A-Za-z\s]+)'
     ]
 
     for pattern in port_patterns:
@@ -260,22 +273,29 @@ def parse_maritime_data(text):
             if count and count.isdigit():
                 data[f'{brand.lower()}Count'] = int(count)
 
-    # Operation type patterns
+    # Enhanced operation type patterns
     operation_patterns = [
-        r'operation[:\s]+(discharge|loading|discharge\s*\+\s*loading)',
-        r'(discharge\s*only|loading\s*only|discharge\s*and\s*loading)'
+        r'operation[:\s\-=]+(discharge|loading|discharge\s*\+\s*loading|discharge\s*and\s*loading)',
+        r'(discharge\s*only|loading\s*only|discharge\s*and\s*loading)',
+        r'type\s*of\s*operation[:\s\-=]+(discharge|loading|both)',
+        r'operation\s*type[:\s\-=]+(discharge|loading|both)',
+        r'work\s*type[:\s\-=]+(discharge|loading|both)',
+        r'(discharge|loading|both)\s*operation',
+        r'cargo\s*operation[:\s\-=]+(discharge|loading|both)'
     ]
 
     for pattern in operation_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
+        match = re.search(pattern, clean_text, re.IGNORECASE)
         if match:
-            op_type = match.group(1).lower()
-            if 'discharge' in op_type and 'loading' in op_type:
+            op_type = match.group(1).lower() if match.groups() else match.group(0).lower()
+            if 'discharge' in op_type and ('loading' in op_type or 'both' in op_type or '+' in op_type):
                 data['operationType'] = 'Discharge + Loading'
             elif 'discharge' in op_type:
                 data['operationType'] = 'Discharge Only'
             elif 'loading' in op_type:
                 data['operationType'] = 'Loading Only'
+            elif 'both' in op_type:
+                data['operationType'] = 'Discharge + Loading'
             break
 
     # Team assignment patterns
@@ -371,18 +391,22 @@ def parse_maritime_data(text):
                 data['operationManager'] = match.group(1).strip()
             break
 
-    # Berth location patterns - enhanced for better extraction
+    # Enhanced berth location patterns
     berth_patterns = [
-        r'berth\s*location[:\s]+([A-Za-z0-9\s]+)',
-        r'berth[:\s]+([123])',
-        r'berth\s*([123])',
-        r'assigned.*berth[:\s]*([123])',
-        r'berth\s*assignment[:\s]+([A-Za-z0-9\s]+)',
-        r'dock[:\s]+([123])',
-        r'pier[:\s]+([123])',
-        r'terminal\s*berth[:\s]+([123])',
-        r'vessel.*berth[:\s]+([123])',
-        r'ship.*berth[:\s]+([123])'
+        r'berth\s*location[:\s\-=]+([A-Za-z0-9\s]+)',
+        r'berth[:\s\-=]+([123456])',
+        r'berth\s*([123456])',
+        r'assigned.*berth[:\s\-=]*([123456])',
+        r'berth\s*assignment[:\s\-=]+([A-Za-z0-9\s]+)',
+        r'dock[:\s\-=]+([123456])',
+        r'pier[:\s\-=]+([123456])',
+        r'terminal\s*berth[:\s\-=]+([123456])',
+        r'vessel.*berth[:\s\-=]+([123456])',
+        r'ship.*berth[:\s\-=]+([123456])',
+        r'mooring[:\s\-=]+([A-Za-z0-9\s]+)',
+        r'wharf[:\s\-=]+([A-Za-z0-9\s]+)',
+        r'(?:at\s+)?berth\s*(\d+)',
+        r'(?:position|location)[:\s\-=]+berth\s*(\d+)'
     ]
 
     for pattern in berth_patterns:
@@ -842,8 +866,13 @@ def extract_data():
         else:
             return jsonify({'error': 'Unsupported file type. Please use PDF, CSV, or TXT files.'}), 400
 
+        print(f"Extracted text length: {len(text)}")
+        print(f"First 500 characters: {text[:500]}")
+
         # Parse maritime-specific data
         extracted_data = parse_maritime_data(text)
+        
+        print(f"Extracted data: {extracted_data}")
 
         # Clean up uploaded file
         os.remove(file_path)
@@ -851,10 +880,16 @@ def extract_data():
         return jsonify({
             'success': True,
             'extracted_text': text[:1000] + '...' if len(text) > 1000 else text,  # Truncate for preview
-            'parsed_data': extracted_data
+            'parsed_data': extracted_data,
+            'debug_info': {
+                'text_length': len(text),
+                'first_200_chars': text[:200],
+                'patterns_found': len(extracted_data)
+            }
         })
 
     except Exception as e:
+        print(f"Extraction error: {str(e)}")
         return jsonify({'error': f'Error processing file: {str(e)}'}), 500
 
 @file_processor_bp.route('/api/health', methods=['GET'])
