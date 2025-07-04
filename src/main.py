@@ -11,7 +11,7 @@ from src.routes.file_processor import file_processor_bp
 from src.routes.ships import ships_bp
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static'))
-app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-dev-key-change-in-production')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Enable CORS for all routes
