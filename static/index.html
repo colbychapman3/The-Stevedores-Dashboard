@@ -266,20 +266,60 @@
                         <input type="number" id="heavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 107">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">BRV Loading Target</label>
-                        <input type="number" id="brvTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 904">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">BRV Total Vehicles</label>
+                        <input type="number" id="brvTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 150">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Electric Vehicles</label>
-                        <input type="number" id="electricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 103">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">SOU Total Vehicles</label>
+                        <input type="number" id="souTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 75">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Static Cargo Units</label>
-                        <input type="number" id="staticCargo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 24">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Cargo Brand/Type</label>
-                        <input type="text" id="cargoType" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Mercedes-Benz">
+                </div>
+
+                <!-- ZEE Compound Section -->
+                <div class="mt-8 p-6 bg-green-50 rounded-lg border border-green-200">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-warehouse text-green-600 mr-2"></i>ZEE Compound Totals
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Configure ZEE compound cargo breakdown and specifications</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Total Vehicles</label>
+                            <input type="number" id="zeeTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 200">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Automobiles</label>
+                            <input type="number" id="zeeAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 180">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Heavy Equipment</label>
+                            <input type="number" id="zeeHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 15">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Electric Vehicles</label>
+                            <input type="number" id="zeeElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Static Cargo Units</label>
+                            <input type="number" id="zeeStaticCargo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 12">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Cargo Type</label>
+                            <input type="text" id="zeeCargoType" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., BMW, Tesla">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Cargo Value (USD)</label>
+                            <input type="number" id="zeeCargoValue" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 5000000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Priority Level</label>
+                            <select id="zeePriority" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                <option value="">Select Priority</option>
+                                <option value="standard">Standard</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="express">Express</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -415,7 +455,7 @@
                 </div>
                 <div class="flex justify-between mt-8">
                     <button onclick="prevStep(3)" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Previous
+                        <i class="fas fa-arrow-left mr-2</i>Previous
                     </button>
                     <button onclick="nextStep(3)" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition duration-200">
                         Next <i class="fas fa-arrow-right ml-2"></i>
@@ -594,6 +634,16 @@
                 document.getElementById('numStationWagons').value = data.numStationWagons;
                 generateVehicleIdFields();
             }
+
+            // Populate ZEE fields
+            if (data.zeeTarget) document.getElementById('zeeTarget').value = data.zeeTarget;
+            if (data.zeeAutomobiles) document.getElementById('zeeAutomobiles').value = data.zeeAutomobiles;
+            if (data.zeeHeavyEquipment) document.getElementById('zeeHeavyEquipment').value = data.zeeHeavyEquipment;
+            if (data.zeeElectricVehicles) document.getElementById('zeeElectricVehicles').value = data.zeeElectricVehicles;
+            if (data.zeeStaticCargo) document.getElementById('zeeStaticCargo').value = data.zeeStaticCargo;
+            if (data.zeeCargoType) document.getElementById('zeeCargoType').value = data.zeeCargoType;
+            if (data.zeeCargoValue) document.getElementById('zeeCargoValue').value = data.zeeCargoValue;
+            if (data.zeePriority) document.getElementById('zeePriority').value = data.zeePriority;
         }
 
         function generateVehicleIdFields() {
