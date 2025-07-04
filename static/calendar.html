@@ -169,9 +169,9 @@
                 <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Sun</div>
                 <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Mon</div>
                 <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Tue</div>
-                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Wed</div>
                 <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Thu</div>
                 <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Fri</div>
+                <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b border-r">Wed</div>
                 <div class="bg-gray-100 p-3 text-center font-semibold text-gray-700 border-b">Sat</div>
             </div>
         </div>
@@ -453,7 +453,7 @@
                 if (data.success) {
                     document.getElementById('calendarUploadSuccess').classList.remove('hidden');
                     console.log('Document processed successfully:', data.parsed_data);
-                    // Optionally create new operation
+                    // Optionally redirect to create new operation
                     if (confirm('Document processed successfully! Would you like to create a new operation with this data?')) {
                         window.location.href = '/';
                     }

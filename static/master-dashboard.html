@@ -93,7 +93,7 @@
         </div>
 
         <!-- Overview Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100">
@@ -402,22 +402,51 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const statusDiv = document.getElementById('masterUploadStatus');
-            const successDiv = document.getElementById('masterUploadSuccess');
+            document.getElementById('masterUploadStatus').classList.remove('hidden');
+            document.getElementById('masterUploadSuccess').classList.add('hidden');
 
-            statusDiv.classList.remove('hidden');
-            successDiv.classList.add('hidden');
+            const formData = new FormData();
+            formData.append('file', file);
 
-            // Simulate file processing
-            setTimeout(() => {
-                statusDiv.classList.add('hidden');
-                successDiv.classList.remove('hidden');
-
-                // Hide success message after 3 seconds
-                setTimeout(() => {
-                    successDiv.classList.add('hidden');
-                }, 3000);
-            }, 2000);
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    return fetch('/api/extract', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            file_path: data.file_path
+                        })
+                    });
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('masterUploadStatus').classList.add('hidden');
+                if (data.success) {
+                    document.getElementById('masterUploadSuccess').classList.remove('hidden');
+                    console.log('Document processed successfully:', data.parsed_data);
+                    // Optionally redirect to wizard with extracted data
+                    if (confirm('Document processed successfully! Would you like to create a new operation with this data?')) {
+                        window.location.href = '/';
+                    }
+                } else {
+                    throw new Error(data.error || 'Extraction failed');
+                }
+            })
+            .catch(error => {
+                document.getElementById('masterUploadStatus').classList.add('hidden');
+                alert('Error processing document: ' + error.message);
+                console.error('Error:', error);
+            });
         }
 
         function goToCalendar() {
