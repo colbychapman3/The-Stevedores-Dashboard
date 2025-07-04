@@ -564,11 +564,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Now extract data from the uploaded file
                     return fetch('/api/extract', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             file_path: data.file_path
