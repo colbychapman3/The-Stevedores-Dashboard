@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +29,16 @@
             border-color: #3182ce;
             background-color: #bee3f8;
         }
+        .deck-complete {
+            background: linear-gradient(90deg, #10b981, #34d399);
+            color: white;
+        }
+        .metric-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
@@ -41,10 +52,13 @@
                     </button>
                     <div>
                         <h1 id="vesselTitle" class="text-3xl font-bold text-gray-900">Ship Information</h1>
-                        <p class="text-gray-600">Detailed Analytics & Management</p>
+                        <p class="text-gray-600">Comprehensive Analytics & Operations Management</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <button onclick="generateReport()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-file-pdf mr-2"></i>Generate Report
+                    </button>
                     <button onclick="updateProgress()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
                         <i class="fas fa-edit mr-2"></i>Update Progress
                     </button>
@@ -58,94 +72,246 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Key Metrics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Current Rate</p>
+                        <p class="text-2xl font-bold text-blue-600" id="currentRateDisplay">0</p>
+                        <p class="text-xs text-gray-500">cars/hour</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-tachometer-alt text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Completion</p>
+                        <p class="text-2xl font-bold text-green-600" id="completionDisplay">0%</p>
+                        <p class="text-xs text-gray-500">of operation</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-percentage text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">ETC</p>
+                        <p class="text-2xl font-bold text-orange-600" id="etcDisplay">--:--</p>
+                        <p class="text-xs text-gray-500">estimated completion</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-orange-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Elapsed Time</p>
+                        <p class="text-2xl font-bold text-purple-600" id="elapsedTimeDisplay">0:00</p>
+                        <p class="text-xs text-gray-500">hours:minutes</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-stopwatch text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Real-time Progress Update Section -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-chart-line text-green-600 mr-3"></i>Real-time Progress Updates
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Discharged</label>
-                        <input type="number" id="dischargedCount" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-                               placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
-                        <p class="text-xs text-gray-500 mt-1">Total: <span id="totalVehicles">1250</span></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Equipment Processed</label>
-                        <input type="number" id="heavyProcessed" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
-                               placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
-                        <p class="text-xs text-gray-500 mt-1">Total: <span id="totalHeavy">150</span></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Rate (cars/hour)</label>
-                        <input type="number" id="currentRate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               placeholder="Enter rate" onchange="updateRealTimeProgress()" min="0" step="0.1">
-                        <p class="text-xs text-gray-500 mt-1">Target: <span id="targetRate">120</span>/hour</p>
-                    </div>
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-chart-line text-green-600 mr-3"></i>Real-time Operations Control
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Discharged</label>
+                    <input type="number" id="dischargedCount" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                           placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
+                    <p class="text-xs text-gray-500 mt-1">Total: <span id="totalVehicles">1250</span></p>
                 </div>
-                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Active Drivers</label>
-                        <input type="number" id="activeDrivers" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
-                               placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
-                        <p class="text-xs text-gray-500 mt-1">Total Available: <span id="totalDrivers">77</span></p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Operation Status</label>
-                        <select id="operationStatus" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" onchange="updateRealTimeProgress()">
-                            <option value="active">Active</option>
-                            <option value="loading">Loading</option>
-                            <option value="discharge">Discharge</option>
-                            <option value="paused">Paused</option>
-                            <option value="complete">Complete</option>
-                        </select>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Deck</label>
+                    <select id="currentDeck" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateRealTimeProgress()">
+                        <option value="1">Deck 1</option>
+                        <option value="2">Deck 2</option>
+                        <option value="3">Deck 3</option>
+                        <option value="4">Deck 4</option>
+                        <option value="5">Deck 5</option>
+                        <option value="6">Deck 6</option>
+                        <option value="7">Deck 7</option>
+                        <option value="8">Deck 8</option>
+                        <option value="9">Deck 9</option>
+                        <option value="10">Deck 10</option>
+                    </select>
                 </div>
-                <div class="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Overall Progress</h3>
-                            <p class="text-sm text-gray-600">Automatically calculated from your inputs</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold text-green-600" id="calculatedProgress">0%</div>
-                            <div class="text-sm text-gray-500">Complete</div>
-                        </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Active Drivers</label>
+                    <input type="number" id="activeDrivers" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                           placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
+                    <p class="text-xs text-gray-500 mt-1">Available: <span id="totalDrivers">77</span></p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Operation Status</label>
+                    <select id="operationStatus" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" onchange="updateRealTimeProgress()">
+                        <option value="active">Active</option>
+                        <option value="loading">Loading</option>
+                        <option value="discharge">Discharge</option>
+                        <option value="break">Break</option>
+                        <option value="paused">Paused</option>
+                        <option value="complete">Complete</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hourly Productivity Analysis -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-blue-600 mr-3"></i>Hourly Productivity Analysis
+                </h3>
+                <canvas id="hourlyProductivityChart" width="400" height="200"></canvas>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                    <div class="text-center p-3 bg-green-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Best Hour</div>
+                        <div class="text-lg font-bold text-green-600" id="bestHour">14:00 (125 cars)</div>
                     </div>
-                    <div class="mt-3 w-full bg-gray-200 rounded-full h-3">
-                        <div id="progressBar" class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    <div class="text-center p-3 bg-red-50 rounded-lg">
+                        <div class="text-sm text-gray-600">Worst Hour</div>
+                        <div class="text-lg font-bold text-red-600" id="worstHour">12:00 (45 cars)</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Document Upload Section -->
-            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                    <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
-                </h2>
-                <div class="flex items-center justify-center w-full">
-                    <label for="shipDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
-                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                            <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
-                        </div>
-                        <input id="shipDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleShipFileUpload(event)">
-                    </label>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-layer-group text-purple-600 mr-3"></i>Deck Progress Overview
+                </h3>
+                <div id="deckProgressContainer" class="space-y-3">
+                    <!-- Deck progress bars will be populated here -->
                 </div>
-                <div id="shipUploadStatus" class="mt-4 hidden">
-                    <div class="flex items-center justify-center">
-                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
-                        <span class="text-blue-600">Processing document...</span>
+            </div>
+        </div>
+
+        <!-- Cargo Flow & Zone Allocation -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-map-marked-alt text-orange-600 mr-3"></i>Zone Allocation & Distance
+                </h3>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-3 gap-4" id="zoneAllocation">
+                        <!-- Zone allocation will be populated here -->
                     </div>
-                </div>
-                <div id="shipUploadSuccess" class="mt-4 hidden">
-                    <div class="flex items-center justify-center text-green-600">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <span>Document processed successfully!</span>
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">Brand Distribution</h4>
+                        <canvas id="brandDistributionChart" width="400" height="200"></canvas>
                     </div>
                 </div>
             </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-clock text-indigo-600 mr-3"></i>Operational Timeline
+                </h3>
+                <div class="space-y-4" id="operationalTimeline">
+                    <!-- Timeline will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Efficiency & Performance Metrics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Efficiency vs Benchmark</h3>
+                <canvas id="efficiencyChart" width="300" height="200"></canvas>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Driver Turnaround Times</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium">Average Turnaround</span>
+                        <span class="text-lg font-bold text-blue-600" id="avgTurnaround">12.5 min</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium">Best Time</span>
+                        <span class="text-lg font-bold text-green-600" id="bestTurnaround">8.2 min</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium">Worst Time</span>
+                        <span class="text-lg font-bold text-red-600" id="worstTurnaround">18.7 min</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Break Schedule</h3>
+                <div class="space-y-2" id="breakSchedule">
+                    <!-- Break schedule will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Inventory Breakdown -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-list-alt text-green-600 mr-3"></i>Detailed Inventory Breakdown
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Brand/Type</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Total</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Discharged</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Remaining</th>
+                            <th class="px-4 py-3 text-right text-sm font-medium text-gray-700">Progress</th>
+                            <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Zone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTable" class="divide-y divide-gray-200">
+                        <!-- Inventory data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Document Upload Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
+            </h2>
+            <div class="flex items-center justify-center w-full">
+                <label for="shipDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
+                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
+                    </div>
+                    <input id="shipDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleShipFileUpload(event)">
+                </label>
+            </div>
+            <div id="shipUploadStatus" class="mt-4 hidden">
+                <div class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+                    <span class="text-blue-600">Processing document...</span>
+                </div>
+            </div>
+            <div id="shipUploadSuccess" class="mt-4 hidden">
+                <div class="flex items-center justify-center text-green-600">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>Document processed successfully!</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Ship Overview -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -181,53 +347,6 @@
             </div>
         </div>
 
-        <!-- Analytics Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Vehicle Processing Chart -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Vehicle Processing Rate</h3>
-                <canvas id="processingChart" width="400" height="200"></canvas>
-            </div>
-
-            <!-- Team Performance -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Team Performance</h3>
-                <canvas id="teamChart" width="400" height="200"></canvas>
-            </div>
-        </div>
-
-        <!-- Data Tables -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Vehicle Breakdown -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Vehicle Breakdown</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full table-auto">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Category</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-700">Count</th>
-                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-700">Processed</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vehicleTable" class="divide-y divide-gray-200">
-                            <!-- Vehicle data will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Zone Allocation -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Zone Allocation</h3>
-                <div class="space-y-4">
-                    <div id="zoneData">
-                        <!-- Zone data will be populated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Photo Management -->
         <div class="bg-white rounded-xl shadow-lg p-6">
             <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
@@ -255,6 +374,10 @@
     <script>
         let currentShip = null;
         let photos = [];
+        let operationStartTime = null;
+        let hourlyData = [];
+        let deckData = [];
+        let brandData = {};
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
@@ -269,12 +392,242 @@
 
             setupPhotoUpload();
             initializeCharts();
-            //Set the values to the real time progress totals and targets
-            document.getElementById('totalVehicles').textContent = 1250;
-            document.getElementById('totalHeavy').textContent = 150;
-            document.getElementById('totalDrivers').textContent = 77;
-            document.getElementById('targetRate').textContent = 120;
+            initializeData();
+            startTimeTracking();
         });
+
+        function initializeData() {
+            // Initialize hourly productivity data
+            hourlyData = [
+                {hour: '07:00', cars: 0, target: 100},
+                {hour: '08:00', cars: 95, target: 100},
+                {hour: '09:00', cars: 110, target: 100},
+                {hour: '10:00', cars: 125, target: 100},
+                {hour: '11:00', cars: 88, target: 100},
+                {hour: '12:00', cars: 45, target: 100}, // Lunch break
+                {hour: '13:00', cars: 0, target: 100},
+                {hour: '14:00', cars: 125, target: 100},
+                {hour: '15:00', cars: 118, target: 100},
+                {hour: '16:00', cars: 108, target: 100},
+                {hour: '17:00', cars: 95, target: 100},
+                {hour: '18:00', cars: 85, target: 100}
+            ];
+
+            // Initialize deck data
+            deckData = [
+                {deck: 1, total: 150, discharged: 150, complete: true},
+                {deck: 2, total: 140, discharged: 140, complete: true},
+                {deck: 3, total: 130, discharged: 125, complete: false},
+                {deck: 4, total: 120, discharged: 95, complete: false},
+                {deck: 5, total: 110, discharged: 45, complete: false},
+                {deck: 6, total: 100, discharged: 0, complete: false},
+                {deck: 7, total: 90, discharged: 0, complete: false},
+                {deck: 8, total: 80, discharged: 0, complete: false},
+                {deck: 9, total: 70, discharged: 0, complete: false},
+                {deck: 10, total: 60, discharged: 0, complete: false}
+            ];
+
+            // Initialize brand data
+            brandData = {
+                'Mercedes-Benz': {total: 350, discharged: 180, zone: 'MB Field', distance: '2.1 km'},
+                'BMW': {total: 280, discharged: 145, zone: 'BMW Field', distance: '1.8 km'},
+                'Land Rover': {total: 220, discharged: 115, zone: 'LR Field', distance: '2.3 km'},
+                'POV': {total: 200, discharged: 95, zone: 'General Yard', distance: '1.5 km'},
+                'Heavy Equipment': {total: 150, discharged: 75, zone: 'Heavy Zone', distance: '3.2 km'},
+                'Static Cargo': {total: 50, discharged: 25, zone: 'Static Bay', distance: '2.8 km'}
+            };
+
+            populateDeckProgress();
+            populateZoneAllocation();
+            populateInventoryTable();
+            populateOperationalTimeline();
+            populateBreakSchedule();
+        }
+
+        function startTimeTracking() {
+            operationStartTime = new Date('2024-01-15T07:00:00');
+            
+            setInterval(() => {
+                updateElapsedTime();
+                updateETC();
+            }, 60000); // Update every minute
+            
+            // Initial update
+            updateElapsedTime();
+            updateETC();
+        }
+
+        function updateElapsedTime() {
+            const now = new Date();
+            const elapsed = Math.floor((now - operationStartTime) / (1000 * 60)); // minutes
+            const hours = Math.floor(elapsed / 60);
+            const minutes = elapsed % 60;
+            document.getElementById('elapsedTimeDisplay').textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+        }
+
+        function updateETC() {
+            const currentProgress = currentShip ? currentShip.progress : 0;
+            if (currentProgress > 0) {
+                const remainingPercentage = 100 - currentProgress;
+                const currentRate = getCurrentRate();
+                if (currentRate > 0) {
+                    const remainingVehicles = (currentShip.totalVehicles * remainingPercentage) / 100;
+                    const hoursRemaining = remainingVehicles / currentRate;
+                    const now = new Date();
+                    const etc = new Date(now.getTime() + (hoursRemaining * 60 * 60 * 1000));
+                    document.getElementById('etcDisplay').textContent = etc.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+            }
+        }
+
+        function getCurrentRate() {
+            const currentHour = new Date().getHours();
+            const hourData = hourlyData.find(h => parseInt(h.hour.split(':')[0]) === currentHour);
+            return hourData ? hourData.cars : 0;
+        }
+
+        function populateDeckProgress() {
+            const container = document.getElementById('deckProgressContainer');
+            const html = deckData.map(deck => {
+                const progress = (deck.discharged / deck.total) * 100;
+                const isComplete = deck.complete;
+                return `
+                    <div class="flex items-center justify-between p-3 rounded-lg ${isComplete ? 'deck-complete' : 'bg-gray-50'}">
+                        <div class="flex items-center">
+                            <span class="font-semibold ${isComplete ? 'text-white' : 'text-gray-900'}">Deck ${deck.deck}</span>
+                            ${isComplete ? '<i class="fas fa-check-circle ml-2"></i>' : ''}
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-sm ${isComplete ? 'text-white' : 'text-gray-600'}">${deck.discharged}/${deck.total}</span>
+                            <div class="w-24 bg-gray-200 rounded-full h-2">
+                                <div class="bg-current h-2 rounded-full" style="width: ${progress}%"></div>
+                            </div>
+                            <span class="text-xs ${isComplete ? 'text-white' : 'text-gray-500'}">${Math.round(progress)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function populateZoneAllocation() {
+            const container = document.getElementById('zoneAllocation');
+            const zones = [
+                {name: 'Zone A', vehicles: 450, capacity: 500, distance: '1.8 km'},
+                {name: 'Zone B', vehicles: 380, capacity: 400, distance: '2.1 km'},
+                {name: 'Zone C', vehicles: 285, capacity: 350, distance: '2.5 km'}
+            ];
+
+            const html = zones.map(zone => {
+                const utilization = (zone.vehicles / zone.capacity) * 100;
+                return `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-gray-800">${zone.name}</h4>
+                        <p class="text-sm text-gray-600">${zone.vehicles}/${zone.capacity} vehicles</p>
+                        <p class="text-xs text-gray-500">${zone.distance} from berth</p>
+                        <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: ${utilization}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">${Math.round(utilization)}% utilized</p>
+                    </div>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function populateInventoryTable() {
+            const tbody = document.getElementById('inventoryTable');
+            const html = Object.entries(brandData).map(([brand, data]) => {
+                const progress = (data.discharged / data.total) * 100;
+                const remaining = data.total - data.discharged;
+                return `
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">${brand}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">${data.total.toLocaleString()}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">${data.discharged.toLocaleString()}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">${remaining.toLocaleString()}</td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-right">
+                            <div class="flex items-center justify-end space-x-2">
+                                <div class="w-16 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: ${progress}%"></div>
+                                </div>
+                                <span>${Math.round(progress)}%</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                ${data.zone}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            tbody.innerHTML = html;
+        }
+
+        function populateOperationalTimeline() {
+            const container = document.getElementById('operationalTimeline');
+            const timeline = [
+                {time: '07:00', event: 'Operation Start', status: 'complete', type: 'start'},
+                {time: '10:30', event: 'First Break', status: 'complete', type: 'break'},
+                {time: '10:45', event: 'Break End', status: 'complete', type: 'resume'},
+                {time: '12:00', event: 'Lunch Break', status: 'complete', type: 'break'},
+                {time: '13:00', event: 'Lunch End', status: 'active', type: 'resume'},
+                {time: '15:30', event: 'Afternoon Break', status: 'upcoming', type: 'break'},
+                {time: '19:00', event: 'Estimated Completion', status: 'upcoming', type: 'end'}
+            ];
+
+            const html = timeline.map(item => {
+                const statusColor = item.status === 'complete' ? 'green' : item.status === 'active' ? 'blue' : 'gray';
+                const icon = item.type === 'start' ? 'play' : item.type === 'break' ? 'pause' : item.type === 'resume' ? 'play' : 'stop';
+                
+                return `
+                    <div class="flex items-center space-x-4 p-3 rounded-lg ${item.status === 'active' ? 'bg-blue-50' : 'bg-gray-50'}">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-${statusColor}-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-${icon} text-${statusColor}-600 text-xs"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-gray-900">${item.event}</div>
+                            <div class="text-xs text-gray-500">${item.time}</div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800">
+                                ${item.status}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
+
+        function populateBreakSchedule() {
+            const container = document.getElementById('breakSchedule');
+            const breaks = [
+                {time: '10:30-10:45', type: 'Morning Break', status: 'complete'},
+                {time: '12:00-13:00', type: 'Lunch Break', status: 'complete'},
+                {time: '15:30-15:45', type: 'Afternoon Break', status: 'upcoming'},
+                {time: '18:00-18:15', type: 'Final Break', status: 'upcoming'}
+            ];
+
+            const html = breaks.map(brk => {
+                const statusColor = brk.status === 'complete' ? 'green' : 'orange';
+                return `
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="font-medium">${brk.type}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-gray-600">${brk.time}</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800">
+                                ${brk.status}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            container.innerHTML = html;
+        }
 
         async function loadShipData(shipId) {
             try {
@@ -323,6 +676,10 @@
 
         function populateShipData() {
             document.getElementById('vesselTitle').textContent = currentShip.vesselName;
+            
+            // Update key metrics
+            document.getElementById('currentRateDisplay').textContent = getCurrentRate();
+            document.getElementById('completionDisplay').textContent = `${currentShip.progress}%`;
 
             const detailsHtml = `
                 <div>
@@ -375,54 +732,90 @@
             updateProgressDisplay(currentShip.progress || 0);
             document.getElementById('progressSlider').value = currentShip.progress || 0;
 
-            // Populate vehicle table
-            populateVehicleTable();
-
-            // Populate zone data
-            populateZoneData();
+            // Set the values to the real time progress totals and targets
+            document.getElementById('totalVehicles').textContent = currentShip.totalVehicles;
+            document.getElementById('totalDrivers').textContent = 77;
         }
 
-        function populateVehicleTable() {
-            const tableHtml = `
-                <tr>
-                    <td class="px-4 py-2 text-sm font-medium text-gray-900">Automobiles</td>
-                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${currentShip.totalAutomobilesDischarge.toLocaleString()}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${Math.floor(currentShip.totalAutomobilesDischarge * (currentShip.progress / 100)).toLocaleString()}</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 text-sm font-medium text-gray-900">Heavy Equipment</td>
-                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${currentShip.heavyEquipmentDischarge.toLocaleString()}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${Math.floor(currentShip.heavyEquipmentDischarge * (currentShip.progress / 100)).toLocaleString()}</td>
-                </tr>
-            `;
-            document.getElementById('vehicleTable').innerHTML = tableHtml;
-        }
+        function initializeCharts() {
+            // Hourly Productivity Chart
+            const hourlyCtx = document.getElementById('hourlyProductivityChart').getContext('2d');
+            new Chart(hourlyCtx, {
+                type: 'line',
+                data: {
+                    labels: hourlyData.map(h => h.hour),
+                    datasets: [{
+                        label: 'Actual Cars/Hour',
+                        data: hourlyData.map(h => h.cars),
+                        borderColor: '#3b82f6',
+                        backgroundColor: '#3b82f620',
+                        tension: 0.1
+                    }, {
+                        label: 'Target Rate',
+                        data: hourlyData.map(h => h.target),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'transparent',
+                        borderDash: [5, 5],
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Cars per Hour'
+                            }
+                        }
+                    }
+                }
+            });
 
-        function populateZoneData() {
-            const zoneHtml = `
-                <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-                    <div>
-                        <div class="font-semibold text-gray-900">BRV Terminal</div>
-                        <div class="text-sm text-gray-600">Target: ${currentShip.brvTarget} vehicles</div>
-                    </div>
-                    <div class="text-2xl font-bold text-blue-600">${Math.floor(currentShip.brvTarget * (currentShip.progress / 100))}</div>
-                </div>
-                <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-                    <div>
-                        <div class="font-semibold text-gray-900">ZEE Compound</div>
-                        <div class="text-sm text-gray-600">Target: ${currentShip.zeeTarget} vehicles</div>
-                    </div>
-                    <div class="text-2xl font-bold text-green-600">${Math.floor(currentShip.zeeTarget * (currentShip.progress / 100))}</div>
-                </div>
-                <div class="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
-                    <div>
-                        <div class="font-semibold text-gray-900">SOU Facility</div>
-                        <div class="text-sm text-gray-600">Target: ${currentShip.souTarget} vehicles</div>
-                    </div>
-                    <div class="text-2xl font-bold text-purple-600">${Math.floor(currentShip.souTarget * (currentShip.progress / 100))}</div>
-                </div>
-            `;
-            document.getElementById('zoneData').innerHTML = zoneHtml;
+            // Brand Distribution Chart
+            const brandCtx = document.getElementById('brandDistributionChart').getContext('2d');
+            new Chart(brandCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(brandData),
+                    datasets: [{
+                        data: Object.values(brandData).map(d => d.total),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Efficiency Chart
+            const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
+            new Chart(efficiencyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Current', 'Benchmark', 'Best Practice'],
+                    datasets: [{
+                        label: 'Efficiency %',
+                        data: [88, 85, 95],
+                        backgroundColor: ['#3b82f6', '#6b7280', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
         }
 
         function updateProgressDisplay(progress) {
@@ -454,8 +847,7 @@
 
                 if (response.ok) {
                     currentShip.progress = progress;
-                    populateVehicleTable();
-                    populateZoneData();
+                    populateInventoryTable();
                     alert('Progress updated successfully!');
                 } else {
                     alert('Failed to update progress');
@@ -464,53 +856,6 @@
                 console.error('Error updating progress:', error);
                 alert('Error updating progress');
             }
-        }
-
-        function initializeCharts() {
-            // Processing Rate Chart
-            const processingCtx = document.getElementById('processingChart').getContext('2d');
-            new Chart(processingCtx, {
-                type: 'line',
-                data: {
-                    labels: ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
-                    datasets: [{
-                        label: 'Vehicles/Hour',
-                        data: [45, 52, 38, 61, 58, 49],
-                        borderColor: '#3b82f6',
-                        backgroundColor: '#3b82f620',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Team Performance Chart
-            const teamCtx = document.getElementById('teamChart').getContext('2d');
-            new Chart(teamCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Auto Operations', 'Heavy Equipment'],
-                    datasets: [{
-                        data: [75, 85],
-                        backgroundColor: ['#3b82f6', '#10b981']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
         }
 
         function setupPhotoUpload() {
@@ -669,19 +1014,66 @@
                 console.error('Error:', error);
             });
         }
-        //New function to update the progress in real time
+
         function updateRealTimeProgress() {
             const discharged = parseInt(document.getElementById('dischargedCount').value) || 0;
-            const heavy = parseInt(document.getElementById('heavyProcessed').value) || 0;
             const totalVehicles = parseInt(document.getElementById('totalVehicles').textContent) || 1250;
-            const totalHeavy = parseInt(document.getElementById('totalHeavy').textContent) || 150;
             const activeDrivers = parseInt(document.getElementById('activeDrivers').value) || 0;
             const operationStatus = document.getElementById('operationStatus').value;
+            const currentDeck = document.getElementById('currentDeck').value;
 
-            let overallProgress = Math.min(100, ((discharged + heavy) / (totalVehicles + totalHeavy)) * 100);
+            let overallProgress = Math.min(100, (discharged / totalVehicles) * 100);
 
             document.getElementById('calculatedProgress').textContent = overallProgress.toFixed(0) + '%';
-            document.getElementById('progressBar').style.width = overallProgress + '%';
+            document.getElementById('completionDisplay').textContent = overallProgress.toFixed(0) + '%';
+            
+            // Update current rate based on status
+            let currentRate = 0;
+            if (operationStatus === 'active' || operationStatus === 'discharge') {
+                currentRate = getCurrentRate();
+            }
+            document.getElementById('currentRateDisplay').textContent = currentRate;
+        }
+
+        function generateReport() {
+            const reportData = {
+                vessel: currentShip.vesselName,
+                date: currentShip.operationDate,
+                progress: currentShip.progress,
+                hourlyData: hourlyData,
+                deckData: deckData,
+                brandData: brandData
+            };
+
+            // Generate a simple text report (in production, you'd generate PDF/Markdown)
+            let report = `VESSEL OPERATION REPORT\n`;
+            report += `========================\n\n`;
+            report += `Vessel: ${reportData.vessel}\n`;
+            report += `Date: ${reportData.date}\n`;
+            report += `Progress: ${reportData.progress}%\n\n`;
+            
+            report += `HOURLY PRODUCTIVITY:\n`;
+            hourlyData.forEach(hour => {
+                if (hour.cars > 0) {
+                    report += `${hour.hour}: ${hour.cars} cars/hour\n`;
+                }
+            });
+            
+            report += `\nBRAND BREAKDOWN:\n`;
+            Object.entries(brandData).forEach(([brand, data]) => {
+                report += `${brand}: ${data.discharged}/${data.total} (${Math.round((data.discharged/data.total)*100)}%)\n`;
+            });
+
+            // Download as text file
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentShip.vesselName}_Report_${currentShip.operationDate}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         }
     </script>
 </body>
