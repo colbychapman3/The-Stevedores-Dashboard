@@ -30,8 +30,37 @@
             </div>
         </div>
 
-        <!-- Time Period Selector -->
+        <!-- Document Upload Section -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
+            </h2>
+            <div class="flex items-center justify-center w-full">
+                <label for="analyticsDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
+                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
+                    </div>
+                    <input id="analyticsDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleAnalyticsFileUpload(event)">
+                </label>
+            </div>
+            <div id="analyticsUploadStatus" class="mt-4 hidden">
+                <div class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+                    <span class="text-blue-600">Processing document...</span>
+                </div>
+            </div>
+            <div id="analyticsUploadSuccess" class="mt-4 hidden">
+                <div class="flex items-center justify-center text-green-600">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>Document processed successfully!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Period Selector -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8"></div>
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <h2 class="text-xl font-bold text-gray-900">Analytics Period</h2>
                 <div class="flex space-x-4">
@@ -371,6 +400,60 @@
 
         function goToCalendar() {
             window.location.href = '/calendar';
+        }
+
+        function handleAnalyticsFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show upload status
+            document.getElementById('analyticsUploadStatus').classList.remove('hidden');
+            document.getElementById('analyticsUploadSuccess').classList.add('hidden');
+
+            // Create FormData and upload file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Now extract data from the uploaded file
+                    return fetch('/api/extract', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            file_path: data.file_path
+                        })
+                    });
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('analyticsUploadStatus').classList.add('hidden');
+                if (data.success) {
+                    document.getElementById('analyticsUploadSuccess').classList.remove('hidden');
+                    console.log('Document processed successfully:', data.parsed_data);
+                    // Optionally redirect to create new operation
+                    if (confirm('Document processed successfully! Would you like to create a new operation with this data?')) {
+                        window.location.href = '/';
+                    }
+                } else {
+                    throw new Error(data.error || 'Extraction failed');
+                }
+            })
+            .catch(error => {
+                document.getElementById('analyticsUploadStatus').classList.add('hidden');
+                alert('Error processing document: ' + error.message);
+                console.error('Error:', error);
+            });
         }
     </script>
 </body>
