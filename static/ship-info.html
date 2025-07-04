@@ -268,13 +268,8 @@
             </div>
         </div>
 
-        <!-- Efficiency & Performance Metrics -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Efficiency vs Benchmark</h3>
-                <canvas id="efficiencyChart" width="300" height="200"></canvas>
-            </div>
-
+        <!-- Performance Metrics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Driver Turnaround Times</h3>
                 <div class="space-y-3">
@@ -945,28 +940,7 @@
                 }
             });
 
-            // Efficiency Chart
-            const efficiencyCtx = document.getElementById('efficiencyChart').getContext('2d');
-            new Chart(efficiencyCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Current', 'Benchmark', 'Best Practice'],
-                    datasets: [{
-                        label: 'Efficiency %',
-                        data: [88, 85, 95],
-                        backgroundColor: ['#3b82f6', '#6b7280', '#10b981']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
+            
         }
 
         function calculateETC() {
