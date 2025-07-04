@@ -26,8 +26,7 @@ def save_ships():
     try:
         # Ensure the directory exists
         db_dir = os.path.dirname(ships_file)
-        if not os.path.exists(db_dir):
-            os.makedirs(db_dir, exist_ok=True)
+        os.makedirs(db_dir, exist_ok=True)
         
         with open(ships_file, 'w') as f:
             json.dump(ships_data, f, indent=2)
