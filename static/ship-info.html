@@ -58,34 +58,94 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Document Upload Section -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
-            </h2>
-            <div class="flex items-center justify-center w-full">
-                <label for="shipDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
-                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
+        <!-- Real-time Progress Update Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-green-600 mr-3"></i>Real-time Progress Updates
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Discharged</label>
+                        <input type="number" id="dischargedCount" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                               placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
+                        <p class="text-xs text-gray-500 mt-1">Total: <span id="totalVehicles">1250</span></p>
                     </div>
-                    <input id="shipDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleShipFileUpload(event)">
-                </label>
-            </div>
-            <div id="shipUploadStatus" class="mt-4 hidden">
-                <div class="flex items-center justify-center">
-                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
-                    <span class="text-blue-600">Processing document...</span>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Equipment Processed</label>
+                        <input type="number" id="heavyProcessed" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+                               placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
+                        <p class="text-xs text-gray-500 mt-1">Total: <span id="totalHeavy">150</span></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Rate (cars/hour)</label>
+                        <input type="number" id="currentRate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               placeholder="Enter rate" onchange="updateRealTimeProgress()" min="0" step="0.1">
+                        <p class="text-xs text-gray-500 mt-1">Target: <span id="targetRate">120</span>/hour</p>
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Active Drivers</label>
+                        <input type="number" id="activeDrivers" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                               placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
+                        <p class="text-xs text-gray-500 mt-1">Total Available: <span id="totalDrivers">77</span></p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Operation Status</label>
+                        <select id="operationStatus" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" onchange="updateRealTimeProgress()">
+                            <option value="active">Active</option>
+                            <option value="loading">Loading</option>
+                            <option value="discharge">Discharge</option>
+                            <option value="paused">Paused</option>
+                            <option value="complete">Complete</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Overall Progress</h3>
+                            <p class="text-sm text-gray-600">Automatically calculated from your inputs</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-3xl font-bold text-green-600" id="calculatedProgress">0%</div>
+                            <div class="text-sm text-gray-500">Complete</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 w-full bg-gray-200 rounded-full h-3">
+                        <div id="progressBar" class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
-            <div id="shipUploadSuccess" class="mt-4 hidden">
-                <div class="flex items-center justify-center text-green-600">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    <span>Document processed successfully!</span>
+
+            <!-- Document Upload Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
+                </h2>
+                <div class="flex items-center justify-center w-full">
+                    <label for="shipDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
+                        </div>
+                        <input id="shipDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleShipFileUpload(event)">
+                    </label>
+                </div>
+                <div id="shipUploadStatus" class="mt-4 hidden">
+                    <div class="flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+                        <span class="text-blue-600">Processing document...</span>
+                    </div>
+                </div>
+                <div id="shipUploadSuccess" class="mt-4 hidden">
+                    <div class="flex items-center justify-center text-green-600">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Document processed successfully!</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <!-- Ship Overview -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -209,6 +269,11 @@
 
             setupPhotoUpload();
             initializeCharts();
+            //Set the values to the real time progress totals and targets
+            document.getElementById('totalVehicles').textContent = 1250;
+            document.getElementById('totalHeavy').textContent = 150;
+            document.getElementById('totalDrivers').textContent = 77;
+            document.getElementById('targetRate').textContent = 120;
         });
 
         async function loadShipData(shipId) {
@@ -603,6 +668,20 @@
                 alert('Error processing document: ' + error.message);
                 console.error('Error:', error);
             });
+        }
+        //New function to update the progress in real time
+        function updateRealTimeProgress() {
+            const discharged = parseInt(document.getElementById('dischargedCount').value) || 0;
+            const heavy = parseInt(document.getElementById('heavyProcessed').value) || 0;
+            const totalVehicles = parseInt(document.getElementById('totalVehicles').textContent) || 1250;
+            const totalHeavy = parseInt(document.getElementById('totalHeavy').textContent) || 150;
+            const activeDrivers = parseInt(document.getElementById('activeDrivers').value) || 0;
+            const operationStatus = document.getElementById('operationStatus').value;
+
+            let overallProgress = Math.min(100, ((discharged + heavy) / (totalVehicles + totalHeavy)) * 100);
+
+            document.getElementById('calculatedProgress').textContent = overallProgress.toFixed(0) + '%';
+            document.getElementById('progressBar').style.width = overallProgress + '%';
         }
     </script>
 </body>
