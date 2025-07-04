@@ -105,7 +105,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-green-100">
@@ -117,7 +117,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-yellow-100">
@@ -129,7 +129,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-purple-100">
@@ -186,7 +186,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <div id="shipsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Ships will be populated here -->
                 <div class="text-center py-12 col-span-full">
@@ -296,7 +296,7 @@
                 const berthElement = document.getElementById(`berth${i}`);
                 const indicator = berthElement.querySelector('.berth-indicator');
                 const statusText = berthElement.querySelector('.text-sm');
-                
+
                 berthElement.className = 'berth-slot bg-gray-100 rounded-lg p-4 text-center cursor-pointer hover:bg-gray-200 transition-colors';
                 indicator.className = 'berth-indicator w-4 h-4 bg-gray-400 rounded-full mx-auto mb-2';
                 statusText.textContent = 'Available';
@@ -308,7 +308,7 @@
                 const berthElement = document.getElementById(`berth${berthNumber}`);
                 const indicator = berthElement.querySelector('.berth-indicator');
                 const statusText = berthElement.querySelector('.text-sm');
-                
+
                 if (berthElement) {
                     berthElement.className = 'berth-slot bg-blue-100 rounded-lg p-4 text-center cursor-pointer hover:bg-blue-200 transition-colors';
                     indicator.className = 'berth-indicator w-4 h-4 bg-blue-500 rounded-full mx-auto mb-2';
@@ -319,7 +319,7 @@
 
         function renderShips() {
             const container = document.getElementById('shipsContainer');
-            
+
             if (ships.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-12 col-span-full">
@@ -344,7 +344,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-4">
                         <div class="flex justify-between text-sm mb-1">
                             <span>Progress</span>
@@ -354,7 +354,7 @@
                             <div class="bg-white h-2 rounded-full" style="width: ${ship.progress}%"></div>
                         </div>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <div class="text-blue-100">Operation</div>
@@ -365,7 +365,7 @@
                             <div class="font-semibold">${ship.totalVehicles.toLocaleString()}</div>
                         </div>
                     </div>
-                    
+
                     <div class="mt-4 pt-4 border-t border-white border-opacity-20">
                         <div class="text-xs text-blue-100 mb-1">Teams</div>
                         <div class="text-sm">
@@ -373,13 +373,13 @@
                             <div><strong>H&H:</strong> ${ship.heavyOpsLead}, ${ship.heavyOpsAssistant}</div>
                         </div>
                     </div>
-                    
+
                     <div class="mt-3 text-xs text-blue-100">
                         Manager: ${ship.operationManager} | ${ship.startTime} - ${ship.estimatedCompletion}
                     </div>
                 </div>
             `).join('');
-            
+
             container.innerHTML = shipsHtml;
         }
 
@@ -430,11 +430,9 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Show upload status
             document.getElementById('masterUploadStatus').classList.remove('hidden');
             document.getElementById('masterUploadSuccess').classList.add('hidden');
 
-            // Create FormData and upload file
             const formData = new FormData();
             formData.append('file', file);
 
@@ -445,7 +443,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Now extract data from the uploaded file
                     return fetch('/api/extract', {
                         method: 'POST',
                         headers: {
@@ -482,4 +479,3 @@
     </script>
 </body>
 </html>
-

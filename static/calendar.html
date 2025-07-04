@@ -53,23 +53,23 @@
             background-color: #ef4444;
             color: white;
         }
-        
+
         /* Ensure proper grid layout */
         #calendarGrid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
         }
-        
+
         /* Remove borders from last column */
         #calendarGrid > div:nth-child(7n) {
             border-right: none;
         }
-        
+
         /* Remove borders from last row */
         #calendarGrid > div:nth-last-child(-n+7) {
             border-bottom: none;
         }
-        
+
         /* Additional calendar styling */
         .calendar-day:hover {
             background-color: #f3f4f6;
@@ -262,7 +262,7 @@
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
-            
+
             // Update month header
             const monthNames = ["January", "February", "March", "April", "May", "June",
                 "July", "August", "September", "October", "November", "December"];
@@ -275,7 +275,7 @@
             const startingDayOfWeek = firstDay.getDay();
 
             const calendarGrid = document.getElementById('calendarGrid');
-            
+
             // Clear existing calendar days (keep headers)
             const headers = calendarGrid.querySelectorAll('.bg-gray-100');
             calendarGrid.innerHTML = '';
@@ -292,7 +292,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day bg-white p-2 border-r border-b';
-                
+
                 const dayNumber = document.createElement('div');
                 dayNumber.className = 'font-semibold text-gray-900 mb-1';
                 dayNumber.textContent = day;
@@ -301,7 +301,7 @@
                 // Add ship events for this day
                 const currentDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayShips = ships.filter(ship => ship.operationDate === currentDateStr);
-                
+
                 dayShips.forEach(ship => {
                     const shipEvent = document.createElement('div');
                     shipEvent.className = `ship-event ${getShipStatusClass(ship)}`;
@@ -326,7 +326,7 @@
         function getShipStatusClass(ship) {
             const today = new Date().toISOString().split('T')[0];
             const shipDate = ship.operationDate;
-            
+
             if (shipDate < today) return 'past';
             if (shipDate === today) {
                 if (ship.operationType.includes('Loading')) return 'loading';
@@ -339,7 +339,7 @@
         function showShipDetails(ship) {
             const modal = document.getElementById('shipModal');
             const content = document.getElementById('modalContent');
-            
+
             content.innerHTML = `
                 <div class="space-y-4">
                     <div class="grid md:grid-cols-2 gap-4">
@@ -386,7 +386,7 @@
                     </div>
                 </div>
             `;
-            
+
             modal.classList.remove('hidden');
         }
 
@@ -421,11 +421,9 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Show upload status
             document.getElementById('calendarUploadStatus').classList.remove('hidden');
             document.getElementById('calendarUploadSuccess').classList.add('hidden');
 
-            // Create FormData and upload file
             const formData = new FormData();
             formData.append('file', file);
 
@@ -436,7 +434,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Now extract data from the uploaded file
                     return fetch('/api/extract', {
                         method: 'POST',
                         headers: {
@@ -456,7 +453,7 @@
                 if (data.success) {
                     document.getElementById('calendarUploadSuccess').classList.remove('hidden');
                     console.log('Document processed successfully:', data.parsed_data);
-                    // Optionally redirect to create new operation
+                    // Optionally create new operation
                     if (confirm('Document processed successfully! Would you like to create a new operation with this data?')) {
                         window.location.href = '/';
                     }
@@ -473,4 +470,3 @@
     </script>
 </body>
 </html>
-
