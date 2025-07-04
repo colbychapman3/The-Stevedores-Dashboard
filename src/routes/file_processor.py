@@ -720,7 +720,7 @@ def parse_maritime_data(text):
         r'brand[/\s]*type[:\s]+([A-Za-z\s\-]+)'
     ]
 
-    forpattern in cargo_type_patterns:
+    for pattern in cargo_type_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['cargoType'] = match.group(1).strip()
