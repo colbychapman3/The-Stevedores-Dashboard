@@ -22,6 +22,7 @@ def load_ships():
 
 def save_ships():
     """Save ships data to file"""
+    global ships_data
     try:
         # Ensure the directory exists
         db_dir = os.path.dirname(ships_file)
@@ -33,7 +34,6 @@ def save_ships():
     except Exception as e:
         print(f"Error saving ships data: {e}")
         # Create empty ships data if save fails
-        global ships_data
         ships_data = []
 
 # Load ships data on module import
