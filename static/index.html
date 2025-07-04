@@ -589,79 +589,95 @@
         }
 
         function populateFormFields(data) {
+            console.log('Populating form fields with data:', data);
+            
             // Helper function to safely set field values
             function safeSetValue(fieldId, value) {
                 const field = document.getElementById(fieldId);
-                if (field && value !== undefined && value !== null) {
+                if (field && value !== undefined && value !== null && value !== '') {
+                    const originalValue = field.value;
                     field.value = value;
+                    console.log(`Set ${fieldId}: '${originalValue}' -> '${value}'`);
+                    
+                    // Trigger change event for any listeners
+                    field.dispatchEvent(new Event('change'));
                 } else if (!field) {
                     console.warn(`Field with ID '${fieldId}' not found`);
+                } else {
+                    console.log(`Skipping ${fieldId} - no value provided (${value})`);
+                }
+            }
+
+            // Helper function to safely set select values
+            function safeSetSelect(fieldId, value) {
+                const field = document.getElementById(fieldId);
+                if (field && value !== undefined && value !== null && value !== '') {
+                    // Try exact match first
+                    const options = Array.from(field.options);
+                    let matchFound = false;
+                    
+                    for (let option of options) {
+                        if (option.value === value || option.text === value) {
+                            field.value = option.value;
+                            matchFound = true;
+                            console.log(`Set select ${fieldId}: '${value}' (exact match)`);
+                            break;
+                        }
+                    }
+                    
+                    // Try partial match for berth numbers
+                    if (!matchFound && fieldId === 'berthLocation') {
+                        for (let option of options) {
+                            if (option.value.includes('Berth') && value.includes(option.value.replace('Berth ', ''))) {
+                                field.value = option.value;
+                                matchFound = true;
+                                console.log(`Set select ${fieldId}: '${value}' (partial match)`);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!matchFound) {
+                        console.warn(`Could not match ${fieldId}:`, value, 'Available options:', options.map(o => `${o.value}:${o.text}`));
+                    }
+                    
+                    // Trigger change event
+                    field.dispatchEvent(new Event('change'));
+                } else if (!field) {
+                    console.warn(`Select field with ID '${fieldId}' not found`);
                 }
             }
 
             // Populate Step 1 fields
             safeSetValue('vesselName', data.vesselName);
-            safeSetValue('vesselType', data.vesselType);
+            safeSetSelect('vesselType', data.vesselType);
             safeSetValue('port', data.port);
             safeSetValue('operationDate', data.operationDate);
             safeSetValue('company', data.company);
-            safeSetValue('operationType', data.operationType);
+            safeSetSelect('operationType', data.operationType);
 
             // Team assignments
             safeSetValue('autoOpsLead', data.autoOperationsLead);
             safeSetValue('autoOpsAssistant', data.autoOperationsAssistant);
             safeSetValue('heavyOpsLead', data.heavyHeavyLead);
             safeSetValue('heavyOpsAssistant', data.heavyHeavyAssistant);
-            // Populate berth and operation details
-            if (data.berthLocation) {
-                const berthSelect = document.getElementById('berthLocation');
-                if (berthSelect) {
-                    // Try to match the extracted berth to available options
-                    const berthValue = data.berthLocation;
-                    const options = Array.from(berthSelect.options);
-
-                    // First try exact match
-                    let matchFound = false;
-                    for (let option of options) {
-                        if (option.value === berthValue || option.text === berthValue) {
-                            berthSelect.value = option.value;
-                            matchFound = true;
-                            break;
-                        }
-                    }
-
-                    // If no exact match, try partial match for berth numbers
-                    if (!matchFound) {
-                        for (let option of options) {
-                            if (option.value.includes('Berth') && berthValue.includes(option.value.replace('Berth ', ''))) {
-                                berthSelect.value = option.value;
-                                matchFound = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Log for debugging
-                    if (!matchFound) {
-                        console.log('Could not match berth location:', berthValue, 'Available options:', options.map(o => o.value));
-                    }
-                }
-            }
-            safeSetValue('operationType', data.operationType);
+            
+            // Berth location
+            safeSetSelect('berthLocation', data.berthLocation);
             safeSetValue('operationManager', data.operationManager);
 
-            // Populate Step 2 fields
-            safeSetValue('totalAutomobiles', data.totalAutomobilesDischarge);
-            safeSetValue('heavyEquipment', data.heavyEquipmentDischarge);
+            // Populate Step 2 fields - use multiple possible field names
+            safeSetValue('totalAutomobiles', data.totalAutomobilesDischarge || data.totalAutomobiles || data.automobiles);
+            safeSetValue('heavyEquipment', data.heavyEquipmentDischarge || data.heavyEquipment);
             safeSetValue('brvTarget', data.brvTarget);
             safeSetValue('souTarget', data.souTarget);
 
             // Zone fields
-            safeSetValue('zoneAVehicles', data.zoneA);
+            safeSetValue('zoneAVehicles', data.zoneA || data.zoneAVehicles);
             safeSetValue('zoneADescription', data.zoneADescription);
-            safeSetValue('zoneBVehicles', data.zoneB);
+            safeSetValue('zoneBVehicles', data.zoneB || data.zoneBVehicles);
             safeSetValue('zoneBDescription', data.zoneBDescription);
-            safeSetValue('zoneCVehicles', data.zoneC);
+            safeSetValue('zoneCVehicles', data.zoneC || data.zoneCVehicles);
             safeSetValue('zoneCDescription', data.zoneCDescription);
 
             // Populate Step 3 fields
@@ -671,6 +687,7 @@
             safeSetValue('shiftEnd', data.shiftEnd);
             safeSetValue('breakDuration', data.breakDuration);
 
+            // Vehicle counts
             if (data.numVans) {
                 safeSetValue('numVans', data.numVans);
                 generateVehicleIdFields();
@@ -688,7 +705,9 @@
             safeSetValue('zeeStaticCargo', data.zeeStaticCargo);
             safeSetValue('zeeCargoType', data.zeeCargoType);
             safeSetValue('zeeCargoValue', data.zeeCargoValue);
-            safeSetValue('zeePriority', data.zeePriority);
+            safeSetSelect('zeePriority', data.zeePriority);
+            
+            console.log('Form population completed');
         }
 
         function generateVehicleIdFields() {

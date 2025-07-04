@@ -199,12 +199,17 @@ def parse_maritime_data(text):
                 data['company'] = match.group(1).strip() if match.groups() else match.group(0).strip()
             break
 
-    # Vehicle count patterns - search all pages
+    # Vehicle count patterns - search all pages with more specific patterns
     vehicle_patterns = [
+        r'total\s*automobiles?[:\s]+(\d+)',
         r'total\s*vehicles?[:\s]+(\d+)',
+        r'automobiles?\s*discharge[:\s]+(\d+)',
         r'automobiles?[:\s]+(\d+)',
         r'cars?[:\s]+(\d+)',
-        r'units?[:\s]+(\d+)'
+        r'units?[:\s]+(\d+)',
+        r'(\d+)\s*automobiles?',
+        r'(\d+)\s*vehicles?',
+        r'(\d+)\s*cars?'
     ]
 
     for pattern in vehicle_patterns:
@@ -214,13 +219,20 @@ def parse_maritime_data(text):
             numbers = [int(match) for match in matches if match.isdigit()]
             if numbers:
                 data['totalAutomobilesDischarge'] = max(numbers)
+                # Also set alternative field names
+                data['totalAutomobiles'] = max(numbers)
+                data['automobiles'] = max(numbers)
                 break
 
-    # Heavy equipment patterns - search all pages
+    # Heavy equipment patterns - search all pages with more specific patterns
     heavy_equipment_patterns = [
+        r'heavy\s*equipment\s*units?[:\s]+(\d+)',
         r'heavy\s*equipment[:\s]+(\d+)',
         r'hh[:\s]+(\d+)',
-        r'high\s*&\s*heavy[:\s]+(\d+)'
+        r'high\s*&\s*heavy[:\s]+(\d+)',
+        r'high\s*and\s*heavy[:\s]+(\d+)',
+        r'(\d+)\s*heavy\s*equipment',
+        r'equipment\s*units?[:\s]+(\d+)'
     ]
 
     for pattern in heavy_equipment_patterns:
@@ -229,6 +241,8 @@ def parse_maritime_data(text):
             numbers = [int(match) for match in matches if match.isdigit()]
             if numbers:
                 data['heavyEquipmentDischarge'] = max(numbers)
+                # Also set alternative field name
+                data['heavyEquipment'] = max(numbers)
                 break
 
     # Brand-specific patterns
@@ -511,22 +525,51 @@ def parse_maritime_data(text):
             elif i == 2:
                 data['zoneC'] = match.group(1).strip()
 
-    # Loading target patterns
-    loading_patterns = [
+    # Loading target patterns - enhanced with more variations
+    brv_patterns = [
         r'brv\s*terminal[:\s]+(\d+)',
-        r'zee\s*compound[:\s]+(\d+)',
-        r'sou\s*facility[:\s]+(\d+)',
+        r'brv\s*total\s*vehicles?[:\s]+(\d+)',
+        r'brv[:\s]+(\d+)',
+        r'brunswick\s*terminal[:\s]+(\d+)'
     ]
 
-    for i, pattern in enumerate(loading_patterns):
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            if i == 0:
-                data['brvTarget'] = match.group(1).strip()
-            elif i == 1:
-                data['zeeTarget'] = match.group(1).strip()
-            elif i == 2:
-                data['souTarget'] = match.group(1).strip()
+    for pattern in brv_patterns:
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            numbers = [int(match) for match in matches if match.isdigit()]
+            if numbers:
+                data['brvTarget'] = max(numbers)
+                break
+
+    zee_patterns = [
+        r'zee\s*compound[:\s]+(\d+)',
+        r'zee\s*total\s*vehicles?[:\s]+(\d+)',
+        r'zee[:\s]+(\d+)',
+        r'zee\s*facility[:\s]+(\d+)'
+    ]
+
+    for pattern in zee_patterns:
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            numbers = [int(match) for match in matches if match.isdigit()]
+            if numbers:
+                data['zeeTarget'] = max(numbers)
+                break
+
+    sou_patterns = [
+        r'sou\s*facility[:\s]+(\d+)',
+        r'sou\s*total\s*vehicles?[:\s]+(\d+)',
+        r'sou[:\s]+(\d+)',
+        r'southern\s*facility[:\s]+(\d+)'
+    ]
+
+    for pattern in sou_patterns:
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            numbers = [int(match) for match in matches if match.isdigit()]
+            if numbers:
+                data['souTarget'] = max(numbers)
+                break
 
     # Vehicle brand patterns (additional brands)
     brand_patterns = [
