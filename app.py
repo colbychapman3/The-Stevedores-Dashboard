@@ -1,25 +1,44 @@
-#!/usr/bin/env python3
-"""
-WSGI entry point for the Maritime Dashboard Flask application.
-This file serves as the main application entry point for deployment.
-"""
-
+from flask import Flask, render_template, jsonify
 import os
-import sys
 
-# Add the current directory to the Python path
-sys.path.insert(0, os.path.dirname(__file__))
+app = Flask(__name__)
 
-# Import the Flask app from the src directory
-from src.main import app
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-# This is the WSGI application object that deployment services look for
-application = app
+@app.route('/ships')
+def ships():
+    return render_template('ships.html')
+
+@app.route('/containers')
+def containers():
+    return render_template('containers.html')
+
+@app.route('/crew')
+def crew():
+    return render_template('crew.html')
+
+@app.route('/analytics')
+def analytics():
+    return render_template('analytics.html')
+
+@app.route('/calendar')
+def calendar():
+    return render_template('calendar.html')
+
+@app.route('/master-dashboard')
+def master_dashboard():
+    return render_template('master-dashboard.html')
+
+@app.route('/api/stats')
+def api_stats():
+    return jsonify({
+        'ships': {'total': 4, 'active': 2, 'maintenance': 1, 'inactive': 1},
+        'containers': {'total': 156, 'loaded': 89, 'empty': 45, 'transit': 22},
+        'crew': {'total': 24, 'on_duty': 18, 'off_duty': 4, 'break': 2}
+    })
 
 if __name__ == '__main__':
-    # Get port from environment variable (for deployment) or default to 5000
     port = int(os.environ.get('PORT', 5000))
-    
-    # Run the Flask application
-    app.run(host='0.0.0.0', port=port, debug=False)
-
+    app.run(host='0.0.0.0', port=port, debug=True)
