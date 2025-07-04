@@ -16,13 +16,20 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def extract_text_from_pdf(file_path):
-    """Extract text from PDF file"""
+    """Extract text from PDF file - processes all pages"""
     try:
         with open(file_path, 'rb') as file:
             pdf_reader = PdfReader(file)
             text = ""
-            for page in pdf_reader.pages:
-                text += page.extract_text() or ""
+            total_pages = len(pdf_reader.pages)
+            
+            for page_num, page in enumerate(pdf_reader.pages, 1):
+                page_text = page.extract_text() or ""
+                # Add page separator for better parsing
+                text += f"\n=== PAGE {page_num} OF {total_pages} ===\n"
+                text += page_text
+                text += f"\n=== END PAGE {page_num} ===\n"
+                
         return text
     except Exception as e:
         return f"Error reading PDF: {str(e)}"
@@ -43,10 +50,17 @@ def extract_data_from_csv(file_path):
         return f"Error reading CSV file: {str(e)}"
 
 def parse_maritime_data(text):
-    """Parse maritime-specific data from extracted text"""
+    """Parse maritime-specific data from extracted text - handles multi-page documents"""
     data = {}
+    
+    # Clean up the text for better parsing across page boundaries
+    # Remove page markers but keep the content
+    clean_text = re.sub(r'=== PAGE \d+ OF \d+ ===\n?', ' ', text)
+    clean_text = re.sub(r'=== END PAGE \d+ ===\n?', ' ', clean_text)
+    # Normalize whitespace
+    clean_text = re.sub(r'\s+', ' ', clean_text)
 
-    # Vessel name patterns
+    # Vessel name patterns - search entire document
     vessel_patterns = [
         r'vessel\s*name[:\s]+([A-Za-z0-9\s]+)',
         r'ship\s*name[:\s]+([A-Za-z0-9\s]+)',
@@ -56,12 +70,19 @@ def parse_maritime_data(text):
     ]
 
     for pattern in vessel_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            data['vesselName'] = match.group(1).strip()
-            break
+        # Search all occurrences, not just the first one
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            # Take the first match that looks like a valid vessel name
+            for match in matches:
+                vessel_name = match.strip()
+                if len(vessel_name) > 2 and not vessel_name.lower() in ['type', 'information', 'details']:
+                    data['vesselName'] = vessel_name
+                    break
+            if 'vesselName' in data:
+                break
 
-    # Vessel type patterns
+    # Vessel type patterns - search cleaned text
     vessel_type_patterns = [
         r'vessel\s*type[:\s]+([A-Za-z\s-]+)',
         r'ship\s*type[:\s]+([A-Za-z\s-]+)',
@@ -69,20 +90,26 @@ def parse_maritime_data(text):
     ]
 
     for pattern in vessel_type_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            vessel_type = match.group(1).strip().lower()
-            if 'auto' in vessel_type or 'car' in vessel_type:
-                data['vesselType'] = 'Auto Carrier'
-            elif 'roro' in vessel_type or 'ro-ro' in vessel_type:
-                data['vesselType'] = 'RoRo Vessel'
-            elif 'container' in vessel_type:
-                data['vesselType'] = 'Container Ship'
-            elif 'multi' in vessel_type:
-                data['vesselType'] = 'Multi-Purpose'
-            break
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            for match in matches:
+                vessel_type = match.strip().lower()
+                if 'auto' in vessel_type or 'car' in vessel_type:
+                    data['vesselType'] = 'Auto Carrier'
+                    break
+                elif 'roro' in vessel_type or 'ro-ro' in vessel_type:
+                    data['vesselType'] = 'RoRo Vessel'
+                    break
+                elif 'container' in vessel_type:
+                    data['vesselType'] = 'Container Ship'
+                    break
+                elif 'multi' in vessel_type:
+                    data['vesselType'] = 'Multi-Purpose'
+                    break
+            if 'vesselType' in data:
+                break
 
-    # Port patterns
+    # Port patterns - search cleaned text
     port_patterns = [
         r'port[:\s]+([A-Za-z\s]+)',
         r'destination[:\s]+([A-Za-z\s]+)',
@@ -94,15 +121,34 @@ def parse_maritime_data(text):
     ]
 
     for pattern in port_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            if 'colonel' in match.group(0).lower():
-                data['port'] = 'Colonel Island'
-            else:
-                data['port'] = match.group(1).strip() if match.groups() else match.group(0).strip()
-            break
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            for match in matches:
+                if isinstance(match, tuple):
+                    match = match[0] if match[0] else match
+                if 'colonel' in str(match).lower():
+                    data['port'] = 'Colonel Island'
+                    break
+                elif len(str(match).strip()) > 1:
+                    data['port'] = str(match).strip()
+                    break
+            if 'port' in data:
+                break
+        else:
+            # Check for direct matches
+            match = re.search(pattern, clean_text, re.IGNORECASE)
+            if match:
+                if 'colonel' in match.group(0).lower():
+                    data['port'] = 'Colonel Island'
+                    break
+                elif match.groups():
+                    data['port'] = match.group(1).strip()
+                    break
+                else:
+                    data['port'] = match.group(0).strip()
+                    break
 
-    # Date patterns
+    # Date patterns - search cleaned text for all dates
     date_patterns = [
         r'(\d{4}-\d{2}-\d{2})',
         r'(\d{2}/\d{2}/\d{4})',
@@ -111,17 +157,25 @@ def parse_maritime_data(text):
     ]
 
     for pattern in date_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            date_str = match.group(1)
-            # Convert to YYYY-MM-DD format
-            if '/' in date_str:
-                parts = date_str.split('/')
-                if len(parts[2]) == 4:  # MM/DD/YYYY
-                    data['operationDate'] = f"{parts[2]}-{parts[0].zfill(2)}-{parts[1].zfill(2)}"
-            elif '-' in date_str and len(date_str.split('-')[0]) == 4:  # YYYY-MM-DD
-                data['operationDate'] = date_str
-            break
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            for date_str in matches:
+                if isinstance(date_str, tuple):
+                    date_str = date_str[0]
+                try:
+                    # Convert to YYYY-MM-DD format
+                    if '/' in date_str:
+                        parts = date_str.split('/')
+                        if len(parts) == 3 and len(parts[2]) == 4:  # MM/DD/YYYY
+                            data['operationDate'] = f"{parts[2]}-{parts[0].zfill(2)}-{parts[1].zfill(2)}"
+                            break
+                    elif '-' in date_str and len(date_str.split('-')[0]) == 4:  # YYYY-MM-DD
+                        data['operationDate'] = date_str
+                        break
+                except:
+                    continue
+            if 'operationDate' in data:
+                break
 
     # Company patterns
     company_patterns = [
@@ -145,7 +199,7 @@ def parse_maritime_data(text):
                 data['company'] = match.group(1).strip() if match.groups() else match.group(0).strip()
             break
 
-    # Vehicle count patterns
+    # Vehicle count patterns - search all pages
     vehicle_patterns = [
         r'total\s*vehicles?[:\s]+(\d+)',
         r'automobiles?[:\s]+(\d+)',
@@ -154,12 +208,15 @@ def parse_maritime_data(text):
     ]
 
     for pattern in vehicle_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            data['totalAutomobilesDischarge'] = int(match.group(1))
-            break
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            # Take the largest number found (likely the total)
+            numbers = [int(match) for match in matches if match.isdigit()]
+            if numbers:
+                data['totalAutomobilesDischarge'] = max(numbers)
+                break
 
-    # Heavy equipment patterns
+    # Heavy equipment patterns - search all pages
     heavy_equipment_patterns = [
         r'heavy\s*equipment[:\s]+(\d+)',
         r'hh[:\s]+(\d+)',
@@ -167,10 +224,12 @@ def parse_maritime_data(text):
     ]
 
     for pattern in heavy_equipment_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            data['heavyEquipmentDischarge'] = int(match.group(1))
-            break
+        matches = re.findall(pattern, clean_text, re.IGNORECASE)
+        if matches:
+            numbers = [int(match) for match in matches if match.isdigit()]
+            if numbers:
+                data['heavyEquipmentDischarge'] = max(numbers)
+                break
 
     # Brand-specific patterns
     brand_patterns = {
