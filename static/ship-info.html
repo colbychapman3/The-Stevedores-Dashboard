@@ -354,36 +354,98 @@
             </div>
         </div>
 
-        <!-- Ship Overview -->
+        <!-- Interactive Tools -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <!-- Ship Details Card -->
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+            <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                     <i class="fas fa-ship text-blue-600 mr-3"></i>Vessel Information
                 </h2>
-                <div id="shipDetails" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div id="shipDetails" class="grid grid-cols-1 gap-4">
                     <!-- Ship details will be populated here -->
                 </div>
             </div>
 
-            <!-- Progress Circle -->
-            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Operation Progress</h3>
-                <div class="relative inline-flex items-center justify-center">
-                    <svg class="w-32 h-32">
-                        <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
-                        <circle id="progressCircle" cx="64" cy="64" r="56" stroke="#3b82f6" stroke-width="8" fill="transparent" stroke-dasharray="351.86" stroke-dashoffset="351.86" class="progress-ring-circle"></circle>
-                    </svg>
-                    <div class="absolute text-center">
-                        <div id="progressText" class="text-3xl font-bold text-gray-900">0%</div>
-                        <div class="text-sm text-gray-500">Complete</div>
+            <!-- Estimated Time of Completion Widget -->
+            <div class="bg-blue-50 rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-clock text-blue-600 mr-3"></i>Estimated Time of Completion
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Remaining</label>
+                        <input type="number" id="vehiclesRemaining" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               placeholder="1003" value="1003" onchange="calculateETC()">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Rate (cars/hour)</label>
+                        <input type="number" id="currentRate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               placeholder="180.2" value="180.2" step="0.1" onchange="calculateETC()">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Current Time</label>
+                        <input type="time" id="currentTime" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                               value="16:09" onchange="calculateETC()">
+                    </div>
+                    
+                    <button onclick="calculateETC()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition duration-200">
+                        Calculate ETC
+                    </button>
+                    
+                    <div id="etcResult" class="mt-4 p-4 bg-white rounded-lg border border-blue-200">
+                        <div class="text-sm text-gray-600">Estimated Completion Time</div>
+                        <div class="text-2xl font-bold text-blue-600" id="calculatedETC">--:--</div>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <input type="range" id="progressSlider" min="0" max="100" value="0" class="w-full" onchange="updateProgressValue()">
-                    <button onclick="saveProgress()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200 w-full">
-                        Save Progress
-                    </button>
+            </div>
+
+            <!-- Port Progress Simulator Widget -->
+            <div class="bg-green-50 rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-green-600 mr-3"></i>Port Progress Simulator
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">BRV Progress</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="brvProgress" min="0" max="904" value="520" class="flex-1" onchange="updatePortProgress()">
+                            <span class="text-sm font-medium text-gray-700 w-16" id="brvValue">520/904</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div id="brvBar" class="bg-blue-500 h-2 rounded-full" style="width: 57.5%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Progress</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="zeeProgress" min="0" max="300" value="0" class="flex-1" onchange="updatePortProgress()">
+                            <span class="text-sm font-medium text-gray-700 w-16" id="zeeValue">0/300</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div id="zeeBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">SOU Progress</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="souProgress" min="0" max="200" value="0" class="flex-1" onchange="updatePortProgress()">
+                            <span class="text-sm font-medium text-gray-700 w-16" id="souValue">0/200</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                            <div id="souBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-white rounded-lg border border-green-200">
+                        <div class="text-sm text-gray-600">Total Progress</div>
+                        <div class="text-2xl font-bold text-green-600" id="totalProgress">37.0%</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -778,55 +840,48 @@
             document.getElementById('completionDisplay').textContent = `${currentShip.progress}%`;
 
             const detailsHtml = `
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Vessel Name</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.vesselName}</p>
+                <div class="text-center mb-4">
+                    <div class="text-2xl font-bold text-gray-900">${currentShip.vesselName}</div>
+                    <div class="text-sm text-gray-600">${currentShip.vesselType}</div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Vessel Type</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.vesselType}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Operation Date</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.operationDate}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Berth Location</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.berth}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Operation Type</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.operationType}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Status</label>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ${currentShip.status}
-                    </span>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Auto Operations Lead</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.autoOpsLead}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Heavy Operations Lead</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.heavyOpsLead}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Operation Manager</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.operationManager}</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Total Vehicles</label>
-                    <p class="text-lg font-semibold text-gray-900">${currentShip.totalVehicles.toLocaleString()}</p>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date:</span>
+                        <span class="font-semibold">${currentShip.operationDate}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Berth:</span>
+                        <span class="font-semibold">${currentShip.berth}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Operation:</span>
+                        <span class="font-semibold">${currentShip.operationType}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ${currentShip.status}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Vehicles:</span>
+                        <span class="font-semibold">${currentShip.totalVehicles.toLocaleString()}</span>
+                    </div>
+                    <div class="pt-3 border-t border-gray-200">
+                        <div class="text-xs text-gray-500 mb-2">Team Leads</div>
+                        <div class="text-xs">
+                            <div><strong>Auto:</strong> ${currentShip.autoOpsLead}</div>
+                            <div><strong>Heavy:</strong> ${currentShip.heavyOpsLead}</div>
+                        </div>
+                    </div>
                 </div>
             `;
 
             document.getElementById('shipDetails').innerHTML = detailsHtml;
 
-            // Update progress
-            updateProgressDisplay(currentShip.progress || 0);
-            document.getElementById('progressSlider').value = currentShip.progress || 0;
+            // Initialize new widgets
+            calculateETC();
+            updatePortProgress();
 
             // Set the values to the real time progress totals and targets
             document.getElementById('totalVehicles').textContent = currentShip.totalVehicles;
@@ -914,19 +969,51 @@
             });
         }
 
-        function updateProgressDisplay(progress) {
-            const circle = document.getElementById('progressCircle');
-            const text = document.getElementById('progressText');
-            const circumference = 2 * Math.PI * 56;
-            const offset = circumference - (progress / 100) * circumference;
-
-            circle.style.strokeDashoffset = offset;
-            text.textContent = `${progress}%`;
+        function calculateETC() {
+            const vehiclesRemaining = parseInt(document.getElementById('vehiclesRemaining').value) || 0;
+            const currentRate = parseFloat(document.getElementById('currentRate').value) || 0;
+            const currentTimeStr = document.getElementById('currentTime').value;
+            
+            if (vehiclesRemaining <= 0 || currentRate <= 0 || !currentTimeStr) {
+                document.getElementById('calculatedETC').textContent = '--:--';
+                return;
+            }
+            
+            const hoursRemaining = vehiclesRemaining / currentRate;
+            const currentTime = new Date();
+            const [hours, minutes] = currentTimeStr.split(':');
+            currentTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+            
+            const completionTime = new Date(currentTime.getTime() + (hoursRemaining * 60 * 60 * 1000));
+            const formattedTime = completionTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            document.getElementById('calculatedETC').textContent = formattedTime;
         }
 
-        function updateProgressValue() {
-            const progress = document.getElementById('progressSlider').value;
-            updateProgressDisplay(progress);
+        function updatePortProgress() {
+            const brvValue = parseInt(document.getElementById('brvProgress').value);
+            const zeeValue = parseInt(document.getElementById('zeeProgress').value);
+            const souValue = parseInt(document.getElementById('souProgress').value);
+            
+            const brvMax = 904;
+            const zeeMax = 300;
+            const souMax = 200;
+            const totalMax = brvMax + zeeMax + souMax;
+            const totalCurrent = brvValue + zeeValue + souValue;
+            
+            // Update displays
+            document.getElementById('brvValue').textContent = `${brvValue}/${brvMax}`;
+            document.getElementById('zeeValue').textContent = `${zeeValue}/${zeeMax}`;
+            document.getElementById('souValue').textContent = `${souValue}/${souMax}`;
+            
+            // Update progress bars
+            document.getElementById('brvBar').style.width = `${(brvValue / brvMax) * 100}%`;
+            document.getElementById('zeeBar').style.width = `${(zeeValue / zeeMax) * 100}%`;
+            document.getElementById('souBar').style.width = `${(souValue / souMax) * 100}%`;
+            
+            // Update total progress
+            const totalPercent = ((totalCurrent / totalMax) * 100).toFixed(1);
+            document.getElementById('totalProgress').textContent = `${totalPercent}%`;
         }
 
         async function saveProgress() {
