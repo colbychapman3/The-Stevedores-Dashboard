@@ -1,7 +1,10 @@
 import os
 import sys
-# DON'T CHANGE THIS !!!
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+# Add parent directory to path for imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -21,8 +24,12 @@ app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(file_processor_bp)
 app.register_blueprint(ships_bp)
 
+# Create database directory if it doesn't exist
+db_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database')
+os.makedirs(db_dir, exist_ok=True)
+
 # uncomment if you need to use database
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'app.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(db_dir, 'app.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -57,6 +64,13 @@ def calendar_view():
 def analytics_view():
     return send_from_directory(app.static_folder, 'analytics.html')
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({'error': 'Resource not found'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

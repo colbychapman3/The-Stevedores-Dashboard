@@ -23,11 +23,18 @@ def load_ships():
 def save_ships():
     """Save ships data to file"""
     try:
-        os.makedirs(os.path.dirname(ships_file), exist_ok=True)
+        # Ensure the directory exists
+        db_dir = os.path.dirname(ships_file)
+        if not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+        
         with open(ships_file, 'w') as f:
             json.dump(ships_data, f, indent=2)
     except Exception as e:
         print(f"Error saving ships data: {e}")
+        # Create empty ships data if save fails
+        global ships_data
+        ships_data = []
 
 # Load ships data on module import
 load_ships()

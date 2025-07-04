@@ -30,9 +30,15 @@ def extract_text_from_pdf(file_path):
 def extract_data_from_csv(file_path):
     """Extract data from CSV file"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            text = file.read()
-        return text
+        # Try UTF-8 first, fallback to other encodings
+        for encoding in ['utf-8', 'latin-1', 'cp1252']:
+            try:
+                with open(file_path, 'r', encoding=encoding) as file:
+                    text = file.read()
+                return text
+            except UnicodeDecodeError:
+                continue
+        return "Error: Unable to decode file with supported encodings"
     except Exception as e:
         return f"Error reading CSV file: {str(e)}"
 
@@ -568,6 +574,14 @@ def upload_file():
     
     if not allowed_file(file.filename):
         return jsonify({'error': 'File type not supported'}), 400
+    
+    # Check file size before saving
+    file.seek(0, 2)  # Seek to end
+    file_size = file.tell()
+    file.seek(0)  # Reset to beginning
+    
+    if file_size > MAX_FILE_SIZE:
+        return jsonify({'error': f'File size exceeds {MAX_FILE_SIZE // (1024*1024)}MB limit'}), 400
     
     # Create upload directory if it doesn't exist
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
