@@ -588,62 +588,71 @@
         }
 
         function populateFormFields(data) {
+            // Helper function to safely set field values
+            function safeSetValue(fieldId, value) {
+                const field = document.getElementById(fieldId);
+                if (field && value !== undefined && value !== null) {
+                    field.value = value;
+                } else if (!field) {
+                    console.warn(`Field with ID '${fieldId}' not found`);
+                }
+            }
+
             // Populate Step 1 fields
-            if (data.vesselName) document.getElementById('vesselName').value = data.vesselName;
-            if (data.vesselType) document.getElementById('vesselType').value = data.vesselType;
-            if (data.port) document.getElementById('port').value = data.port;
-            if (data.operationDate) document.getElementById('operationDate').value = data.operationDate;
-            if (data.company) document.getElementById('company').value = data.company;
-            if (data.operationType) document.getElementById('operationType').value = data.operationType;
+            safeSetValue('vesselName', data.vesselName);
+            safeSetValue('vesselType', data.vesselType);
+            safeSetValue('port', data.port);
+            safeSetValue('operationDate', data.operationDate);
+            safeSetValue('company', data.company);
+            safeSetValue('operationType', data.operationType);
 
             // Team assignments
-            if (data.autoOperationsLead) document.getElementById('autoOpsLead').value = data.autoOperationsLead;
-            if (data.autoOperationsAssistant) document.getElementById('autoOpsAssistant').value = data.autoOperationsAssistant;
-            if (data.heavyHeavyLead) document.getElementById('heavyOpsLead').value = data.heavyHeavyLead;
-            if (data.heavyHeavyAssistant) document.getElementById('heavyOpsAssistant').value = data.heavyHeavyAssistant;
-            if (data.berthLocation) document.getElementById('berthLocation').value = data.berthLocation;
-            if (data.operationManager) document.getElementById('operationManager').value = data.operationManager;
+            safeSetValue('autoOpsLead', data.autoOperationsLead);
+            safeSetValue('autoOpsAssistant', data.autoOperationsAssistant);
+            safeSetValue('heavyOpsLead', data.heavyHeavyLead);
+            safeSetValue('heavyOpsAssistant', data.heavyHeavyAssistant);
+            safeSetValue('berthLocation', data.berthLocation);
+            safeSetValue('operationManager', data.operationManager);
 
             // Populate Step 2 fields
-            if (data.totalAutomobilesDischarge) document.getElementById('totalAutomobiles').value = data.totalAutomobilesDischarge;
-            if (data.heavyEquipmentDischarge) document.getElementById('heavyEquipment').value = data.heavyEquipmentDischarge;
-            if (data.brvTarget) document.getElementById('brvTarget').value = data.brvTarget;
-            if (data.electricVehicles) document.getElementById('electricVehicles').value = data.electricVehicles;
-            if (data.staticCargo) document.getElementById('staticCargo').value = data.staticCargo;
-            if (data.cargoType) document.getElementById('cargoType').value = data.cargoType;
+            safeSetValue('totalAutomobiles', data.totalAutomobilesDischarge);
+            safeSetValue('heavyEquipment', data.heavyEquipmentDischarge);
+            safeSetValue('brvTarget', data.brvTarget);
+            safeSetValue('souTarget', data.souTarget);
 
             // Zone fields
-            if (data.zoneA) document.getElementById('zoneAVehicles').value = data.zoneA;
-            if (data.zoneADescription) document.getElementById('zoneADescription').value = data.zoneADescription;
-            if (data.zoneB) document.getElementById('zoneBVehicles').value = data.zoneB;
-            if (data.zoneBDescription) document.getElementById('zoneBDescription').value = data.zoneBDescription;
-            if (data.zoneC) document.getElementById('zoneCVehicles').value = data.zoneC;
-            if (data.zoneCDescription) document.getElementById('zoneCDescription').value = data.zoneCDescription;
+            safeSetValue('zoneAVehicles', data.zoneA);
+            safeSetValue('zoneADescription', data.zoneADescription);
+            safeSetValue('zoneBVehicles', data.zoneB);
+            safeSetValue('zoneBDescription', data.zoneBDescription);
+            safeSetValue('zoneCVehicles', data.zoneC);
+            safeSetValue('zoneCDescription', data.zoneCDescription);
 
             // Populate Step 3 fields
-            if (data.expectedRate) document.getElementById('expectedRate').value = data.expectedRate;
-            if (data.totalDrivers) document.getElementById('totalDrivers').value = data.totalDrivers;
-            if (data.shiftStart) document.getElementById('shiftStart').value = data.shiftStart;
-            if (data.shiftEnd) document.getElementById('shiftEnd').value = data.shiftEnd;
-            if (data.breakDuration) document.getElementById('breakDuration').value = data.breakDuration;
+            safeSetValue('expectedRate', data.expectedRate);
+            safeSetValue('totalDrivers', data.totalDrivers);
+            safeSetValue('shiftStart', data.shiftStart);
+            safeSetValue('shiftEnd', data.shiftEnd);
+            safeSetValue('breakDuration', data.breakDuration);
+            
             if (data.numVans) {
-                document.getElementById('numVans').value = data.numVans;
+                safeSetValue('numVans', data.numVans);
                 generateVehicleIdFields();
             }
             if (data.numStationWagons) {
-                document.getElementById('numStationWagons').value = data.numStationWagons;
+                safeSetValue('numStationWagons', data.numStationWagons);
                 generateVehicleIdFields();
             }
 
             // Populate ZEE fields
-            if (data.zeeTarget) document.getElementById('zeeTarget').value = data.zeeTarget;
-            if (data.zeeAutomobiles) document.getElementById('zeeAutomobiles').value = data.zeeAutomobiles;
-            if (data.zeeHeavyEquipment) document.getElementById('zeeHeavyEquipment').value = data.zeeHeavyEquipment;
-            if (data.zeeElectricVehicles) document.getElementById('zeeElectricVehicles').value = data.zeeElectricVehicles;
-            if (data.zeeStaticCargo) document.getElementById('zeeStaticCargo').value = data.zeeStaticCargo;
-            if (data.zeeCargoType) document.getElementById('zeeCargoType').value = data.zeeCargoType;
-            if (data.zeeCargoValue) document.getElementById('zeeCargoValue').value = data.zeeCargoValue;
-            if (data.zeePriority) document.getElementById('zeePriority').value = data.zeePriority;
+            safeSetValue('zeeTarget', data.zeeTarget);
+            safeSetValue('zeeAutomobiles', data.zeeAutomobiles);
+            safeSetValue('zeeHeavyEquipment', data.zeeHeavyEquipment);
+            safeSetValue('zeeElectricVehicles', data.zeeElectricVehicles);
+            safeSetValue('zeeStaticCargo', data.zeeStaticCargo);
+            safeSetValue('zeeCargoType', data.zeeCargoType);
+            safeSetValue('zeeCargoValue', data.zeeCargoValue);
+            safeSetValue('zeePriority', data.zeePriority);
         }
 
         function generateVehicleIdFields() {

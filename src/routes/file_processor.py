@@ -45,7 +45,7 @@ def extract_data_from_csv(file_path):
 def parse_maritime_data(text):
     """Parse maritime-specific data from extracted text"""
     data = {}
-    
+
     # Vessel name patterns
     vessel_patterns = [
         r'vessel\s*name[:\s]+([A-Za-z0-9\s]+)',
@@ -54,20 +54,20 @@ def parse_maritime_data(text):
         r'm/v\s+([A-Za-z0-9\s]+)',
         r'vessel[:\s]+([A-Za-z0-9\s]+)'
     ]
-    
+
     for pattern in vessel_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['vesselName'] = match.group(1).strip()
             break
-    
+
     # Vessel type patterns
     vessel_type_patterns = [
         r'vessel\s*type[:\s]+([A-Za-z\s-]+)',
         r'ship\s*type[:\s]+([A-Za-z\s-]+)',
         r'type[:\s]+(auto\s*carrier|roro|ro-ro|container|multi-purpose)',
     ]
-    
+
     for pattern in vessel_type_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -81,7 +81,7 @@ def parse_maritime_data(text):
             elif 'multi' in vessel_type:
                 data['vesselType'] = 'Multi-Purpose'
             break
-    
+
     # Port patterns
     port_patterns = [
         r'port[:\s]+([A-Za-z\s]+)',
@@ -92,7 +92,7 @@ def parse_maritime_data(text):
         r'savannah',
         r'charleston'
     ]
-    
+
     for pattern in port_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -101,7 +101,7 @@ def parse_maritime_data(text):
             else:
                 data['port'] = match.group(1).strip() if match.groups() else match.group(0).strip()
             break
-    
+
     # Date patterns
     date_patterns = [
         r'(\d{4}-\d{2}-\d{2})',
@@ -109,7 +109,7 @@ def parse_maritime_data(text):
         r'(\d{2}-\d{2}-\d{4})',
         r'date[:\s]+(\d{1,2}[/-]\d{1,2}[/-]\d{4})'
     ]
-    
+
     for pattern in date_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -122,7 +122,7 @@ def parse_maritime_data(text):
             elif '-' in date_str and len(date_str.split('-')[0]) == 4:  # YYYY-MM-DD
                 data['operationDate'] = date_str
             break
-    
+
     # Company patterns
     company_patterns = [
         r'stevedoring[:\s]+([A-Za-z\s]+)',
@@ -131,7 +131,7 @@ def parse_maritime_data(text):
         r'ssa\s*marine',
         r'ports\s*america'
     ]
-    
+
     for pattern in company_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -144,7 +144,7 @@ def parse_maritime_data(text):
             else:
                 data['company'] = match.group(1).strip() if match.groups() else match.group(0).strip()
             break
-    
+
     # Vehicle count patterns
     vehicle_patterns = [
         r'total\s*vehicles?[:\s]+(\d+)',
@@ -152,26 +152,26 @@ def parse_maritime_data(text):
         r'cars?[:\s]+(\d+)',
         r'units?[:\s]+(\d+)'
     ]
-    
+
     for pattern in vehicle_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['totalAutomobilesDischarge'] = int(match.group(1))
             break
-    
+
     # Heavy equipment patterns
     heavy_equipment_patterns = [
         r'heavy\s*equipment[:\s]+(\d+)',
         r'hh[:\s]+(\d+)',
         r'high\s*&\s*heavy[:\s]+(\d+)'
     ]
-    
+
     for pattern in heavy_equipment_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['heavyEquipmentDischarge'] = int(match.group(1))
             break
-    
+
     # Brand-specific patterns
     brand_patterns = {
         'MB': r'mercedes[-\s]*benz[:\s]+(\d+)|mb[:\s]+(\d+)',
@@ -179,20 +179,20 @@ def parse_maritime_data(text):
         'LR': r'land\s*rover[:\s]+(\d+)|lr[:\s]+(\d+)',
         'RR': r'rolls[-\s]*royce[:\s]+(\d+)|rr[:\s]+(\d+)'
     }
-    
+
     for brand, pattern in brand_patterns.items():
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             count = match.group(1) or match.group(2) if match.groups() else match.group(0)
             if count and count.isdigit():
                 data[f'{brand.lower()}Count'] = int(count)
-    
+
     # Operation type patterns
     operation_patterns = [
         r'operation[:\s]+(discharge|loading|discharge\s*\+\s*loading)',
         r'(discharge\s*only|loading\s*only|discharge\s*and\s*loading)'
     ]
-    
+
     for pattern in operation_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -204,7 +204,7 @@ def parse_maritime_data(text):
             elif 'loading' in op_type:
                 data['operationType'] = 'Loading Only'
             break
-    
+
     # Team assignment patterns
     # Auto Operations Team
     auto_lead_patterns = [
@@ -215,7 +215,7 @@ def parse_maritime_data(text):
         r'auto.*lead.*([A-Za-z\s]+chapman)',
         r'auto.*([A-Za-z\s]*colby[A-Za-z\s]*)'
     ]
-    
+
     for pattern in auto_lead_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -224,7 +224,7 @@ def parse_maritime_data(text):
             elif match.groups():
                 data['autoOperationsLead'] = match.group(1).strip()
             break
-    
+
     auto_assistant_patterns = [
         r'auto\s*operations?\s*team[:\s]*assistant\s*supervisor[:\s]+([A-Za-z\s]+)',
         r'auto\s*operations?[:\s]*assistant[:\s]+([A-Za-z\s]+)',
@@ -233,7 +233,7 @@ def parse_maritime_data(text):
         r'auto.*assistant.*([A-Za-z\s]+bailey)',
         r'auto.*([A-Za-z\s]*cole[A-Za-z\s]*)'
     ]
-    
+
     for pattern in auto_assistant_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -242,7 +242,7 @@ def parse_maritime_data(text):
             elif match.groups():
                 data['autoOperationsAssistant'] = match.group(1).strip()
             break
-    
+
     # High & Heavy Team
     heavy_lead_patterns = [
         r'high\s*&?\s*heavy\s*team[:\s]*lead\s*supervisor[:\s]+([A-Za-z\s]+)',
@@ -252,7 +252,7 @@ def parse_maritime_data(text):
         r'heavy.*lead.*([A-Za-z\s]+wilkins)',
         r'heavy.*([A-Za-z\s]*spencer[A-Za-z\s]*)'
     ]
-    
+
     for pattern in heavy_lead_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -261,7 +261,7 @@ def parse_maritime_data(text):
             elif match.groups():
                 data['heavyHeavyLead'] = match.group(1).strip()
             break
-    
+
     heavy_assistant_patterns = [
         r'high\s*&?\s*heavy\s*team[:\s]*assistant\s*supervisor[:\s]+([A-Za-z\s]+)',
         r'high\s*&?\s*heavy[:\s]*assistant[:\s]+([A-Za-z\s]+)',
@@ -270,7 +270,7 @@ def parse_maritime_data(text):
         r'heavy.*assistant.*([A-Za-z\s]+banner)',
         r'heavy.*([A-Za-z\s]*bruce[A-Za-z\s]*)'
     ]
-    
+
     for pattern in heavy_assistant_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -279,7 +279,7 @@ def parse_maritime_data(text):
             elif match.groups():
                 data['heavyHeavyAssistant'] = match.group(1).strip()
             break
-    
+
     # Operation Manager
     manager_patterns = [
         r'operation\s*manager[:\s]+([A-Za-z\s]+)',
@@ -288,7 +288,7 @@ def parse_maritime_data(text):
         r'john\s+smith',
         r'supervisor[:\s]+([A-Za-z\s]+)'
     ]
-    
+
     for pattern in manager_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -297,7 +297,7 @@ def parse_maritime_data(text):
             elif match.groups():
                 data['operationManager'] = match.group(1).strip()
             break
-    
+
     # Berth location patterns
     berth_patterns = [
         r'berth\s*location[:\s]+([A-Za-z0-9\s]+)',
@@ -305,7 +305,7 @@ def parse_maritime_data(text):
         r'berth\s*([123])',
         r'assigned.*berth[:\s]*([123])'
     ]
-    
+
     for pattern in berth_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -315,9 +315,9 @@ def parse_maritime_data(text):
             elif 'berth' in berth_num.lower():
                 data['berthLocation'] = berth_num
             break
-    
+
     # Extract all additional operational parameters
-    
+
     # Expected Rate patterns
     rate_patterns = [
         r'expected\s*rate[:\s]+(\d+(?:\.\d+)?)',
@@ -325,64 +325,64 @@ def parse_maritime_data(text):
         r'(\d+(?:\.\d+)?)\s*cars?/hour',
         r'processing\s*rate[:\s]+(\d+(?:\.\d+)?)'
     ]
-    
+
     for pattern in rate_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['expectedRate'] = match.group(1).strip()
             break
-    
+
     # Total Drivers patterns
     driver_patterns = [
         r'total\s*drivers?[:\s]+(\d+)',
         r'drivers?[:\s]+(\d+)\s*drivers?',
         r'(\d+)\s*drivers?\s*total'
     ]
-    
+
     for pattern in driver_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['totalDrivers'] = match.group(1).strip()
             break
-    
+
     # Shift time patterns
     shift_start_patterns = [
         r'shift\s*start[:\s]+(\d{1,2}:\d{2}(?:\s*[AP]M)?)',
         r'start\s*time[:\s]+(\d{1,2}:\d{2}(?:\s*[AP]M)?)',
         r'(\d{1,2}:\d{2}\s*AM).*shift',
     ]
-    
+
     for pattern in shift_start_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['shiftStart'] = match.group(1).strip()
             break
-    
+
     shift_end_patterns = [
         r'shift\s*end[:\s]+(\d{1,2}:\d{2}(?:\s*[AP]M)?)',
         r'end\s*time[:\s]+(\d{1,2}:\d{2}(?:\s*[AP]M)?)',
         r'(\d{1,2}:\d{2}\s*PM).*shift',
     ]
-    
+
     for pattern in shift_end_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['shiftEnd'] = match.group(1).strip()
             break
-    
+
     # Break duration patterns
     break_patterns = [
         r'break\s*duration[:\s]+(\d+)',
         r'break[:\s]+(\d+)\s*minutes?',
         r'(\d+)\s*minutes?\s*break',
     ]
-    
+
     for pattern in break_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['breakDuration'] = match.group(1).strip()
             break
-    
+
     # Vehicle ID patterns
     van_id_patterns = [
         r'van\s*1\s*id[:\s]+([A-Za-z0-9]+)',
@@ -391,7 +391,7 @@ def parse_maritime_data(text):
         r'van\s*4\s*id[:\s]+([A-Za-z0-9]+)',
         r'v(\d+)',
     ]
-    
+
     # Extract individual van IDs
     van_ids = []
     for i, pattern in enumerate(van_id_patterns[:4]):  # First 4 patterns for specific vans
@@ -405,7 +405,7 @@ def parse_maritime_data(text):
                 data['van3Id'] = match.group(1).strip()
             elif i == 3:
                 data['van4Id'] = match.group(1).strip()
-    
+
     # Generic van ID extraction
     van_id_matches = re.findall(r'v(\d+)', text, re.IGNORECASE)
     if van_id_matches and len(van_id_matches) >= 4:
@@ -413,14 +413,14 @@ def parse_maritime_data(text):
         data['van2Id'] = f'V{van_id_matches[1]}'
         data['van3Id'] = f'V{van_id_matches[2]}'
         data['van4Id'] = f'V{van_id_matches[3]}'
-    
+
     # Zone allocation patterns
     zone_patterns = [
         r'zone\s*a[:\s]+(\d+)',
         r'zone\s*b[:\s]+(\d+)',
         r'zone\s*c[:\s]+(\d+)',
     ]
-    
+
     for i, pattern in enumerate(zone_patterns):
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -430,14 +430,14 @@ def parse_maritime_data(text):
                 data['zoneB'] = match.group(1).strip()
             elif i == 2:
                 data['zoneC'] = match.group(1).strip()
-    
+
     # Loading target patterns
     loading_patterns = [
         r'brv\s*terminal[:\s]+(\d+)',
         r'zee\s*compound[:\s]+(\d+)',
         r'sou\s*facility[:\s]+(\d+)',
     ]
-    
+
     for i, pattern in enumerate(loading_patterns):
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -447,7 +447,7 @@ def parse_maritime_data(text):
                 data['zeeTarget'] = match.group(1).strip()
             elif i == 2:
                 data['souTarget'] = match.group(1).strip()
-    
+
     # Vehicle brand patterns (additional brands)
     brand_patterns = [
         r'audi[:\s]+(\d+)',
@@ -455,7 +455,7 @@ def parse_maritime_data(text):
         r'mini[:\s]+(\d+)',
         r'jaguar[:\s]+(\d+)',
     ]
-    
+
     for i, pattern in enumerate(brand_patterns):
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -474,7 +474,7 @@ def parse_maritime_data(text):
         r'ev[:\s]+(\d+)',
         r'(\d+)\s*electric\s*vehicles?'
     ]
-    
+
     for pattern in electric_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -487,7 +487,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*automobiles?[:\s]+(\d+)',
         r'zee.*automobiles?[:\s]+(\d+)'
     ]
-    
+
     for pattern in zee_auto_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -499,7 +499,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*heavy[:\s]+(\d+)',
         r'zee.*heavy.*equipment[:\s]+(\d+)'
     ]
-    
+
     for pattern in zee_heavy_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -511,7 +511,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*electric[:\s]+(\d+)',
         r'zee.*electric.*vehicles?[:\s]+(\d+)'
     ]
-    
+
     for pattern in zee_electric_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -523,7 +523,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*static[:\s]+(\d+)',
         r'zee.*static.*cargo[:\s]+(\d+)'
     ]
-    
+
     for pattern in zee_static_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -535,7 +535,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*cargo[:\s]+([A-Za-z\s\-]+)',
         r'zee.*cargo.*type[:\s]+([A-Za-z\s\-]+)'
     ]
-    
+
     for pattern in zee_cargo_type_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -547,7 +547,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*value[:\s]+(\d+)',
         r'zee.*value[:\s]+(\d+)'
     ]
-    
+
     for pattern in zee_value_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -559,7 +559,7 @@ def parse_maritime_data(text):
         r'zee\s*compound\s*priority[:\s]+([A-Za-z\s]+)',
         r'zee.*priority[:\s]+([A-Za-z\s]+)'
     ]
-    
+
     for pattern in zee_priority_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -573,38 +573,38 @@ def parse_maritime_data(text):
             else:
                 data['zeePriority'] = 'standard'
             break
-    
+
     static_cargo_patterns = [
         r'static\s*cargo[:\s]+(\d+)',
         r'static\s*cargo\s*units?[:\s]+(\d+)',
         r'(\d+)\s*static\s*cargo'
     ]
-    
+
     for pattern in static_cargo_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['staticCargo'] = match.group(1).strip()
             break
-    
+
     cargo_type_patterns = [
         r'cargo\s*brand[/\s]*type[:\s]+([A-Za-z\s\-]+)',
         r'cargo\s*type[:\s]+([A-Za-z\s\-]+)',
         r'brand[/\s]*type[:\s]+([A-Za-z\s\-]+)'
     ]
-    
+
     for pattern in cargo_type_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['cargoType'] = match.group(1).strip()
             break
-    
+
     # Zone description patterns
     zone_desc_patterns = [
         r'zone\s*a[:\s]*description[:\s]+([A-Za-z\s\-]+)',
         r'zone\s*b[:\s]*description[:\s]+([A-Za-z\s\-]+)',
         r'zone\s*c[:\s]*description[:\s]+([A-Za-z\s\-]+)',
     ]
-    
+
     for i, pattern in enumerate(zone_desc_patterns):
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
@@ -614,39 +614,39 @@ def parse_maritime_data(text):
                 data['zoneBDescription'] = match.group(1).strip()
             elif i == 2:
                 data['zoneCDescription'] = match.group(1).strip()
-    
+
     # TICO Transportation vehicle counts
     van_count_patterns = [
         r'number\s*of\s*vans[:\s]+(\d+)',
         r'vans?[:\s]+(\d+)',
         r'(\d+)\s*vans?'
     ]
-    
+
     for pattern in van_count_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['numVans'] = match.group(1).strip()
             break
-    
+
     wagon_count_patterns = [
         r'number\s*of\s*station\s*wagons?[:\s]+(\d+)',
         r'station\s*wagons?[:\s]+(\d+)',
         r'(\d+)\s*station\s*wagons?'
     ]
-    
+
     for pattern in wagon_count_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             data['numStationWagons'] = match.group(1).strip()
             break
-    
+
     # Individual vehicle ID extraction (up to 15 vans and 15 wagons)
     for i in range(1, 16):
         van_id_pattern = rf'van\s*{i}\s*id[:\s]+([A-Za-z0-9]+)'
         match = re.search(van_id_pattern, text, re.IGNORECASE)
         if match:
             data[f'vanId{i}'] = match.group(1).strip()
-    
+
     for i in range(1, 16):
         wagon_id_pattern = rf'(?:station\s*wagon|wagon)\s*{i}\s*id[:\s]+([A-Za-z0-9]+)'
         match = re.search(wagon_id_pattern, text, re.IGNORECASE)
@@ -660,30 +660,30 @@ def upload_file():
     """Handle file upload and return file info"""
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
-    
+
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No file selected'}), 400
-    
+
     if not allowed_file(file.filename):
         return jsonify({'error': 'File type not supported'}), 400
-    
+
     # Check file size before saving
     file.seek(0, 2)  # Seek to end
     file_size = file.tell()
     file.seek(0)  # Reset to beginning
-    
+
     if file_size > MAX_FILE_SIZE:
         return jsonify({'error': f'File size exceeds {MAX_FILE_SIZE // (1024*1024)}MB limit'}), 400
-    
+
     # Create upload directory if it doesn't exist
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    
+
     # Save file
     filename = secure_filename(file.filename)
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
-    
+
     return jsonify({
         'success': True,
         'filename': filename,
@@ -696,13 +696,13 @@ def extract_data():
     """Extract data from uploaded file"""
     data = request.get_json()
     file_path = data.get('file_path')
-    
+
     if not file_path or not os.path.exists(file_path):
         return jsonify({'error': 'File not found'}), 404
-    
+
     # Determine file type and extract text
     file_extension = file_path.split('.')[-1].lower()
-    
+
     try:
         if file_extension == 'pdf':
             text = extract_text_from_pdf(file_path)
@@ -713,19 +713,19 @@ def extract_data():
                 text = f.read()
         else:
             return jsonify({'error': 'Unsupported file type. Please use PDF, CSV, or TXT files.'}), 400
-        
+
         # Parse maritime-specific data
         extracted_data = parse_maritime_data(text)
-        
+
         # Clean up uploaded file
         os.remove(file_path)
-        
+
         return jsonify({
             'success': True,
             'extracted_text': text[:1000] + '...' if len(text) > 1000 else text,  # Truncate for preview
             'parsed_data': extracted_data
         })
-        
+
     except Exception as e:
         return jsonify({'error': f'Error processing file: {str(e)}'}), 500
 
