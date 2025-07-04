@@ -256,103 +256,115 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                     <i class="fas fa-car text-green-600 mr-3"></i>Cargo Configuration
                 </h2>
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Total Automobiles</label>
-                        <input type="number" id="totalAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 1004">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Equipment Units</label>
-                        <input type="number" id="heavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 107">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">BRV Total Vehicles</label>
-                        <input type="number" id="brvTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 150">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">SOU Total Vehicles</label>
-                        <input type="number" id="souTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 75">
+                <p class="text-gray-600 mb-6">Configure cargo breakdown by terminal and facility location</p>
+
+                <!-- BRV Section -->
+                <div class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-warehouse text-blue-600 mr-2"></i>BRV Terminal
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                            <input type="number" id="brvTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                            <textarea id="brvVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Sedan: 300, SUV: 150, Truck: 50" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                            <input type="number" id="brvTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 25">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                            <textarea id="brvHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Excavator: 10, Bulldozer: 15" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                            <input type="number" id="brvTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 15">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                            <input type="text" id="brvDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., North Terminal">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                            <input type="text" id="brvLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., South Terminal">
+                        </div>
                     </div>
                 </div>
 
-                <!-- ZEE Compound Section -->
+                <!-- ZEE Section -->
                 <div class="mt-8 p-6 bg-green-50 rounded-lg border border-green-200">
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-warehouse text-green-600 mr-2"></i>ZEE Compound Totals
+                        <i class="fas fa-warehouse text-green-600 mr-2"></i>ZEE Compound
                     </h3>
-                    <p class="text-sm text-gray-600 mb-4">Configure ZEE compound cargo breakdown and specifications</p>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Total Vehicles</label>
-                            <input type="number" id="zeeTarget" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 200">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                            <input type="number" id="zeeTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 300">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Automobiles</label>
-                            <input type="number" id="zeeAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 180">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                            <textarea id="zeeVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., BMW: 150, Mercedes: 100, Audi: 50" rows="2"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Heavy Equipment</label>
-                            <input type="number" id="zeeHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 15">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                            <input type="number" id="zeeTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 20">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Electric Vehicles</label>
-                            <input type="number" id="zeeElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 5">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                            <textarea id="zeeHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., Crane: 5, Loader: 15" rows="2"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Static Cargo Units</label>
-                            <input type="number" id="zeeStaticCargo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 12">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                            <input type="number" id="zeeTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 25">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Cargo Type</label>
-                            <input type="text" id="zeeCargoType" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., BMW, Tesla">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                            <input type="text" id="zeeDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., East Terminal">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Cargo Value (USD)</label>
-                            <input type="number" id="zeeCargoValue" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 5000000">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Priority Level</label>
-                            <select id="zeePriority" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                <option value="">Select Priority</option>
-                                <option value="standard">Standard</option>
-                                <option value="high">High</option>
-                                <option value="urgent">Urgent</option>
-                                <option value="express">Express</option>
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                            <input type="text" id="zeeLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., West Terminal">
                         </div>
                     </div>
                 </div>
 
-                <!-- Zone Tracking Section -->
-                <div class="mt-8 p-6 bg-yellow-50 rounded-lg border border-yellow-200">
+                <!-- SOU Section -->
+                <div class="mt-8 p-6 bg-purple-50 rounded-lg border border-purple-200">
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-map-marked-alt text-yellow-600 mr-2"></i>Discharge Zone Configuration
+                        <i class="fas fa-warehouse text-purple-600 mr-2"></i>SOU Facility
                     </h3>
-                    <p class="text-sm text-gray-600 mb-4">Configure discharge zones for vehicle tracking and analytics</p>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Zone A - Vehicles</label>
-                            <input type="number" id="zoneAVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 350">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                            <input type="number" id="souTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 200">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Zone A - Description</label>
-                            <input type="text" id="zoneADescription" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., North Terminal">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                            <textarea id="souVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Honda: 100, Toyota: 75, Nissan: 25" rows="2"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Zone B - Vehicles</label>
-                            <input type="number" id="zoneBVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 400">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                            <input type="number" id="souTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 15">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Zone B - Description</label>
-                            <input type="text" id="zoneBDescription" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., South Terminal">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                            <textarea id="souHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Forklift: 10, Generator: 5" rows="2"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Zone C - Vehicles</label>
-                            <input type="number" id="zoneCVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 254">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                            <input type="number" id="souTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 10">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Zone C - Description</label>
-                            <input type="text" id="zoneCDescription" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Processing Area">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                            <input type="text" id="souDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Central Terminal">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                            <input type="text" id="souLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Processing Area">
                         </div>
                     </div>
                 </div>
