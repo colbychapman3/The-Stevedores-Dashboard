@@ -480,6 +480,99 @@ def parse_maritime_data(text):
         if match:
             data['electricVehicles'] = match.group(1).strip()
             break
+
+    # ZEE Compound specific patterns
+    zee_auto_patterns = [
+        r'zee\s*automobiles?[:\s]+(\d+)',
+        r'zee\s*compound\s*automobiles?[:\s]+(\d+)',
+        r'zee.*automobiles?[:\s]+(\d+)'
+    ]
+    
+    for pattern in zee_auto_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['zeeAutomobiles'] = match.group(1).strip()
+            break
+
+    zee_heavy_patterns = [
+        r'zee\s*heavy\s*equipment[:\s]+(\d+)',
+        r'zee\s*compound\s*heavy[:\s]+(\d+)',
+        r'zee.*heavy.*equipment[:\s]+(\d+)'
+    ]
+    
+    for pattern in zee_heavy_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['zeeHeavyEquipment'] = match.group(1).strip()
+            break
+
+    zee_electric_patterns = [
+        r'zee\s*electric\s*vehicles?[:\s]+(\d+)',
+        r'zee\s*compound\s*electric[:\s]+(\d+)',
+        r'zee.*electric.*vehicles?[:\s]+(\d+)'
+    ]
+    
+    for pattern in zee_electric_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['zeeElectricVehicles'] = match.group(1).strip()
+            break
+
+    zee_static_patterns = [
+        r'zee\s*static\s*cargo[:\s]+(\d+)',
+        r'zee\s*compound\s*static[:\s]+(\d+)',
+        r'zee.*static.*cargo[:\s]+(\d+)'
+    ]
+    
+    for pattern in zee_static_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['zeeStaticCargo'] = match.group(1).strip()
+            break
+
+    zee_cargo_type_patterns = [
+        r'zee\s*cargo\s*type[:\s]+([A-Za-z\s\-]+)',
+        r'zee\s*compound\s*cargo[:\s]+([A-Za-z\s\-]+)',
+        r'zee.*cargo.*type[:\s]+([A-Za-z\s\-]+)'
+    ]
+    
+    for pattern in zee_cargo_type_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['zeeCargoType'] = match.group(1).strip()
+            break
+
+    zee_value_patterns = [
+        r'zee\s*cargo\s*value[:\s]+(\d+)',
+        r'zee\s*compound\s*value[:\s]+(\d+)',
+        r'zee.*value[:\s]+(\d+)'
+    ]
+    
+    for pattern in zee_value_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            data['zeeCargoValue'] = match.group(1).strip()
+            break
+
+    zee_priority_patterns = [
+        r'zee\s*priority[:\s]+([A-Za-z\s]+)',
+        r'zee\s*compound\s*priority[:\s]+([A-Za-z\s]+)',
+        r'zee.*priority[:\s]+([A-Za-z\s]+)'
+    ]
+    
+    for pattern in zee_priority_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            priority = match.group(1).strip().lower()
+            if 'high' in priority:
+                data['zeePriority'] = 'high'
+            elif 'urgent' in priority:
+                data['zeePriority'] = 'urgent'
+            elif 'express' in priority:
+                data['zeePriority'] = 'express'
+            else:
+                data['zeePriority'] = 'standard'
+            break
     
     static_cargo_patterns = [
         r'static\s*cargo[:\s]+(\d+)',

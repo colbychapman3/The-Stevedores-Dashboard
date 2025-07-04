@@ -64,6 +64,10 @@ def calendar_view():
 def analytics_view():
     return send_from_directory(app.static_folder, 'analytics.html')
 
+@app.route('/ship-info')
+def ship_info():
+    return send_from_directory(app.static_folder, 'ship-info.html')
+
 @app.errorhandler(404)
 def not_found_error(error):
     return jsonify({'error': 'Resource not found'}), 404

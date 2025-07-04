@@ -81,14 +81,14 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                     <i class="fas fa-ship text-blue-600 mr-3"></i>Vessel Information
                 </h2>
-                
+
                 <!-- File Upload Section -->
                 <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-dashed border-blue-300">
                     <div class="text-center">
                         <i class="fas fa-cloud-upload-alt text-4xl text-blue-500 mb-4"></i>
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Quick Fill from Document</h3>
                         <p class="text-gray-600 mb-4">Upload a maritime document (PDF, CSV, or TXT) to automatically populate the form</p>
-                        
+
                         <div class="flex items-center justify-center w-full">
                             <label for="documentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
                                 <div class="flex flex-col items-center justify-center pt-5 pb-6">
@@ -99,21 +99,21 @@
                                 <input id="documentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleFileUpload(event)">
                             </label>
                         </div>
-                        
+
                         <div id="uploadStatus" class="mt-4 hidden">
                             <div class="flex items-center justify-center">
                                 <div id="uploadSpinner" class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
                                 <span id="uploadText" class="text-blue-600">Processing document...</span>
                             </div>
                         </div>
-                        
+
                         <div id="uploadSuccess" class="mt-4 hidden">
                             <div class="flex items-center justify-center text-green-600">
                                 <i class="fas fa-check-circle mr-2"></i>
                                 <span>Document processed successfully! Form has been auto-filled.</span>
                             </div>
                         </div>
-                        
+
                         <div id="uploadError" class="mt-4 hidden">
                             <div class="flex items-center justify-center text-red-600">
                                 <i class="fas fa-exclamation-circle mr-2"></i>
@@ -122,7 +122,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Stevedore Team Assignment Section -->
                 <div class="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
                     <div class="flex items-center mb-4">
@@ -130,7 +130,7 @@
                         <h3 class="text-xl font-semibold text-gray-800">Stevedore Team Assignment</h3>
                     </div>
                     <p class="text-gray-600 mb-4">Assign team members to different operation roles for this vessel</p>
-                    
+
                     <div class="grid md:grid-cols-2 gap-6">
                         <!-- Auto Operations Team -->
                         <div class="bg-white p-4 rounded-lg border border-green-200">
@@ -148,7 +148,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- High & Heavy Team -->
                         <div class="bg-white p-4 rounded-lg border border-green-200">
                             <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
@@ -166,7 +166,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Additional Team Roles -->
                     <div class="mt-4 grid md:grid-cols-2 gap-6">
                         <div class="bg-white p-4 rounded-lg border border-green-200">
@@ -183,7 +183,7 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="bg-white p-4 rounded-lg border border-green-200">
                             <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
                                 <i class="fas fa-user-tie text-indigo-500 mr-2"></i>Operation Manager
@@ -195,7 +195,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Vessel Name</label>
@@ -282,7 +282,7 @@
                         <input type="text" id="cargoType" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Mercedes-Benz">
                     </div>
                 </div>
-                
+
                 <!-- Zone Tracking Section -->
                 <div class="mt-8 p-6 bg-yellow-50 rounded-lg border border-yellow-200">
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
@@ -357,7 +357,7 @@
                         <input type="datetime-local" id="targetCompletion" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                 </div>
-                
+
                 <!-- TICO Transportation Section -->
                 <div class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
@@ -407,7 +407,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <!-- Dynamic Vehicle ID Fields -->
                     <div id="vehicleIdFields" class="mt-6">
                         <!-- Will be populated by JavaScript -->
@@ -453,14 +453,14 @@
             if (validateStep(step)) {
                 document.getElementById(`step${step}`).classList.add('hidden');
                 document.getElementById(`step${step + 1}`).classList.remove('hidden');
-                
+
                 // Update step indicators
                 document.getElementById(`step${step}-indicator`).classList.remove('step-active');
                 document.getElementById(`step${step}-indicator`).classList.add('step-completed');
                 document.getElementById(`step${step + 1}-indicator`).classList.add('step-active');
-                
+
                 currentStep = step + 1;
-                
+
                 if (step === 3) {
                     generateReviewSummary();
                 }
@@ -470,12 +470,12 @@
         function prevStep(step) {
             document.getElementById(`step${step}`).classList.add('hidden');
             document.getElementById(`step${step - 1}`).classList.remove('hidden');
-            
+
             // Update step indicators
             document.getElementById(`step${step}-indicator`).classList.remove('step-active');
             document.getElementById(`step${step - 1}-indicator`).classList.add('step-active');
             document.getElementById(`step${step - 1}-indicator`).classList.remove('step-completed');
-            
+
             currentStep = step - 1;
         }
 
@@ -530,7 +530,7 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('uploadStatus').classList.add('hidden');
-                
+
                 if (data.success) {
                     document.getElementById('uploadSuccess').classList.remove('hidden');
                     extractedData = data.parsed_data;
@@ -555,7 +555,7 @@
             if (data.operationDate) document.getElementById('operationDate').value = data.operationDate;
             if (data.company) document.getElementById('company').value = data.company;
             if (data.operationType) document.getElementById('operationType').value = data.operationType;
-            
+
             // Team assignments
             if (data.autoOperationsLead) document.getElementById('autoOpsLead').value = data.autoOperationsLead;
             if (data.autoOperationsAssistant) document.getElementById('autoOpsAssistant').value = data.autoOperationsAssistant;
@@ -563,7 +563,7 @@
             if (data.heavyHeavyAssistant) document.getElementById('heavyOpsAssistant').value = data.heavyHeavyAssistant;
             if (data.berthLocation) document.getElementById('berthLocation').value = data.berthLocation;
             if (data.operationManager) document.getElementById('operationManager').value = data.operationManager;
-            
+
             // Populate Step 2 fields
             if (data.totalAutomobilesDischarge) document.getElementById('totalAutomobiles').value = data.totalAutomobilesDischarge;
             if (data.heavyEquipmentDischarge) document.getElementById('heavyEquipment').value = data.heavyEquipmentDischarge;
@@ -571,7 +571,7 @@
             if (data.electricVehicles) document.getElementById('electricVehicles').value = data.electricVehicles;
             if (data.staticCargo) document.getElementById('staticCargo').value = data.staticCargo;
             if (data.cargoType) document.getElementById('cargoType').value = data.cargoType;
-            
+
             // Zone fields
             if (data.zoneA) document.getElementById('zoneAVehicles').value = data.zoneA;
             if (data.zoneADescription) document.getElementById('zoneADescription').value = data.zoneADescription;
@@ -579,7 +579,7 @@
             if (data.zoneBDescription) document.getElementById('zoneBDescription').value = data.zoneBDescription;
             if (data.zoneC) document.getElementById('zoneCVehicles').value = data.zoneC;
             if (data.zoneCDescription) document.getElementById('zoneCDescription').value = data.zoneCDescription;
-            
+
             // Populate Step 3 fields
             if (data.expectedRate) document.getElementById('expectedRate').value = data.expectedRate;
             if (data.totalDrivers) document.getElementById('totalDrivers').value = data.totalDrivers;
@@ -600,13 +600,13 @@
             const numVans = parseInt(document.getElementById('numVans').value) || 0;
             const numWagons = parseInt(document.getElementById('numStationWagons').value) || 0;
             const container = document.getElementById('vehicleIdFields');
-            
+
             let html = '';
-            
+
             if (numVans > 0 || numWagons > 0) {
                 html += '<h4 class="text-lg font-semibold text-gray-800 mb-4">Vehicle ID Numbers</h4>';
                 html += '<div class="grid md:grid-cols-2 gap-4">';
-                
+
                 // Van IDs
                 for (let i = 1; i <= numVans; i++) {
                     html += `
@@ -616,7 +616,7 @@
                         </div>
                     `;
                 }
-                
+
                 // Station Wagon IDs
                 for (let i = 1; i <= numWagons; i++) {
                     html += `
@@ -626,10 +626,10 @@
                         </div>
                     `;
                 }
-                
+
                 html += '</div>';
             }
-            
+
             container.innerHTML = html;
         }
 
@@ -639,7 +639,7 @@
             const totalAutos = document.getElementById('totalAutomobiles').value || '0';
             const heavyEquip = document.getElementById('heavyEquipment').value || '0';
             const expectedRate = document.getElementById('expectedRate').value || 'Not specified';
-            
+
             const summaryHtml = `
                 <h3 class="text-xl font-bold mb-4">Operation Summary</h3>
                 <div class="grid md:grid-cols-2 gap-4">
@@ -655,7 +655,7 @@
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('reviewSummary').innerHTML = summaryHtml;
         }
 
@@ -663,7 +663,7 @@
             // Hide wizard and show dashboard
             document.getElementById('wizardInterface').classList.add('hidden');
             document.getElementById('dashboardInterface').classList.remove('hidden');
-            
+
             // Populate dashboard with form data
             populateDashboard();
         }
@@ -769,7 +769,7 @@
             const discharged = parseInt(document.getElementById('currentDischarged').value) || 0;
             const total = parseInt(document.getElementById('totalAutomobiles').value) || 1;
             const progress = Math.min((discharged / total) * 100, 100);
-            
+
             document.getElementById('dischargeProgress').textContent = progress.toFixed(1) + '%';
         }
     </script>

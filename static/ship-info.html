@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ship Information Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .progress-ring-circle {
+            transition: stroke-dasharray 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .photo-upload-zone {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        .photo-upload-zone:hover {
+            border-color: #4299e1;
+            background-color: #ebf8ff;
+        }
+        .photo-upload-zone.dragover {
+            border-color: #3182ce;
+            background-color: #bee3f8;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-blue-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <button onclick="goBack()" class="mr-4 p-2 text-gray-600 hover:text-blue-600 transition duration-200">
+                        <i class="fas fa-arrow-left text-2xl"></i>
+                    </button>
+                    <div>
+                        <h1 id="vesselTitle" class="text-3xl font-bold text-gray-900">Ship Information</h1>
+                        <p class="text-gray-600">Detailed Analytics & Management</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="updateProgress()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-edit mr-2"></i>Update Progress
+                    </button>
+                    <button onclick="goToMaster()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Master Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Ship Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Ship Details Card -->
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-ship text-blue-600 mr-3"></i>Vessel Information
+                </h2>
+                <div id="shipDetails" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Ship details will be populated here -->
+                </div>
+            </div>
+
+            <!-- Progress Circle -->
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Operation Progress</h3>
+                <div class="relative inline-flex items-center justify-center">
+                    <svg class="w-32 h-32">
+                        <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="transparent"></circle>
+                        <circle id="progressCircle" cx="64" cy="64" r="56" stroke="#3b82f6" stroke-width="8" fill="transparent" stroke-dasharray="351.86" stroke-dashoffset="351.86" class="progress-ring-circle"></circle>
+                    </svg>
+                    <div class="absolute text-center">
+                        <div id="progressText" class="text-3xl font-bold text-gray-900">0%</div>
+                        <div class="text-sm text-gray-500">Complete</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <input type="range" id="progressSlider" min="0" max="100" value="0" class="w-full" onchange="updateProgressValue()">
+                    <button onclick="saveProgress()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200 w-full">
+                        Save Progress
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Vehicle Processing Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Vehicle Processing Rate</h3>
+                <canvas id="processingChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- Team Performance -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Team Performance</h3>
+                <canvas id="teamChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Data Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Vehicle Breakdown -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Vehicle Breakdown</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Category</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-700">Count</th>
+                                <th class="px-4 py-2 text-right text-sm font-medium text-gray-700">Processed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vehicleTable" class="divide-y divide-gray-200">
+                            <!-- Vehicle data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Zone Allocation -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Zone Allocation</h3>
+                <div class="space-y-4">
+                    <div id="zoneData">
+                        <!-- Zone data will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Management -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-camera text-blue-600 mr-3"></i>Photo Management
+            </h3>
+            
+            <!-- Photo Upload Area -->
+            <div id="photoUploadZone" class="photo-upload-zone rounded-lg p-8 text-center mb-6">
+                <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                <p class="text-lg font-medium text-gray-600 mb-2">Drag & drop photos here or click to browse</p>
+                <p class="text-sm text-gray-500">Supports JPG, PNG, GIF up to 10MB each</p>
+                <input type="file" id="photoInput" multiple accept="image/*" class="hidden">
+                <button onclick="document.getElementById('photoInput').click()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition duration-200">
+                    Select Photos
+                </button>
+            </div>
+
+            <!-- Photo Gallery -->
+            <div id="photoGallery" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Photos will be populated here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentShip = null;
+        let photos = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shipId = urlParams.get('ship');
+            if (shipId) {
+                loadShipData(shipId);
+            } else {
+                // Load sample data for demo
+                loadSampleShipData();
+            }
+            
+            setupPhotoUpload();
+            initializeCharts();
+        });
+
+        async function loadShipData(shipId) {
+            try {
+                const response = await fetch(`/api/ships/${shipId}`);
+                if (response.ok) {
+                    currentShip = await response.json();
+                    populateShipData();
+                } else {
+                    console.error('Failed to load ship data');
+                    loadSampleShipData();
+                }
+            } catch (error) {
+                console.error('Error loading ship data:', error);
+                loadSampleShipData();
+            }
+        }
+
+        function loadSampleShipData() {
+            currentShip = {
+                id: 1,
+                vesselName: "Atlantic Voyager",
+                vesselType: "Auto Carrier",
+                berth: "Berth 1",
+                status: "active",
+                operationType: "Discharge Only",
+                autoOpsLead: "Colby Chapman",
+                autoOpsAssistant: "Cole Bailey",
+                heavyOpsLead: "Spencer Wilkins",
+                heavyOpsAssistant: "Bruce Banner",
+                operationManager: "John Smith",
+                totalVehicles: 1250,
+                totalAutomobilesDischarge: 1100,
+                heavyEquipmentDischarge: 150,
+                progress: 65,
+                operationDate: "2024-01-15",
+                company: "APS Stevedoring",
+                port: "Colonel Island",
+                brvTarget: 400,
+                zeeTarget: 350,
+                souTarget: 500,
+                shiftStart: "07:00",
+                shiftEnd: "19:00"
+            };
+            populateShipData();
+        }
+
+        function populateShipData() {
+            document.getElementById('vesselTitle').textContent = currentShip.vesselName;
+            
+            const detailsHtml = `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Vessel Name</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.vesselName}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Vessel Type</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.vesselType}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Operation Date</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.operationDate}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Berth Location</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.berth}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Operation Type</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.operationType}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ${currentShip.status}
+                    </span>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Auto Operations Lead</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.autoOpsLead}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Heavy Operations Lead</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.heavyOpsLead}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Operation Manager</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.operationManager}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Total Vehicles</label>
+                    <p class="text-lg font-semibold text-gray-900">${currentShip.totalVehicles.toLocaleString()}</p>
+                </div>
+            `;
+            
+            document.getElementById('shipDetails').innerHTML = detailsHtml;
+            
+            // Update progress
+            updateProgressDisplay(currentShip.progress || 0);
+            document.getElementById('progressSlider').value = currentShip.progress || 0;
+            
+            // Populate vehicle table
+            populateVehicleTable();
+            
+            // Populate zone data
+            populateZoneData();
+        }
+
+        function populateVehicleTable() {
+            const tableHtml = `
+                <tr>
+                    <td class="px-4 py-2 text-sm font-medium text-gray-900">Automobiles</td>
+                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${currentShip.totalAutomobilesDischarge.toLocaleString()}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${Math.floor(currentShip.totalAutomobilesDischarge * (currentShip.progress / 100)).toLocaleString()}</td>
+                </tr>
+                <tr>
+                    <td class="px-4 py-2 text-sm font-medium text-gray-900">Heavy Equipment</td>
+                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${currentShip.heavyEquipmentDischarge.toLocaleString()}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700 text-right">${Math.floor(currentShip.heavyEquipmentDischarge * (currentShip.progress / 100)).toLocaleString()}</td>
+                </tr>
+            `;
+            document.getElementById('vehicleTable').innerHTML = tableHtml;
+        }
+
+        function populateZoneData() {
+            const zoneHtml = `
+                <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+                    <div>
+                        <div class="font-semibold text-gray-900">BRV Terminal</div>
+                        <div class="text-sm text-gray-600">Target: ${currentShip.brvTarget} vehicles</div>
+                    </div>
+                    <div class="text-2xl font-bold text-blue-600">${Math.floor(currentShip.brvTarget * (currentShip.progress / 100))}</div>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                    <div>
+                        <div class="font-semibold text-gray-900">ZEE Compound</div>
+                        <div class="text-sm text-gray-600">Target: ${currentShip.zeeTarget} vehicles</div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600">${Math.floor(currentShip.zeeTarget * (currentShip.progress / 100))}</div>
+                </div>
+                <div class="flex justify-between items-center p-4 bg-purple-50 rounded-lg">
+                    <div>
+                        <div class="font-semibold text-gray-900">SOU Facility</div>
+                        <div class="text-sm text-gray-600">Target: ${currentShip.souTarget} vehicles</div>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-600">${Math.floor(currentShip.souTarget * (currentShip.progress / 100))}</div>
+                </div>
+            `;
+            document.getElementById('zoneData').innerHTML = zoneHtml;
+        }
+
+        function updateProgressDisplay(progress) {
+            const circle = document.getElementById('progressCircle');
+            const text = document.getElementById('progressText');
+            const circumference = 2 * Math.PI * 56;
+            const offset = circumference - (progress / 100) * circumference;
+            
+            circle.style.strokeDashoffset = offset;
+            text.textContent = `${progress}%`;
+        }
+
+        function updateProgressValue() {
+            const progress = document.getElementById('progressSlider').value;
+            updateProgressDisplay(progress);
+        }
+
+        async function saveProgress() {
+            const progress = parseInt(document.getElementById('progressSlider').value);
+            
+            try {
+                const response = await fetch(`/api/ships/${currentShip.id}/progress`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ progress: progress })
+                });
+                
+                if (response.ok) {
+                    currentShip.progress = progress;
+                    populateVehicleTable();
+                    populateZoneData();
+                    alert('Progress updated successfully!');
+                } else {
+                    alert('Failed to update progress');
+                }
+            } catch (error) {
+                console.error('Error updating progress:', error);
+                alert('Error updating progress');
+            }
+        }
+
+        function initializeCharts() {
+            // Processing Rate Chart
+            const processingCtx = document.getElementById('processingChart').getContext('2d');
+            new Chart(processingCtx, {
+                type: 'line',
+                data: {
+                    labels: ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+                    datasets: [{
+                        label: 'Vehicles/Hour',
+                        data: [45, 52, 38, 61, 58, 49],
+                        borderColor: '#3b82f6',
+                        backgroundColor: '#3b82f620',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Team Performance Chart
+            const teamCtx = document.getElementById('teamChart').getContext('2d');
+            new Chart(teamCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Auto Operations', 'Heavy Equipment'],
+                    datasets: [{
+                        data: [75, 85],
+                        backgroundColor: ['#3b82f6', '#10b981']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupPhotoUpload() {
+            const uploadZone = document.getElementById('photoUploadZone');
+            const photoInput = document.getElementById('photoInput');
+
+            uploadZone.addEventListener('click', () => photoInput.click());
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                handlePhotoUpload(files);
+            });
+
+            photoInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                handlePhotoUpload(files);
+            });
+        }
+
+        function handlePhotoUpload(files) {
+            files.forEach(file => {
+                if (file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const photo = {
+                            id: Date.now() + Math.random(),
+                            src: e.target.result,
+                            name: file.name,
+                            timestamp: new Date().toLocaleString()
+                        };
+                        photos.push(photo);
+                        renderPhotoGallery();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function renderPhotoGallery() {
+            const gallery = document.getElementById('photoGallery');
+            const galleryHtml = photos.map(photo => `
+                <div class="relative group">
+                    <img src="${photo.src}" alt="${photo.name}" class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-75 transition duration-200" onclick="viewPhoto('${photo.id}')">
+                    <button onclick="deletePhoto('${photo.id}')" class="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                        <i class="fas fa-times text-xs"></i>
+                    </button>
+                    <div class="mt-2 text-xs text-gray-600 truncate">${photo.name}</div>
+                    <div class="text-xs text-gray-500">${photo.timestamp}</div>
+                </div>
+            `).join('');
+            
+            gallery.innerHTML = galleryHtml;
+        }
+
+        function deletePhoto(photoId) {
+            photos = photos.filter(photo => photo.id !== photoId);
+            renderPhotoGallery();
+        }
+
+        function viewPhoto(photoId) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                // Create modal to view full-size photo
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center';
+                modal.innerHTML = `
+                    <div class="max-w-4xl max-h-full p-4">
+                        <img src="${photo.src}" alt="${photo.name}" class="max-w-full max-h-full object-contain">
+                        <div class="text-center mt-4">
+                            <button onclick="this.closest('.fixed').remove()" class="bg-white text-black px-4 py-2 rounded-lg">Close</button>
+                        </div>
+                    </div>
+                `;
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) modal.remove();
+                });
+                document.body.appendChild(modal);
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function goToMaster() {
+            window.location.href = '/master';
+        }
+
+        function updateProgress() {
+            document.getElementById('progressSlider').focus();
+        }
+    </script>
+</body>
+</html>
