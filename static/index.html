@@ -443,6 +443,249 @@
         </div>
     </div>
 
+    <!-- Add the missing JavaScript functions -->
+    <script>
+        let currentStep = 1;
+        let extractedData = {};
+
+        // Wizard navigation functions
+        function nextStep(step) {
+            if (validateStep(step)) {
+                document.getElementById(`step${step}`).classList.add('hidden');
+                document.getElementById(`step${step + 1}`).classList.remove('hidden');
+                
+                // Update step indicators
+                document.getElementById(`step${step}-indicator`).classList.remove('step-active');
+                document.getElementById(`step${step}-indicator`).classList.add('step-completed');
+                document.getElementById(`step${step + 1}-indicator`).classList.add('step-active');
+                
+                currentStep = step + 1;
+                
+                if (step === 3) {
+                    generateReviewSummary();
+                }
+            }
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step${step}`).classList.add('hidden');
+            document.getElementById(`step${step - 1}`).classList.remove('hidden');
+            
+            // Update step indicators
+            document.getElementById(`step${step}-indicator`).classList.remove('step-active');
+            document.getElementById(`step${step - 1}-indicator`).classList.add('step-active');
+            document.getElementById(`step${step - 1}-indicator`).classList.remove('step-completed');
+            
+            currentStep = step - 1;
+        }
+
+        function validateStep(step) {
+            // Basic validation - ensure required fields are filled
+            if (step === 1) {
+                const vesselName = document.getElementById('vesselName').value.trim();
+                const vesselType = document.getElementById('vesselType').value;
+                if (!vesselName || !vesselType) {
+                    alert('Please fill in the vessel name and type.');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // File upload functions
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show upload status
+            document.getElementById('uploadStatus').classList.remove('hidden');
+            document.getElementById('uploadSuccess').classList.add('hidden');
+            document.getElementById('uploadError').classList.add('hidden');
+
+            // Create FormData and upload file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Now extract data from the uploaded file
+                    return fetch('/api/extract', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            file_path: data.file_path
+                        })
+                    });
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('uploadStatus').classList.add('hidden');
+                
+                if (data.success) {
+                    document.getElementById('uploadSuccess').classList.remove('hidden');
+                    extractedData = data.parsed_data;
+                    populateFormFields(data.parsed_data);
+                } else {
+                    throw new Error(data.error || 'Extraction failed');
+                }
+            })
+            .catch(error => {
+                document.getElementById('uploadStatus').classList.add('hidden');
+                document.getElementById('uploadError').classList.remove('hidden');
+                document.getElementById('errorText').textContent = error.message;
+                console.error('Error:', error);
+            });
+        }
+
+        function populateFormFields(data) {
+            // Populate Step 1 fields
+            if (data.vesselName) document.getElementById('vesselName').value = data.vesselName;
+            if (data.vesselType) document.getElementById('vesselType').value = data.vesselType;
+            if (data.port) document.getElementById('port').value = data.port;
+            if (data.operationDate) document.getElementById('operationDate').value = data.operationDate;
+            if (data.company) document.getElementById('company').value = data.company;
+            if (data.operationType) document.getElementById('operationType').value = data.operationType;
+            
+            // Team assignments
+            if (data.autoOperationsLead) document.getElementById('autoOpsLead').value = data.autoOperationsLead;
+            if (data.autoOperationsAssistant) document.getElementById('autoOpsAssistant').value = data.autoOperationsAssistant;
+            if (data.heavyHeavyLead) document.getElementById('heavyOpsLead').value = data.heavyHeavyLead;
+            if (data.heavyHeavyAssistant) document.getElementById('heavyOpsAssistant').value = data.heavyHeavyAssistant;
+            if (data.berthLocation) document.getElementById('berthLocation').value = data.berthLocation;
+            if (data.operationManager) document.getElementById('operationManager').value = data.operationManager;
+            
+            // Populate Step 2 fields
+            if (data.totalAutomobilesDischarge) document.getElementById('totalAutomobiles').value = data.totalAutomobilesDischarge;
+            if (data.heavyEquipmentDischarge) document.getElementById('heavyEquipment').value = data.heavyEquipmentDischarge;
+            if (data.brvTarget) document.getElementById('brvTarget').value = data.brvTarget;
+            if (data.electricVehicles) document.getElementById('electricVehicles').value = data.electricVehicles;
+            if (data.staticCargo) document.getElementById('staticCargo').value = data.staticCargo;
+            if (data.cargoType) document.getElementById('cargoType').value = data.cargoType;
+            
+            // Zone fields
+            if (data.zoneA) document.getElementById('zoneAVehicles').value = data.zoneA;
+            if (data.zoneADescription) document.getElementById('zoneADescription').value = data.zoneADescription;
+            if (data.zoneB) document.getElementById('zoneBVehicles').value = data.zoneB;
+            if (data.zoneBDescription) document.getElementById('zoneBDescription').value = data.zoneBDescription;
+            if (data.zoneC) document.getElementById('zoneCVehicles').value = data.zoneC;
+            if (data.zoneCDescription) document.getElementById('zoneCDescription').value = data.zoneCDescription;
+            
+            // Populate Step 3 fields
+            if (data.expectedRate) document.getElementById('expectedRate').value = data.expectedRate;
+            if (data.totalDrivers) document.getElementById('totalDrivers').value = data.totalDrivers;
+            if (data.shiftStart) document.getElementById('shiftStart').value = data.shiftStart;
+            if (data.shiftEnd) document.getElementById('shiftEnd').value = data.shiftEnd;
+            if (data.breakDuration) document.getElementById('breakDuration').value = data.breakDuration;
+            if (data.numVans) {
+                document.getElementById('numVans').value = data.numVans;
+                generateVehicleIdFields();
+            }
+            if (data.numStationWagons) {
+                document.getElementById('numStationWagons').value = data.numStationWagons;
+                generateVehicleIdFields();
+            }
+        }
+
+        function generateVehicleIdFields() {
+            const numVans = parseInt(document.getElementById('numVans').value) || 0;
+            const numWagons = parseInt(document.getElementById('numStationWagons').value) || 0;
+            const container = document.getElementById('vehicleIdFields');
+            
+            let html = '';
+            
+            if (numVans > 0 || numWagons > 0) {
+                html += '<h4 class="text-lg font-semibold text-gray-800 mb-4">Vehicle ID Numbers</h4>';
+                html += '<div class="grid md:grid-cols-2 gap-4">';
+                
+                // Van IDs
+                for (let i = 1; i <= numVans; i++) {
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Van ${i} ID</label>
+                            <input type="text" id="vanId${i}" class="w-full px-3 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-blue-500" placeholder="e.g., V${i}">
+                        </div>
+                    `;
+                }
+                
+                // Station Wagon IDs
+                for (let i = 1; i <= numWagons; i++) {
+                    html += `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Station Wagon ${i} ID</label>
+                            <input type="text" id="wagonId${i}" class="w-full px-3 py-2 rounded border border-gray-300 focus:ring-2 focus:ring-blue-500" placeholder="e.g., SW${i}">
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function generateReviewSummary() {
+            const vesselName = document.getElementById('vesselName').value || 'Not specified';
+            const vesselType = document.getElementById('vesselType').value || 'Not specified';
+            const totalAutos = document.getElementById('totalAutomobiles').value || '0';
+            const heavyEquip = document.getElementById('heavyEquipment').value || '0';
+            const expectedRate = document.getElementById('expectedRate').value || 'Not specified';
+            
+            const summaryHtml = `
+                <h3 class="text-xl font-bold mb-4">Operation Summary</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <p><strong>Vessel:</strong> ${vesselName}</p>
+                        <p><strong>Type:</strong> ${vesselType}</p>
+                        <p><strong>Total Automobiles:</strong> ${totalAutos}</p>
+                    </div>
+                    <div>
+                        <p><strong>Heavy Equipment:</strong> ${heavyEquip}</p>
+                        <p><strong>Expected Rate:</strong> ${expectedRate} cars/hour</p>
+                        <p><strong>Port:</strong> ${document.getElementById('port').value || 'Not specified'}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('reviewSummary').innerHTML = summaryHtml;
+        }
+
+        function generateDashboard() {
+            // Hide wizard and show dashboard
+            document.getElementById('wizardInterface').classList.add('hidden');
+            document.getElementById('dashboardInterface').classList.remove('hidden');
+            
+            // Populate dashboard with form data
+            populateDashboard();
+        }
+
+        function populateDashboard() {
+            // This would populate the dashboard with the collected data
+            // For now, redirect to the master dashboard
+            window.location.href = '/master';
+        }
+
+        function showWizard() {
+            document.getElementById('dashboardInterface').classList.add('hidden');
+            document.getElementById('wizardInterface').classList.remove('hidden');
+        }
+
+        // Set default date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('operationDate').value = today;
+        });
+    </script>
+
     <!-- Generated Dashboard -->
     <div id="dashboardInterface" class="dashboard-container hidden">
         <div class="container mx-auto px-4 py-8">
@@ -464,4 +707,71 @@
                 <div class="grid md:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Discharged</label>
-                        <input type="number" id="currentDischarged" class="w-full px-4 py-3 rounded border focus:ring-2 focus:ring-blue-500" onchange
+                        <input type="number" id="currentDischarged" class="w-full px-4 py-3 rounded border focus:ring-2 focus:ring-blue-500" onchange="updateProgress()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Loaded</label>
+                        <input type="number" id="currentLoaded" class="w-full px-4 py-3 rounded border focus:ring-2 focus:ring-blue-500" onchange="updateProgress()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Heavy Equipment</label>
+                        <input type="number" id="currentHeavy" class="w-full px-4 py-3 rounded border focus:ring-2 focus:ring-blue-500" onchange="updateProgress()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Active Drivers</label>
+                        <input type="number" id="activeDrivers" class="w-full px-4 py-3 rounded border focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="kpi-card dashboard-card rounded-2xl p-6 shadow-2xl text-center">
+                    <div class="text-3xl font-bold text-blue-600" id="dischargeProgress">0%</div>
+                    <div class="text-gray-600">Discharge Progress</div>
+                </div>
+                <div class="kpi-card dashboard-card rounded-2xl p-6 shadow-2xl text-center">
+                    <div class="text-3xl font-bold text-green-600" id="loadingProgress">0%</div>
+                    <div class="text-gray-600">Loading Progress</div>
+                </div>
+                <div class="kpi-card dashboard-card rounded-2xl p-6 shadow-2xl text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="currentRate">0</div>
+                    <div class="text-gray-600">Current Rate (cars/hr)</div>
+                </div>
+                <div class="kpi-card dashboard-card rounded-2xl p-6 shadow-2xl text-center">
+                    <div class="text-3xl font-bold text-orange-600" id="eta">--:--</div>
+                    <div class="text-gray-600">Estimated Completion</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dashboard-card rounded-2xl p-6 shadow-2xl mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <button onclick="window.location.href='/master'" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Master Dashboard
+                    </button>
+                    <button onclick="window.location.href='/calendar'" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-calendar mr-2"></i>Calendar View
+                    </button>
+                    <button onclick="window.location.href='/analytics'" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-chart-bar mr-2"></i>Analytics
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            // This function would update the progress indicators
+            // Based on the input values
+            const discharged = parseInt(document.getElementById('currentDischarged').value) || 0;
+            const total = parseInt(document.getElementById('totalAutomobiles').value) || 1;
+            const progress = Math.min((discharged / total) * 100, 100);
+            
+            document.getElementById('dischargeProgress').textContent = progress.toFixed(1) + '%';
+        }
+    </script>
+</body>
+</html>
