@@ -40,10 +40,23 @@ def create_project_download():
                 if file in exclude_files:
                     continue
                 
-                # Add file to ZIP
+                # Add file to ZIP with timestamp handling
                 arcname = os.path.relpath(file_path, '.')
-                zipf.write(file_path, arcname)
-                print(f"Added: {arcname}")
+                try:
+                    zipf.write(file_path, arcname)
+                    print(f"Added: {arcname}")
+                except ValueError as e:
+                    if "ZIP does not support timestamps before 1980" in str(e):
+                        # Create ZipInfo manually with valid timestamp
+                        import time
+                        info = zipfile.ZipInfo(arcname)
+                        info.date_time = time.localtime(time.time())[:6]
+                        info.compress_type = zipfile.ZIP_DEFLATED
+                        with open(file_path, 'rb') as src:
+                            zipf.writestr(info, src.read())
+                        print(f"Added (timestamp fixed): {arcname}")
+                    else:
+                        raise e
     
     file_size = os.path.getsize(zip_filename) / (1024 * 1024)  # Size in MB
     print(f"\n✅ Project packaged successfully!")
