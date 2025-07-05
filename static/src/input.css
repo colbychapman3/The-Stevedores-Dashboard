@@ -1,0 +1,138 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.step-indicator {
+    transition: all 0.3s ease;
+}
+.step-active {
+    background: linear-gradient(135deg, #3B82F6, #1E40AF);
+    transform: scale(1.1);
+}
+.step-completed {
+    background: linear-gradient(135deg, #10B981, #059669);
+}
+.dashboard-card {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.kpi-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.progress-bar-animated {
+    background: linear-gradient(90deg, #10B981, #34D399, #6EE7B7);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+.wizard-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+.dashboard-container {
+    background: linear-gradient(135deg, #e0f2f7 0%, #a5d8ef 100%);
+    color: #374151;
+    min-height: 100vh;
+}
+.progress-ring {
+    transform: rotate(-90deg);
+}
+.progress-ring-circle {
+    transition: stroke-dasharray 0.35s;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+}
+.photo-upload-zone {
+    border: 2px dashed #cbd5e0;
+    transition: all 0.3s ease;
+}
+.photo-upload-zone:hover {
+    border-color: #4299e1;
+    background-color: #ebf8ff;
+}
+.photo-upload-zone.dragover {
+    border-color: #3182ce;
+    background-color: #bee3f8;
+}
+.deck-complete {
+    background: linear-gradient(90deg, #10b981, #34d399);
+    color: white;
+}
+.metric-card {
+    transition: transform 0.2s ease-in-out;
+}
+.metric-card:hover {
+    transform: translateY(-2px);
+}
+.widget-container {
+    position: relative;
+}
+.widget-handle {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: move;
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.widget-container:hover .widget-handle {
+    opacity: 1;
+}
+.widget-dragging {
+    opacity: 0.7;
+    transform: rotate(2deg) scale(1.02);
+    z-index: 1000;
+    transition: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+.widget-drop-zone {
+    border: 2px dashed #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+}
+.widget-controls {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.widget-container:hover .widget-controls {
+    opacity: 1;
+}
+.widget-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.ship-card {
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.ship-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+.berth-indicator {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+.status-active { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
+.status-loading { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); }
+.status-discharge { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+.status-complete { background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); }
