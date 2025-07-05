@@ -6,7 +6,7 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
-from flask import Flask, send_from_directory, jsonify, redirect
+from flask import Flask, send_from_directory, jsonify, redirect, send_file
 from flask_cors import CORS
 from src.models.user import db
 from src.routes.user import user_bp
@@ -67,6 +67,44 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    """Serve downloadable project files"""
+    import os
+    file_path = os.path.join('downloads', filename)
+    if os.path.exists(file_path):
+        return send_file(file_path, as_attachment=True)
+    else:
+        return "File not found", 404
+
+@app.route('/create-download')
+def create_download():
+    """Create and return download link for project"""
+    import subprocess
+    result = subprocess.run(['python', 'download_project.py'], 
+                          capture_output=True, text=True)
+
+    if result.returncode == 0:
+        # Extract filename from output
+        lines = result.stdout.split('\n')
+        download_url = None
+        for line in lines:
+            if 'Download URL:' in line:
+                download_url = line.split('Download URL: ')[1]
+                break
+
+        if download_url:
+            return jsonify({
+                'success': True,
+                'download_url': download_url,
+                'message': 'Project packaged successfully!'
+            })
+
+    return jsonify({
+        'success': False,
+        'message': 'Failed to create download package'
+    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
