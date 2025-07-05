@@ -72,7 +72,11 @@ def internal_error(error):
 def download_file(filename):
     """Serve downloadable project files"""
     import os
-    file_path = os.path.join('downloads', filename)
+    # Get the project root directory (parent of src folder)
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    downloads_dir = os.path.join(project_root, 'downloads')
+    file_path = os.path.join(downloads_dir, filename)
+    
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     else:
