@@ -49,20 +49,12 @@
             cursor: move;
             background: rgba(0,0,0,0.1);
             border-radius: 4px;
-            padding: 6px;
+            padding: 4px;
             opacity: 0;
             transition: opacity 0.2s;
-            user-select: none;
-            z-index: 10;
         }
         .widget-container:hover .widget-handle {
             opacity: 1;
-        }
-        .widget-handle:hover {
-            background: rgba(0,0,0,0.2);
-        }
-        .widget-handle:active {
-            background: rgba(0,0,0,0.3);
         }
         .widget-dragging {
             opacity: 0.5;
@@ -657,11 +649,16 @@
             }
 
             setupPhotoUpload();
-            initializeCharts();
             initializeData();
+            loadWidgetSettings();
+            
+            // Initialize charts after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                initializeCharts();
+            }, 100);
+            
             startTimeTracking();
             setupWidgetDragAndDrop();
-            loadWidgetSettings();
         });
 
         function initializeData() {
@@ -1162,63 +1159,71 @@
         }
 
         function initializeCharts() {
-            // Hourly Productivity Chart
-            const hourlyCtx = document.getElementById('hourlyProductivityChart').getContext('2d');
-            new Chart(hourlyCtx, {
-                type: 'line',
-                data: {
-                    labels: hourlyData.map(h => h.hour),
-                    datasets: [{
-                        label: 'Actual Cars/Hour',
-                        data: hourlyData.map(h => h.cars),
-                        borderColor: '#3b82f6',
-                        backgroundColor: '#3b82f620',
-                        tension: 0.1
-                    }, {
-                        label: 'Target Rate',
-                        data: hourlyData.map(h => h.target),
-                        borderColor: '#ef4444',
-                        backgroundColor: 'transparent',
-                        borderDash: [5, 5],
-                        tension: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Cars per Hour'
+            try {
+                // Hourly Productivity Chart
+                const hourlyCanvas = document.getElementById('hourlyProductivityChart');
+                if (hourlyCanvas) {
+                    const hourlyCtx = hourlyCanvas.getContext('2d');
+                    new Chart(hourlyCtx, {
+                        type: 'line',
+                        data: {
+                            labels: hourlyData.map(h => h.hour),
+                            datasets: [{
+                                label: 'Actual Cars/Hour',
+                                data: hourlyData.map(h => h.cars),
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.1
+                            }, {
+                                label: 'Target Rate',
+                                data: hourlyData.map(h => h.target),
+                                borderColor: '#ef4444',
+                                backgroundColor: 'transparent',
+                                borderDash: [5, 5],
+                                tension: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Cars per Hour'
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
                 }
-            });
 
-            // Brand Distribution Chart
-            const brandCtx = document.getElementById('brandDistributionChart').getContext('2d');
-            new Chart(brandCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(brandData),
-                    datasets: [{
-                        data: Object.values(brandData).map(d => d.total),
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+                // Brand Distribution Chart
+                const brandCanvas = document.getElementById('brandDistributionChart');
+                if (brandCanvas) {
+                    const brandCtx = brandCanvas.getContext('2d');
+                    new Chart(brandCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(brandData),
+                            datasets: [{
+                                data: Object.values(brandData).map(d => d.total),
+                                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
                         }
-                    }
+                    });
                 }
-            });
-
-            
+            } catch (error) {
+                console.error('Error initializing charts:', error);
+            }
         }
 
         function calculateETC() {
@@ -1516,36 +1521,17 @@
             customizeMode = !customizeMode;
             const btn = document.getElementById('customizeBtn');
             const addPanel = document.getElementById('addWidgetPanel');
-            const widgetContainers = document.querySelectorAll('.widget-container');
             
             if (customizeMode) {
                 btn.innerHTML = '<i class="fas fa-save mr-2"></i>Save Layout';
                 btn.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200';
                 addPanel.classList.remove('hidden');
                 document.body.classList.add('customize-mode');
-                
-                // Show widget handles and enable dragging
-                widgetContainers.forEach(container => {
-                    container.style.position = 'relative';
-                    const handle = container.querySelector('.widget-handle');
-                    if (handle) {
-                        handle.style.display = 'block';
-                    }
-                });
             } else {
                 btn.innerHTML = '<i class="fas fa-cog mr-2"></i>Customize';
                 btn.className = 'bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200';
                 addPanel.classList.add('hidden');
                 document.body.classList.remove('customize-mode');
-                
-                // Hide widget handles when not in customize mode
-                widgetContainers.forEach(container => {
-                    const handle = container.querySelector('.widget-handle');
-                    if (handle) {
-                        handle.style.display = '';
-                    }
-                });
-                
                 saveWidgetSettings();
             }
         }
@@ -1570,60 +1556,33 @@
         function setupWidgetDragAndDrop() {
             const container = document.getElementById('widgetsContainer');
             let draggedElement = null;
-            let isDragging = false;
 
             // Make widgets draggable
-            function initializeWidgetDragging() {
-                container.querySelectorAll('.widget-container').forEach(widget => {
-                    const handle = widget.querySelector('.widget-handle');
-                    
-                    // Remove existing event listeners
-                    handle.replaceWith(handle.cloneNode(true));
-                    const newHandle = widget.querySelector('.widget-handle');
-                    
-                    newHandle.addEventListener('mousedown', (e) => {
+            container.querySelectorAll('.widget-container').forEach(widget => {
+                const handle = widget.querySelector('.widget-handle');
+                
+                if (handle) {
+                    handle.addEventListener('mousedown', (e) => {
                         if (!customizeMode) return;
                         
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        isDragging = true;
                         draggedElement = widget;
                         widget.classList.add('widget-dragging');
                         
-                        // Store initial mouse position
-                        const startY = e.clientY;
-                        const rect = widget.getBoundingClientRect();
-                        
                         const handleMouseMove = (e) => {
-                            if (!isDragging) return;
-                            
                             e.preventDefault();
+                            const afterElement = getDragAfterElement(container, e.clientY);
                             
-                            // Only start moving if mouse has moved enough
-                            if (Math.abs(e.clientY - startY) > 5) {
-                                const afterElement = getDragAfterElement(container, e.clientY);
-                                
-                                if (afterElement == null) {
-                                    container.appendChild(draggedElement);
-                                } else {
-                                    container.insertBefore(draggedElement, afterElement);
-                                }
+                            if (afterElement == null) {
+                                container.appendChild(draggedElement);
+                            } else {
+                                container.insertBefore(draggedElement, afterElement);
                             }
                         };
                         
-                        const handleMouseUp = (e) => {
-                            if (!isDragging) return;
-                            
-                            e.preventDefault();
-                            isDragging = false;
-                            
-                            if (draggedElement) {
-                                draggedElement.classList.remove('widget-dragging');
-                                updateWidgetOrder();
-                            }
-                            
+                        const handleMouseUp = () => {
+                            widget.classList.remove('widget-dragging');
                             draggedElement = null;
+                            updateWidgetOrder();
                             document.removeEventListener('mousemove', handleMouseMove);
                             document.removeEventListener('mouseup', handleMouseUp);
                         };
@@ -1631,25 +1590,8 @@
                         document.addEventListener('mousemove', handleMouseMove);
                         document.addEventListener('mouseup', handleMouseUp);
                     });
-                    
-                    // Prevent text selection while dragging
-                    newHandle.addEventListener('selectstart', (e) => {
-                        e.preventDefault();
-                    });
-                });
-            }
-
-            // Initialize dragging
-            initializeWidgetDragging();
-            
-            // Re-initialize when customize mode is toggled
-            const originalToggleCustomizeMode = window.toggleCustomizeMode;
-            window.toggleCustomizeMode = function() {
-                originalToggleCustomizeMode();
-                setTimeout(() => {
-                    initializeWidgetDragging();
-                }, 100);
-            };
+                }
+            });
         }
 
         function getDragAfterElement(container, y) {
