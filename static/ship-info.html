@@ -302,42 +302,15 @@
                     <i class="fas fa-grip-vertical text-gray-500"></i>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg p-3">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex justify-between items-center mb-3">
                         <h3 class="text-base font-bold text-gray-900 flex items-center">
-                            <i class="fas fa-map-marked-alt text-orange-600 mr-2 text-sm"></i>Zone Allocation
+                            <i class="fas fa-chart-pie text-orange-600 mr-2 text-sm"></i>Brand Distribution
                         </h3>
-                        <button id="editZoneBtn" onclick="toggleZoneEdit()" class="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded-md font-medium transition duration-200 text-xs">
-                            <i class="fas fa-edit mr-1"></i>Edit
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 mb-2" id="zoneAllocation">
-                        <!-- Zone allocation will be populated here -->
-                    </div>
-                    <div id="zoneEditForm" class="hidden">
-                        <div class="space-y-2 mt-2">
-                            <div class="grid grid-cols-4 gap-2 text-xs font-medium text-gray-700 mb-2">
-                                <span>Zone</span>
-                                <span>Vehicles</span>
-                                <span>Capacity</span>
-                                <span>Distance</span>
-                            </div>
-                            <div id="zoneEditInputs" class="space-y-2">
-                                <!-- Edit inputs will be populated here -->
-                            </div>
-                            <div class="flex space-x-2 pt-2">
-                                <button onclick="saveZoneChanges()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md font-medium transition duration-200 text-xs">
-                                    <i class="fas fa-save mr-1"></i>Save
-                                </button>
-                                <button onclick="cancelZoneEdit()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded-md font-medium transition duration-200 text-xs">
-                                    <i class="fas fa-times mr-1"></i>Cancel
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div class="mt-2">
-                        <h4 class="font-medium text-gray-800 mb-1 text-xs">Brand Distribution</h4>
-                        <div class="w-full h-24">
-                            <canvas id="brandDistributionChart" width="250" height="100"></canvas>
+                        <h4 class="font-medium text-gray-800 mb-3 text-sm">Brand Distribution</h4>
+                        <div class="w-full h-48">
+                            <canvas id="brandDistributionChart" width="300" height="200"></canvas>
                         </div>
                     </div>
                 </div>
@@ -704,7 +677,6 @@
             };
 
             populateDeckProgress();
-            populateZoneAllocation();
             populateInventoryTable();
             populateBreakSchedule();
             updateHourlyQuantityDisplay();
@@ -831,84 +803,7 @@
             toggleDeckEdit();
         }
 
-        let zoneData = [
-            {name: 'Zone A', vehicles: 450, capacity: 500, distance: '1.8 km'},
-            {name: 'Zone B', vehicles: 380, capacity: 400, distance: '2.1 km'},
-            {name: 'Zone C', vehicles: 285, capacity: 350, distance: '2.5 km'}
-        ];
-
-        function populateZoneAllocation() {
-            const container = document.getElementById('zoneAllocation');
-            const html = zoneData.map(zone => {
-                const utilization = (zone.vehicles / zone.capacity) * 100;
-                return `
-                    <div class="bg-gray-50 p-2 rounded-lg">
-                        <h4 class="font-medium text-gray-800 text-xs">${zone.name}</h4>
-                        <p class="text-xs text-gray-600">${zone.vehicles}/${zone.capacity}</p>
-                        <p class="text-xs text-gray-500">${zone.distance}</p>
-                        <div class="mt-1 w-full bg-gray-200 rounded-full h-1">
-                            <div class="bg-blue-600 h-1 rounded-full" style="width: ${utilization}%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">${Math.round(utilization)}%</p>
-                    </div>
-                `;
-            }).join('');
-            container.innerHTML = html;
-        }
-
-        function toggleZoneEdit() {
-            const container = document.getElementById('zoneAllocation');
-            const editForm = document.getElementById('zoneEditForm');
-            const editBtn = document.getElementById('editZoneBtn');
-
-            if (editForm.classList.contains('hidden')) {
-                // Show edit form
-                container.classList.add('hidden');
-                editForm.classList.remove('hidden');
-                editBtn.innerHTML = '<i class="fas fa-times mr-1"></i>Cancel';
-                populateZoneEditForm();
-            } else {
-                // Hide edit form
-                container.classList.remove('hidden');
-                editForm.classList.add('hidden');
-                editBtn.innerHTML = '<i class="fas fa-edit mr-1"></i>Edit';
-            }
-        }
-
-        function populateZoneEditForm() {
-            const container = document.getElementById('zoneEditInputs');
-            const html = zoneData.map((zone, index) => `
-                <div class="grid grid-cols-4 gap-2">
-                    <input type="text" id="zoneName_${index}" value="${zone.name}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm">
-                    <input type="number" id="zoneVehicles_${index}" value="${zone.vehicles}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm" min="0">
-                    <input type="number" id="zoneCapacity_${index}" value="${zone.capacity}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm" min="0">
-                    <input type="text" id="zoneDistance_${index}" value="${zone.distance}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm" placeholder="e.g., 2.1 km">
-                </div>
-            `).join('');
-            container.innerHTML = html;
-        }
-
-        function saveZoneChanges() {
-            zoneData.forEach((zone, index) => {
-                const name = document.getElementById(`zoneName_${index}`).value || `Zone ${String.fromCharCode(65 + index)}`;
-                const vehicles = parseInt(document.getElementById(`zoneVehicles_${index}`).value) || 0;
-                const capacity = parseInt(document.getElementById(`zoneCapacity_${index}`).value) || 0;
-                const distance = document.getElementById(`zoneDistance_${index}`).value || '0 km';
-
-                zone.name = name;
-                zone.vehicles = Math.min(vehicles, capacity); // Ensure vehicles doesn't exceed capacity
-                zone.capacity = capacity;
-                zone.distance = distance;
-            });
-
-            populateZoneAllocation();
-            toggleZoneEdit();
-            alert('Zone allocation updated successfully!');
-        }
-
-        function cancelZoneEdit() {
-            toggleZoneEdit();
-        }
+        
 
         function populateInventoryTable() {
             const tbody = document.getElementById('inventoryTable');
@@ -1214,9 +1109,14 @@
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             plugins: {
                                 legend: {
-                                    position: 'bottom'
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true
+                                    }
                                 }
                             }
                         }
