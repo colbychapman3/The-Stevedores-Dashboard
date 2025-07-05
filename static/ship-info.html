@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -525,30 +524,30 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-clock text-blue-600 mr-3"></i>Estimated Time of Completion
                 </h3>
-                
+
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Remaining</label>
                         <input type="number" id="vehiclesRemaining" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                                placeholder="1003" value="1003" onchange="calculateETC()">
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Rate (cars/hour)</label>
-                        <input type="number" id="currentRate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                        number" id="currentRate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                                placeholder="180.2" value="180.2" step="0.1" onchange="calculateETC()">
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Time</label>
                         <input type="time" id="currentTime" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                                value="16:09" onchange="calculateETC()">
                     </div>
-                    
+
                     <button onclick="calculateETC()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition duration-200">
                         Calculate ETC
                     </button>
-                    
+
                     <div id="etcResult" class="mt-4 p-4 bg-white rounded-lg border border-blue-200">
                         <div class="text-sm text-gray-600">Estimated Completion Time</div>
                         <div class="text-2xl font-bold text-blue-600" id="calculatedETC">--:--</div>
@@ -561,7 +560,7 @@
                 <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-chart-line text-green-600 mr-3"></i>Port Progress Simulator
                 </h3>
-                
+
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">BRV Progress</label>
@@ -573,7 +572,7 @@
                             <div id="brvBar" class="bg-blue-500 h-2 rounded-full" style="width: 57.5%"></div>
                         </div>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">ZEE Progress</label>
                         <div class="flex items-center space-x-3">
@@ -584,7 +583,7 @@
                             <div id="zeeBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
                         </div>
                     </div>
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">SOU Progress</label>
                         <div class="flex items-center space-x-3">
@@ -595,7 +594,7 @@
                             <div id="souBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
                         </div>
                     </div>
-                    
+
                     <div class="mt-4 p-4 bg-white rounded-lg border border-green-200">
                         <div class="text-sm text-gray-600">Total Progress</div>
                         <div class="text-2xl font-bold text-green-600" id="totalProgress">37.0%</div>
@@ -654,12 +653,12 @@
             setupPhotoUpload();
             initializeData();
             loadWidgetSettings();
-            
+
             // Initialize charts after a short delay to ensure DOM is ready
             setTimeout(() => {
                 initializeCharts();
             }, 100);
-            
+
             startTimeTracking();
             setupWidgetDragAndDrop();
         });
@@ -714,12 +713,12 @@
 
         function startTimeTracking() {
             operationStartTime = new Date('2024-01-15T07:00:00');
-            
+
             setInterval(() => {
                 updateElapsedTime();
                 updateETC();
             }, 60000); // Update every minute
-            
+
             // Initial update
             updateElapsedTime();
             updateETC();
@@ -782,7 +781,7 @@
             const container = document.getElementById('deckProgressContainer');
             const editForm = document.getElementById('deckEditForm');
             const editBtn = document.getElementById('editDeckBtn');
-            
+
             if (editForm.classList.contains('hidden')) {
                 // Show edit form
                 container.classList.add('hidden');
@@ -818,12 +817,12 @@
                 const total = parseInt(document.getElementById(`deckTotal_${index}`).value) || 0;
                 const discharged = parseInt(document.getElementById(`deckDischarged_${index}`).value) || 0;
                 const complete = document.getElementById(`deckComplete_${index}`).checked;
-                
+
                 deck.total = total;
                 deck.discharged = Math.min(discharged, total); // Ensure discharged doesn't exceed total
                 deck.complete = complete;
             });
-            
+
             populateDeckProgress();
             toggleDeckEdit();
             alert('Deck progress updated successfully!');
@@ -862,7 +861,7 @@
             const container = document.getElementById('zoneAllocation');
             const editForm = document.getElementById('zoneEditForm');
             const editBtn = document.getElementById('editZoneBtn');
-            
+
             if (editForm.classList.contains('hidden')) {
                 // Show edit form
                 container.classList.add('hidden');
@@ -896,13 +895,13 @@
                 const vehicles = parseInt(document.getElementById(`zoneVehicles_${index}`).value) || 0;
                 const capacity = parseInt(document.getElementById(`zoneCapacity_${index}`).value) || 0;
                 const distance = document.getElementById(`zoneDistance_${index}`).value || '0 km';
-                
+
                 zone.name = name;
                 zone.vehicles = Math.min(vehicles, capacity); // Ensure vehicles doesn't exceed capacity
                 zone.capacity = capacity;
                 zone.distance = distance;
             });
-            
+
             populateZoneAllocation();
             toggleZoneEdit();
             alert('Zone allocation updated successfully!');
@@ -945,21 +944,21 @@
         function addHourlyQuantity() {
             const hourSelect = document.getElementById('hourSelect');
             const quantityInput = document.getElementById('hourlyQuantity');
-            
+
             const hour = hourSelect.value;
             const quantity = parseInt(quantityInput.value);
-            
+
             if (!hour || !quantity || quantity < 0) {
                 alert('Please select an hour and enter a valid quantity');
                 return;
             }
-            
+
             hourlyQuantities[hour] = quantity;
-            
+
             // Clear inputs
             hourSelect.value = '';
             quantityInput.value = '';
-            
+
             updateHourlyQuantityDisplay();
         }
 
@@ -967,16 +966,16 @@
             const container = document.getElementById('hourlyQuantityList');
             const totalElement = document.getElementById('totalRecorded');
             const averageElement = document.getElementById('averagePerHour');
-            
+
             if (Object.keys(hourlyQuantities).length === 0) {
                 container.innerHTML = '<div class="text-gray-500 text-sm italic text-center py-4">No hourly data recorded yet</div>';
                 totalElement.textContent = '0 vehicles';
                 averageElement.textContent = '0 vehicles/hour';
                 return;
             }
-            
+
             const sortedHours = Object.keys(hourlyQuantities).sort((a, b) => parseInt(a) - parseInt(b));
-            
+
             const html = sortedHours.map(hour => {
                 const quantity = hourlyQuantities[hour];
                 const hourLabel = getHourLabel(hour);
@@ -1000,13 +999,13 @@
                     </div>
                 `;
             }).join('');
-            
+
             container.innerHTML = html;
-            
+
             // Calculate totals
             const total = Object.values(hourlyQuantities).reduce((sum, qty) => sum + qty, 0);
             const average = Object.keys(hourlyQuantities).length > 0 ? (total / Object.keys(hourlyQuantities).length).toFixed(1) : 0;
-            
+
             totalElement.textContent = `${total.toLocaleString()} vehicles`;
             averageElement.textContent = `${average} vehicles/hour`;
         }
@@ -1107,7 +1106,7 @@
 
         function populateShipData() {
             document.getElementById('vesselTitle').textContent = currentShip.vesselName;
-            
+
             // Update key metrics
             document.getElementById('currentRateDisplay').textContent = getCurrentRate();
             document.getElementById('completionDisplay').textContent = `${currentShip.progress}%`;
@@ -1233,20 +1232,20 @@
             const vehiclesRemaining = parseInt(document.getElementById('vehiclesRemaining').value) || 0;
             const currentRate = parseFloat(document.getElementById('currentRate').value) || 0;
             const currentTimeStr = document.getElementById('currentTime').value;
-            
+
             if (vehiclesRemaining <= 0 || currentRate <= 0 || !currentTimeStr) {
                 document.getElementById('calculatedETC').textContent = '--:--';
                 return;
             }
-            
+
             const hoursRemaining = vehiclesRemaining / currentRate;
             const currentTime = new Date();
             const [hours, minutes] = currentTimeStr.split(':');
             currentTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-            
+
             const completionTime = new Date(currentTime.getTime() + (hoursRemaining * 60 * 60 * 1000));
             const formattedTime = completionTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            
+
             document.getElementById('calculatedETC').textContent = formattedTime;
         }
 
@@ -1254,23 +1253,23 @@
             const brvValue = parseInt(document.getElementById('brvProgress').value);
             const zeeValue = parseInt(document.getElementById('zeeProgress').value);
             const souValue = parseInt(document.getElementById('souProgress').value);
-            
+
             const brvMax = 904;
             const zeeMax = 300;
             const souMax = 200;
             const totalMax = brvMax + zeeMax + souMax;
             const totalCurrent = brvValue + zeeValue + souValue;
-            
+
             // Update displays
             document.getElementById('brvValue').textContent = `${brvValue}/${brvMax}`;
             document.getElementById('zeeValue').textContent = `${zeeValue}/${zeeMax}`;
             document.getElementById('souValue').textContent = `${souValue}/${souMax}`;
-            
+
             // Update progress bars
             document.getElementById('brvBar').style.width = `${(brvValue / brvMax) * 100}%`;
             document.getElementById('zeeBar').style.width = `${(zeeValue / zeeMax) * 100}%`;
             document.getElementById('souBar').style.width = `${(souValue / souMax) * 100}%`;
-            
+
             // Update total progress
             const totalPercent = ((totalCurrent / totalMax) * 100).toFixed(1);
             document.getElementById('totalProgress').textContent = `${totalPercent}%`;
@@ -1469,7 +1468,7 @@
 
             document.getElementById('calculatedProgress').textContent = overallProgress.toFixed(0) + '%';
             document.getElementById('completionDisplay').textContent = overallProgress.toFixed(0) + '%';
-            
+
             // Update current rate based on status
             let currentRate = 0;
             if (operationStatus === 'active' || operationStatus === 'discharge') {
@@ -1494,14 +1493,14 @@
             report += `Vessel: ${reportData.vessel}\n`;
             report += `Date: ${reportData.date}\n`;
             report += `Progress: ${reportData.progress}%\n\n`;
-            
+
             report += `HOURLY PRODUCTIVITY:\n`;
             hourlyData.forEach(hour => {
                 if (hour.cars > 0) {
                     report += `${hour.hour}: ${hour.cars} cars/hour\n`;
                 }
             });
-            
+
             report += `\nBRAND BREAKDOWN:\n`;
             Object.entries(brandData).forEach(([brand, data]) => {
                 report += `${brand}: ${data.discharged}/${data.total} (${Math.round((data.discharged/data.total)*100)}%)\n`;
@@ -1524,13 +1523,13 @@
             customizeMode = !customizeMode;
             const btn = document.getElementById('customizeBtn');
             const addPanel = document.getElementById('addWidgetPanel');
-            
+
             if (customizeMode) {
                 btn.innerHTML = '<i class="fas fa-save mr-2"></i>Save Layout';
                 btn.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200';
                 addPanel.classList.remove('hidden');
                 document.body.classList.add('customize-mode');
-                
+
                 // Show helpful message
                 const container = document.getElementById('widgetsContainer');
                 const helpMsg = document.createElement('div');
@@ -1543,11 +1542,11 @@
                 btn.className = 'bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200';
                 addPanel.classList.add('hidden');
                 document.body.classList.remove('customize-mode');
-                
+
                 // Remove help message
                 const helpMsg = document.getElementById('customizeHelp');
                 if (helpMsg) helpMsg.remove();
-                
+
                 saveWidgetSettings();
             }
         }
@@ -1577,49 +1576,49 @@
             // Set up event delegation for drag handles
             container.addEventListener('mousedown', (e) => {
                 if (!customizeMode) return;
-                
+
                 const handle = e.target.closest('.widget-handle');
                 if (!handle) return;
-                
+
                 e.preventDefault();
-                
+
                 const widget = handle.closest('.widget-container');
                 if (!widget) return;
-                
+
                 draggedElement = widget;
                 isDragging = true;
                 widget.classList.add('widget-dragging');
-                
+
                 const startY = e.clientY;
                 const startRect = widget.getBoundingClientRect();
-                
+
                 const handleMouseMove = (e) => {
                     if (!isDragging || !draggedElement) return;
-                    
+
                     e.preventDefault();
-                    
+
                     const afterElement = getDragAfterElement(container, e.clientY);
-                    
+
                     if (afterElement == null) {
                         container.appendChild(draggedElement);
                     } else {
                         container.insertBefore(draggedElement, afterElement);
                     }
                 };
-                
+
                 const handleMouseUp = () => {
                     if (draggedElement) {
                         draggedElement.classList.remove('widget-dragging');
                         updateWidgetOrder();
                     }
-                    
+
                     isDragging = false;
                     draggedElement = null;
-                    
+
                     document.removeEventListener('mousemove', handleMouseMove);
                     document.removeEventListener('mouseup', handleMouseUp);
                 };
-                
+
                 document.addEventListener('mousemove', handleMouseMove);
                 document.addEventListener('mouseup', handleMouseUp);
             });
@@ -1632,11 +1631,11 @@
 
         function getDragAfterElement(container, y) {
             const draggableElements = [...container.querySelectorAll('.widget-container:not(.widget-dragging)')];
-            
+
             return draggableElements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
                 const offset = y - box.top - box.height / 2;
-                
+
                 if (offset < 0 && offset > closest.offset) {
                     return { offset: offset, element: child };
                 } else {
@@ -1664,7 +1663,7 @@
                 const parsed = JSON.parse(settings);
                 widgetOrder = parsed.widgetOrder || widgetOrder;
                 enabledWidgets = new Set(parsed.enabledWidgets || enabledWidgets);
-                
+
                 // Apply saved settings
                 applyWidgetSettings();
             }
@@ -1672,7 +1671,7 @@
 
         function applyWidgetSettings() {
             const container = document.getElementById('widgetsContainer');
-            
+
             // Reorder widgets
             widgetOrder.forEach(widgetId => {
                 const widget = document.querySelector(`[data-widget-id="${widgetId}"]`);
@@ -1680,7 +1679,7 @@
                     container.appendChild(widget);
                 }
             });
-            
+
             // Apply enabled/disabled state
             document.querySelectorAll('.widget-container').forEach(widget => {
                 const widgetId = widget.dataset.widgetId;

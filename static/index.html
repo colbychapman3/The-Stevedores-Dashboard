@@ -619,10 +619,10 @@
                 if (data.success) {
                     document.getElementById('wizardUploadSuccess').classList.remove('hidden');
                     console.log('Document processed successfully:', data.parsed_data);
-                    
+
                     // Auto-populate form fields with extracted data
                     populateFormFields(data.parsed_data);
-                    
+
                     // Store extracted data globally
                     extractedData = data.parsed_data;
                 } else {
@@ -660,7 +660,7 @@
             if (data.totalAutos) document.getElementById('totalAutos').value = data.totalAutos;
             if (data.totalHeavy) document.getElementById('totalHeavy').value = data.totalHeavy;
             if (data.cargoType) document.getElementById('cargoType').value = data.cargoType;
-            
+
             // Show success message briefly
             setTimeout(() => {
                 document.getElementById('wizardUploadSuccess').classList.add('hidden');
