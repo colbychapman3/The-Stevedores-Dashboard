@@ -63,6 +63,42 @@
                 <p class="text-xl text-blue-100">Create custom live dashboards for your vessel operations</p>
             </div>
 
+            <!-- Document Upload Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8 max-w-4xl mx-auto">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents (Optional)
+                </h2>
+                <p class="text-gray-600 mb-4">Upload vessel operation documents to automatically populate form fields below</p>
+                <div class="flex items-center justify-center w-full">
+                    <label for="wizardDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
+                        </div>
+                        <input id="wizardDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleWizardFileUpload(event)">
+                    </label>
+                </div>
+                <div id="wizardUploadStatus" class="mt-4 hidden">
+                    <div class="flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+                        <span class="text-blue-600">Processing document...</span>
+                    </div>
+                </div>
+                <div id="wizardUploadSuccess" class="mt-4 hidden">
+                    <div class="flex items-center justify-center text-green-600">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Document processed successfully! Form fields have been populated.</span>
+                    </div>
+                </div>
+                <div id="wizardUploadError" class="mt-4 hidden">
+                    <div class="flex items-center justify-center text-red-600">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span id="wizardUploadErrorText">Error processing document. Please try again.</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Step Indicator -->
             <div class="flex justify-center mb-12">
                 <div class="flex items-center space-x-4">
@@ -541,6 +577,94 @@
                 }
             }
             return true;
+        }
+
+        // Wizard file upload functions
+        function handleWizardFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show upload status
+            document.getElementById('wizardUploadStatus').classList.remove('hidden');
+            document.getElementById('wizardUploadSuccess').classList.add('hidden');
+            document.getElementById('wizardUploadError').classList.add('hidden');
+
+            // Create FormData and upload file
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    return fetch('/api/extract', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            file_path: data.file_path
+                        })
+                    });
+                } else {
+                    throw new Error(data.error || 'Upload failed');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('wizardUploadStatus').classList.add('hidden');
+                if (data.success) {
+                    document.getElementById('wizardUploadSuccess').classList.remove('hidden');
+                    console.log('Document processed successfully:', data.parsed_data);
+                    
+                    // Auto-populate form fields with extracted data
+                    populateFormFields(data.parsed_data);
+                    
+                    // Store extracted data globally
+                    extractedData = data.parsed_data;
+                } else {
+                    throw new Error(data.error || 'Extraction failed');
+                }
+            })
+            .catch(error => {
+                document.getElementById('wizardUploadStatus').classList.add('hidden');
+                document.getElementById('wizardUploadError').classList.remove('hidden');
+                document.getElementById('wizardUploadErrorText').textContent = 'Error processing document: ' + error.message;
+                console.error('Error:', error);
+            });
+        }
+
+        function populateFormFields(data) {
+            // Populate Step 1 fields
+            if (data.vesselName) document.getElementById('vesselName').value = data.vesselName;
+            if (data.vesselType) document.getElementById('vesselType').value = data.vesselType;
+            if (data.port) document.getElementById('port').value = data.port;
+            if (data.company) document.getElementById('company').value = data.company;
+            if (data.operationType) document.getElementById('operationType').value = data.operationType;
+            if (data.operationDate) document.getElementById('operationDate').value = data.operationDate;
+            if (data.berth) document.getElementById('berth').value = data.berth;
+            if (data.shiftStart) document.getElementById('shiftStart').value = data.shiftStart;
+            if (data.shiftEnd) document.getElementById('shiftEnd').value = data.shiftEnd;
+
+            // Populate Step 2 fields
+            if (data.autoOperationsLead) document.getElementById('autoOpsLead').value = data.autoOperationsLead;
+            if (data.autoOperationsAssistant) document.getElementById('autoOpsAssistant').value = data.autoOperationsAssistant;
+            if (data.heavyHeavyLead) document.getElementById('heavyOpsLead').value = data.heavyHeavyLead;
+            if (data.heavyHeavyAssistant) document.getElementById('heavyOpsAssistant').value = data.heavyHeavyAssistant;
+            if (data.operationManager) document.getElementById('operationManager').value = data.operationManager;
+
+            // Populate Step 3 fields
+            if (data.totalAutos) document.getElementById('totalAutos').value = data.totalAutos;
+            if (data.totalHeavy) document.getElementById('totalHeavy').value = data.totalHeavy;
+            if (data.cargoType) document.getElementById('cargoType').value = data.cargoType;
+            
+            // Show success message briefly
+            setTimeout(() => {
+                document.getElementById('wizardUploadSuccess').classList.add('hidden');
+            }, 5000);
         }
 
         // File upload functions
