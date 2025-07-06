@@ -280,15 +280,16 @@
         }
 
         function updateStats() {
-            const activeShips = ships.filter(ship => ship.status !== 'complete').length;
-            const totalTeams = ships.length * 2; // Auto ops + Heavy ops teams
-            const totalVehicles = ships.reduce((sum, ship) => sum + ship.totalVehicles, 0);
-            const occupiedBerths = new Set(ships.map(ship => ship.berth)).size;
+            const activeShips = ships.filter(ship => ship.status !== 'complete');
+            const activeShipsCount = activeShips.length;
+            const totalTeams = activeShipsCount * 2; // Auto ops + Heavy ops teams
+            const totalVehicles = activeShips.reduce((sum, ship) => sum + ship.totalVehicles, 0);
+            const berthsOccupied = new Set(activeShips.map(ship => ship.berth)).size;
 
-            document.getElementById('activeShipsCount').textContent = activeShips;
+            document.getElementById('activeShipsCount').textContent = activeShipsCount;
             document.getElementById('teamsCount').textContent = totalTeams;
             document.getElementById('totalVehicles').textContent = totalVehicles.toLocaleString();
-            document.getElementById('berthsOccupied').textContent = occupiedBerths;
+            document.getElementById('berthsOccupied').textContent = berthsOccupied;
         }
 
         function updateBerthMap() {
