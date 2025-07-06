@@ -530,9 +530,11 @@
                     <div id="etcResult" class="mt-4 p-4 bg-white rounded-lg border border-blue-200">
                         <div class="text-sm text-gray-600">Estimated Completion Time</div>
                         <div class="text-2xl font-bold text-blue-600" id="calculatedETC">--:--</div>
+                        <div class="text-sm text-gray-600 mt-2">Overall Progress</div>
+                        <div class="text-lg font-bold text-green-600" id="calculatedProgress">0%</div>
                     </div>
 
-
+                </div>
             </div>
 
             <!-- Port Progress Simulator Widget -->
@@ -1102,7 +1104,7 @@
             container.innerHTML = html;
         }
 
-        async function loadShipData(shipId) {
+        async async function loadShipData(shipId) {
             try {
                 const response = await fetch(`/api/ships/${shipId}`);
                 if (response.ok) {
@@ -1171,15 +1173,15 @@
                 titleElement.textContent = 'No Ship Data Available';
             }
             
-            // Show create operation button
-            const headerElement = document.querySelector('header .flex.justify-between .flex.space-x-4');
-            if (headerElement) {
-                headerElement.innerHTML = `
-                    <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-plus mr-2"></i>Create New Operation
+            // Show create operation button in header
+            const headerButtons = document.querySelector('header .flex.justify-between .flex.flex-wrap');
+            if (headerButtons) {
+                headerButtons.innerHTML = `
+                    <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline"> Create New Operation</span>
                     </a>
-                    <a href="/master" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-tachometer-alt mr-2"></i>Master Dashboard
+                    <a href="/master" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-tachometer-alt sm:mr-2"></i><span class="hidden sm:inline"> Master Dashboard</span>
                     </a>
                 `;
             }
@@ -1787,6 +1789,12 @@
             const completionElement = document.getElementById('completionDisplay');
             if (completionElement) {
                 completionElement.textContent = overallProgress.toFixed(0) + '%';
+            }
+
+            // Update calculated progress display
+            const calculatedProgressElement = document.getElementById('calculatedProgress');
+            if (calculatedProgressElement) {
+                calculatedProgressElement.textContent = overallProgress.toFixed(0) + '%';
             }
 
             // Update current rate based on status
