@@ -225,17 +225,14 @@
                     updateDashboard();
                 } else {
                     console.error('Failed to load ships');
+                    ships = [];
+                    updateDashboard();
                 }
             } catch (error) {
                 console.error('Error loading ships:', error);
-                // For demo purposes, load sample data
-                loadSampleData();
+                ships = [];
+                updateDashboard();
             }
-        }
-
-        function loadSampleData() {
-            ships = [];
-            updateDashboard();
         }
 
         function updateDashboard() {
