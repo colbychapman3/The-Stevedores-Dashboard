@@ -30,10 +30,11 @@
     "targetCompletion": "2025-07-06T13:30",
     "ticoVans": 6,
     "ticoStationWagons": 0,
-    "status": "active",
-    "progress": 0,
+    "status": "complete",
+    "progress": 100,
     "createdAt": "2025-07-06T16:41:02.170437",
     "startTime": "08:00",
-    "estimatedCompletion": "2025-07-06T13:30"
+    "estimatedCompletion": "2025-07-06T13:30",
+    "updatedAt": "2025-07-06T22:52:54.742058"
   }
 ]
