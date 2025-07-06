@@ -240,12 +240,12 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Vessel Type</label>
-                        <select id="vesselType" name="vesselType" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <select id="vesselType" name="vesselType" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="updateCargoConfiguration()">
                             <option value="">Select Type</option>
-                            <option value="Auto Carrier">Auto Carrier</option>
-                            <option value="RoRo Vessel">RoRo Vessel</option>
-                            <option value="Multi-Purpose">Multi-Purpose</option>
-                            <option value="Container Ship">Container Ship</option>
+                            <option value="K-Line">K-Line</option>
+                            <option value="Glovis">Glovis</option>
+                            <option value="MOL">MOL</option>
+                            <option value="Grimaldi">Grimaldi</option>
                         </select>
                     </div>
                     <div>
@@ -295,116 +295,164 @@
                 </h2>
                 <p class="text-gray-600 mb-6">Configure cargo breakdown by terminal and facility location</p>
 
-                <!-- BRV Section -->
-                <div class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-warehouse text-blue-600 mr-2"></i>BRV Terminal
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
-                            <input type="number" id="brvTotalAutos" name="brvTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 500">
+                <!-- K-Line Configuration -->
+                <div id="klineConfiguration" class="hidden">
+                    <!-- BRV Section -->
+                    <div class="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-warehouse text-blue-600 mr-2"></i>BRV Terminal
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                                <input type="number" id="brvTotalAutos" name="brvTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                                <textarea id="brvVehicleTypes" name="brvVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Sedan: 300, SUV: 150, Truck: 50" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                                <input type="number" id="brvHeavyEquipment" name = "brvHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 25">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                                <textarea id="brvHeavyTypes" name="brvHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Excavator: 10, Bulldozer: 15" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                                <input type="number" id="brvTotalElectric" name="brvTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 15">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                                <input type="text" id="brvDischargeLocation" name="brvDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., North Terminal">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                                <input type="text" id="brvLoadbackLocation" name="brvLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., South Terminal">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                            <textarea id="brvVehicleTypes" name="brvVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Sedan: 300, SUV: 150, Truck: 50" rows="2"></textarea>
+                    </div>
+
+                    <!-- ZEE Section -->
+                    <div class="mt-8 p-6 bg-green-50 rounded-lg border border-green-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-warehouse text-green-600 mr-2"></i>ZEE Compound
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                                <input type="number" id="zeeTotalAutos" name="zeeTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 300">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                                <textarea id="zeeVehicleTypes" name="zeeVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., BMW: 150, Mercedes: 100, Audi: 50" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                                <input type="number" id="zeeTotalHeavy" name="zeeTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 20">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                                <textarea id="zeeHeavyTypes" name="zeeHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., Crane: 5, Loader: 15" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                                <input type="number" id="zeeElectricVehicles" name="zeeElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 25">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                                <input type="text" id="zeeDischargeLocation" name="zeeDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., East Terminal">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                                <input type="text" id="zeeLoadbackLocation" name="zeeLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., West Terminal">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
-                            <input type="number" id="brvTotalHeavy" name = "brvTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 25">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
-                            <textarea id="brvHeavyTypes" name="brvHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Excavator: 10, Bulldozer: 15" rows="2"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
-                            <input type="number" id="brvTotalElectric" name="brvTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 15">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
-                            <input type="text" id="brvDischargeLocation" name="brvDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., North Terminal">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
-                            <input type="text" id="brvLoadbackLocation" name="brvLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., South Terminal">
+                    </div>
+
+                    <!-- SOU Section -->
+                    <div class="mt-8 p-6 bg-purple-50 rounded-lg border border-purple-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-warehouse text-purple-600 mr-2"></i>SOU Facility
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                                <input type="number" id="souTotalAutos" name="souTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 200">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                                <textarea id="souVehicleTypes"  name="souVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Honda: 100, Toyota: 75, Nissan: 25" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                                <input type="number" id="souHeavyEquipment" name="souHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 15">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                                <textarea id="souHeavyTypes" name="souHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Forklift: 10, Generator: 5" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                                <input type="number" id="souTotalElectric" name="souTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 10">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                                <input type="text" id="souDischargeLocation" name="souDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Central Terminal">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                                <input type="text" id="souLoadbackLocation" name="souLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Processing Area">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ZEE Section -->
-                <div class="mt-8 p-6 bg-green-50 rounded-lg border border-green-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-warehouse text-green-600 mr-2"></i>ZEE Compound
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
-                            <input type="number" id="zeeTotalAutos" name="zeeTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 300">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                            <textarea id="zeeVehicleTypes" name="zeeVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., BMW: 150, Mercedes: 100, Audi: 50" rows="2"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
-                            <input type="number" id="zeeTotalHeavy" name="zeeTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 20">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
-                            <textarea id="zeeHeavyTypes" name="zeeHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., Crane: 5, Loader: 15" rows="2"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
-                            <input type="number" id="zeeTotalElectric" name="zeeTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 25">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
-                            <input type="text" id="zeeDischargeLocation" name="zeeDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., East Terminal">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
-                            <input type="text" id="zeeLoadbackLocation" name="zeeLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., West Terminal">
+                <!-- SSI Configuration -->
+                <div id="ssiConfiguration" class="hidden">
+                    <!-- SSI Section -->
+                    <div class="mt-8 p-6 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-boxes text-yellow-600 mr-2"></i>SSI Facility
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
+                                <input type="number" id="ssiTotalAutomobiles" name="ssiTotalAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 400">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
+                                <textarea id="ssiVehicleTypes" name="ssiVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Sedan: 250, SUV: 100, Hatchback: 50" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
+                                <input type="number" id="ssiHeavyEquipment" name="ssiHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 30">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
+                                <textarea id="ssiHeavyTypes" name="ssiHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Tractor: 10, Trailer: 20" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
+                                <input type="number" id="ssiElectricVehicles" name="ssiElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 30">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Static Cargo</label>
+                                <input type="number" id="ssiStaticCargo" name="ssiStaticCargo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 20">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
+                                <input type="text" id="ssiDischargeLocation" name="ssiDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Main Yard">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
+                                <input type="text" id="ssiLoadbackLocation" name="ssiLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Staging Area">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- SOU Section -->
-                <div class="mt-8 p-6 bg-purple-50 rounded-lg border border-purple-200">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-warehouse text-purple-600 mr-2"></i>SOU Facility
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
-                            <input type="number" id="souTotalAutos" name="souTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 200">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                            <textarea id="souVehicleTypes"  name="souVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Honda: 100, Toyota: 75, Nissan: 25" rows="2"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
-                            <input type="number" id="souTotalHeavy" name="souTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 15">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
-                            <textarea id="souHeavyTypes" name="souHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Forklift: 10, Generator: 5" rows="2"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
-                            <input type="number" id="souTotalElectric" name="souTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 10">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
-                            <input type="text" id="souDischargeLocation" name="souDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Central Terminal">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
-                            <input type="text" id="souLoadbackLocation" name="souLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Processing Area">
-                        </div>
-                    </div>
-                </div>
                 <div class="flex justify-between mt-8">
                     <button type="button" onclick="prevStep(2)" class="bg-gray-500 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition duration-200">
                         <i class="fas fa-arrow-left mr-2"></i>Previous
@@ -864,6 +912,33 @@ This might indicate the document format is not recognized. Please check the cons
             console.log('Form population completed');
         }
 
+        function updateFormField(fieldId, value) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.value = value;
+                console.log(`Updated ${fieldId} with value:`, value);
+            } else {
+                console.log(`Field with ID '${fieldId}' not found`);
+            }
+        }
+
+        function updateCargoConfiguration() {
+            const vesselType = document.getElementById('vesselType').value;
+            const klineConfig = document.getElementById('klineConfiguration');
+            const ssiConfig = document.getElementById('ssiConfiguration');
+
+            // Hide both configurations first
+            klineConfig.classList.add('hidden');
+            ssiConfig.classList.add('hidden');
+
+            // Show appropriate configuration based on vessel type
+            if (vesselType === 'K-Line') {
+                klineConfig.classList.remove('hidden');
+            } else if (vesselType === 'Glovis' || vesselType === 'MOL' || vesselType === 'Grimaldi') {
+                ssiConfig.classList.remove('hidden');
+            }
+        }
+
         function generateVehicleIdFields() {
             const numVans = parseInt(document.getElementById('numVans').value) || 0;
             const numWagons = parseInt(document.getElementById('numStationWagons').value) || 0;
@@ -952,7 +1027,7 @@ This might indicate the document format is not recognized. Please check the cons
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('operationDate').value = today;
         });
-    
+
         // Handle form submission
         document.getElementById('operationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -967,18 +1042,56 @@ This might indicate the document format is not recognized. Please check the cons
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
-            // Convert numeric fields
-            const numericFields = ['totalAutomobilesDischarge', 'heavyEquipmentDischarge', 'brvTarget', 'zeeTarget', 'souTarget', 'expectedRate', 'totalDrivers', 'breakDuration', 'ticoVans', 'ticoStationWagons'];
+            // Get vessel type to determine configuration
+            const vesselType = data.vesselType;
+
+            // Calculate totals based on configuration type
+            if (vesselType === 'K-Line') {
+                // K-Line: Sum from BRV, ZEE, SOU
+                const brvAutos = parseInt(data.brvTotalAutos) || 0;
+                const brvHeavy = parseInt(data.brvHeavyEquipment) || 0;
+                const zeeAutos = parseInt(data.zeeTotalAutos) || 0;
+                const zeeElectric = parseInt(data.zeeElectricVehicles) || 0;
+                const souAutos = parseInt(data.souTotalAutos) || 0;
+                const souStatic = parseInt(data.souStaticCargo) || 0;
+
+                data.totalAutomobilesDischarge = brvAutos + zeeAutos + souAutos + zeeElectric;
+                data.heavyEquipmentDischarge = brvHeavy + souStatic;
+                data.brvTarget = brvAutos + brvHeavy;
+                data.zeeTarget = zeeAutos + zeeElectric;
+                data.souTarget = souAutos + souStatic;
+            } else if (vesselType === 'Glovis' || vesselType === 'MOL' || vesselType === 'Grimaldi') {
+                // SSI: Use direct values
+                data.totalAutomobilesDischarge = parseInt(data.ssiTotalAutomobiles) || 0;
+                data.heavyEquipmentDischarge = parseInt(data.ssiHeavyEquipment) || 0;
+                const ssiElectric = parseInt(data.ssiElectricVehicles) || 0;
+                const ssiStatic = parseInt(data.ssiStaticCargo) || 0;
+
+                // Add electric vehicles to automobile total
+                data.totalAutomobilesDischarge += ssiElectric;
+                data.heavyEquipmentDischarge += ssiStatic;
+
+                // Set targets (SSI is single terminal)
+                data.brvTarget = 0;
+                data.zeeTarget = 0;
+                data.souTarget = data.totalAutomobilesDischarge + data.heavyEquipmentDischarge;
+            }
+
+            // Convert other numeric fields
+            const numericFields = [
+                'expectedRate', 'totalDrivers', 'breakDuration',
+                'ticoVans', 'ticoStationWagons'
+            ];
+
             numericFields.forEach(field => {
                 if (data[field]) {
                     data[field] = parseInt(data[field]) || 0;
                 }
             });
 
-            console.log('Submitting form data:', data);
+            console.log('Submitting data:', data);
 
             try {
-                // Submit to API
                 const response = await fetch('/api/ships', {
                     method: 'POST',
                     headers: {
@@ -987,18 +1100,13 @@ This might indicate the document format is not recognized. Please check the cons
                     body: JSON.stringify(data)
                 });
 
-                const result = await response.json();
-
                 if (response.ok) {
-                    console.log('Ship created successfully:', result);
-
-                    // Show success message
-                    alert('Operation created successfully!');
-
-                    // Redirect to master dashboard
-                    window.location.href = '/master';
+                    const result = await response.json();
+                    alert('Ship operation created successfully!');
+                    window.location.href = `/ship-info?ship=${result.id}`;
                 } else {
-                    throw new Error(result.error || 'Failed to create operation');
+                    const error = await response.json();
+                    alert('Error creating ship operation: ' + (error.error || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error creating operation:', error);
@@ -1016,7 +1124,7 @@ This might indicate the document format is not recognized. Please check the cons
         <div class="container mx-auto px-4 py-8">
             <!-- Dashboard Header -->
             <div id="dashboardHeader" class="text-center mb-8 p-6 dashboard-card rounded-2xl shadow-2xl">
-                <!-- Will be populated by JavaScript -->
+                                <!-- Will be populated by JavaScript -->
             </div>
 
             <!-- Dashboard Controls -->
