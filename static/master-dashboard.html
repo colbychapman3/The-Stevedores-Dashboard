@@ -297,8 +297,11 @@
 
         function renderShips() {
             const container = document.getElementById('shipsContainer');
+            
+            // Filter out completed ships - only show active operations
+            const activeShips = ships.filter(ship => ship.status !== 'complete');
 
-            if (ships.length === 0) {
+            if (activeShips.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-12 col-span-full">
                         <i class="fas fa-ship text-6xl text-gray-300 mb-4"></i>
@@ -309,7 +312,7 @@
                 return;
             }
 
-            const shipsHtml = ships.map(ship => `
+            const shipsHtml = activeShips.map(ship => `
                 <div class="ship-card rounded-xl p-6 text-white cursor-pointer ${getStatusClass(ship.status)}" onclick="viewShipDetails(${ship.id})">
                     <div class="flex justify-between items-start mb-4">
                         <div>
