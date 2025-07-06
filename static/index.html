@@ -251,13 +251,22 @@
                         <input type="text" id="vesselName" name="vesselName" class="w-full px-3 py-2 lg:px-4 lg:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base" placeholder="e.g., Donington 38">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Shipping Line</label>
+                        <select id="shippingLine" name="shippingLine" class="w-full px-3 py-2 lg:px-4 lg:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base" onchange="updateCargoConfiguration()">
+                            <option value="">Select Shipping Line</option>
+                            <option value="K-Line">K-Line</option>
+                            <option value="MOL">MOL</option>
+                            <option value="Glovis">Glovis</option>
+                            <option value="Grimaldi">Grimaldi</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Vessel Type</label>
                         <select id="vesselType" name="vesselType" class="w-full px-3 py-2 lg:px-4 lg:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base" onchange="updateCargoConfiguration()">
-                            <option value="">Select Type</option>
-                            <option value="K-Line">K-Line</option>
-                            <option value="Glovis">Glovis</option>
-                            <option value="MOL">MOL</option>
-                            <option value="Grimaldi">Grimaldi</option>
+                            <option value="">Select Vessel Type</option>
+                            <option value="Auto Only">Auto Only</option>
+                            <option value="Heavy Only">Heavy Only</option>
+                            <option value="Auto + Heavy">Auto + Heavy</option>
                         </select>
                     </div>
                     <div>
@@ -315,26 +324,26 @@
                             <i class="fas fa-warehouse text-blue-600 mr-2"></i>BRV Terminal
                         </h3>
                         <div class="grid md:grid-cols-2 gap-6">
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
                                 <input type="number" id="brvAutomobiles" name="brvAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 500" onchange="validateBrvTotals()">
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
                                 <div id="brvVehicleTypes">
                                     <button type="button" onclick="addVehicleType('brv')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Vehicle Type</button>
                                     <div id="brvVehicleTypeContainer"></div>
                                 </div>
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
-                                <input type="number" id="brvHeavyEquipment" name = "brvHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 25">
+                                <input type="number" id="brvHeavyEquipment" name="brvHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 25">
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
                                 <textarea id="brvHeavyTypes" name="brvHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Excavator: 10, Bulldozer: 15" rows="2"></textarea>
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
                                 <input type="number" id="brvTotalElectric" name="brvTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 15">
                             </div>
@@ -355,23 +364,23 @@
                             <i class="fas fa-warehouse text-green-600 mr-2"></i>ZEE Compound
                         </h3>
                         <div class="grid md:grid-cols-2 gap-6">
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
                                 <input type="number" id="zeeTotalAutos" name="zeeTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 300">
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
                                 <textarea id="zeeVehicleTypes" name="zeeVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., BMW: 150, Mercedes: 100, Audi: 50" rows="2"></textarea>
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
                                 <input type="number" id="zeeTotalHeavy" name="zeeTotalHeavy" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 20">
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
                                 <textarea id="zeeHeavyTypes" name="zeeHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., Crane: 5, Loader: 15" rows="2"></textarea>
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
                                 <input type="number" id="zeeElectricVehicles" name="zeeElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="e.g., 25">
                             </div>
@@ -392,23 +401,23 @@
                             <i class="fas fa-warehouse text-purple-600 mr-2"></i>SOU Facility
                         </h3>
                         <div class="grid md:grid-cols-2 gap-6">
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
                                 <input type="number" id="souTotalAutos" name="souTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 200">
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                                <textarea id="souVehicleTypes"  name="souVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Honda: 100, Toyota: 75, Nissan: 25" rows="2"></textarea>
+                                <textarea id="souVehicleTypes" name="souVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Honda: 100, Toyota: 75, Nissan: 25" rows="2"></textarea>
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
                                 <input type="number" id="souHeavyEquipment" name="souHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 15">
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
                                 <textarea id="souHeavyTypes" name="souHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., Forklift: 10, Generator: 5" rows="2"></textarea>
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
                                 <input type="number" id="souTotalElectric" name="souTotalElectric" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="e.g., 10">
                             </div>
@@ -424,48 +433,48 @@
                     </div>
                 </div>
 
-                <!-- SSI Configuration -->
-                <div id="ssiConfiguration" class="hidden">
-                    <!-- SSI Section -->
+                <!-- Single Terminal Configuration for Glovis, MOL, Grimaldi -->
+                <div id="singleTerminalConfiguration" class="hidden">
+                    <!-- Single Terminal Section -->
                     <div class="mt-8 p-6 bg-yellow-50 rounded-lg border border-yellow-200">
                         <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-boxes text-yellow-600 mr-2"></i>SSI Facility
+                            <i class="fas fa-boxes text-yellow-600 mr-2"></i>Terminal Facility
                         </h3>
                         <div class="grid md:grid-cols-2 gap-6">
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Automobiles</label>
-                                <input type="number" id="ssiAutomobiles" name="ssiAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 400" onchange="validateSsiTotals()">
+                                <input type="number" id="terminalAutomobiles" name="terminalAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 400">
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                                 <div id="ssiVehicleTypes">
-                                    <button type="button" onclick="addVehicleType('ssi')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Vehicle Type</button>
-                                    <div id="ssiVehicleTypeContainer"></div>
+                                <div id="terminalVehicleTypes">
+                                    <button type="button" onclick="addVehicleType('terminal')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Vehicle Type</button>
+                                    <div id="terminalVehicleTypeContainer"></div>
                                 </div>
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
-                                <input type="number" id="ssiHeavyEquipment" name="ssiHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 30">
+                                <input type="number" id="terminalHeavyEquipment" name="terminalHeavyEquipment" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 30">
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Heavy Vehicle Type & Quantity</label>
-                                <textarea id="ssiHeavyTypes" name="ssiHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Tractor: 10, Trailer: 20" rows="2"></textarea>
+                                <textarea id="terminalHeavyTypes" name="terminalHeavyTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Tractor: 10, Trailer: 20" rows="2"></textarea>
                             </div>
-                            <div>
+                            <div class="auto-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Electric</label>
-                                <input type="number" id="ssiElectricVehicles" name="ssiElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 30">
+                                <input type="number" id="terminalElectricVehicles" name="terminalElectricVehicles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 30">
                             </div>
-                            <div>
+                            <div class="heavy-only-field auto-heavy-field">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Static Cargo</label>
-                                <input type="number" id="ssiStaticCargo" name="ssiStaticCargo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 20">
+                                <input type="number" id="terminalStaticCargo" name="terminalStaticCargo" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 20">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Discharge Location</label>
-                                <input type="text" id="ssiDischargeLocation" name="ssiDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Main Yard">
+                                <input type="text" id="terminalDischargeLocation" name="terminalDischargeLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Main Yard">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Loadback Location</label>
-                                <input type="text" id="ssiLoadbackLocation" name="ssiLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Staging Area">
+                                <input type="text" id="terminalLoadbackLocation" name="terminalLoadbackLocation" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Staging Area">
                             </div>
                         </div>
                     </div>
@@ -638,9 +647,10 @@
             // Basic validation - ensure required fields are filled
             if (step === 1) {
                 const vesselName = document.getElementById('vesselName').value.trim();
+                const shippingLine = document.getElementById('shippingLine').value;
                 const vesselType = document.getElementById('vesselType').value;
-                if (!vesselName || !vesselType) {
-                    alert('Please fill in the vessel name and type.');
+                if (!vesselName || !shippingLine || !vesselType) {
+                    alert('Please fill in the vessel name, shipping line, and vessel type.');
                     return false;
                 }
             }
@@ -941,19 +951,39 @@ This might indicate the document format is not recognized. Please check the cons
         }
 
         function updateCargoConfiguration() {
+            const shippingLine = document.getElementById('shippingLine').value;
             const vesselType = document.getElementById('vesselType').value;
             const klineConfig = document.getElementById('klineConfiguration');
-            const ssiConfig = document.getElementById('ssiConfiguration');
+            const singleTerminalConfig = document.getElementById('singleTerminalConfiguration');
 
-            // Hide both configurations first
+            // Hide all configurations first
             klineConfig.classList.add('hidden');
-            ssiConfig.classList.add('hidden');
+            singleTerminalConfig.classList.add('hidden');
 
-            // Show appropriate configuration based on vessel type
-            if (vesselType === 'K-Line') {
+            // Hide/show vessel type specific fields
+            const autoOnlyFields = document.querySelectorAll('.auto-only-field');
+            const heavyOnlyFields = document.querySelectorAll('.heavy-only-field');
+            const autoHeavyFields = document.querySelectorAll('.auto-heavy-field');
+
+            // Hide all fields first
+            autoOnlyFields.forEach(field => field.style.display = 'none');
+            heavyOnlyFields.forEach(field => field.style.display = 'none');
+            autoHeavyFields.forEach(field => field.style.display = 'none');
+
+            // Show appropriate configuration based on shipping line
+            if (shippingLine === 'K-Line') {
                 klineConfig.classList.remove('hidden');
-            } else if (vesselType === 'Glovis' || vesselType === 'MOL' || vesselType === 'Grimaldi') {
-                ssiConfig.classList.remove('hidden');
+            } else if (shippingLine === 'Glovis' || shippingLine === 'MOL' || shippingLine === 'Grimaldi') {
+                singleTerminalConfig.classList.remove('hidden');
+            }
+
+            // Show fields based on vessel type
+            if (vesselType === 'Auto Only') {
+                autoOnlyFields.forEach(field => field.style.display = 'block');
+            } else if (vesselType === 'Heavy Only') {
+                heavyOnlyFields.forEach(field => field.style.display = 'block');
+            } else if (vesselType === 'Auto + Heavy') {
+                autoHeavyFields.forEach(field => field.style.display = 'block');
             }
         }
 
@@ -1122,36 +1152,36 @@ This might indicate the document format is not recognized. Please check the cons
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
-            // Get vessel type to determine configuration
-            const vesselType = data.vesselType;
+            // Get shipping line to determine configuration
+            const shippingLine = data.shippingLine;
 
             // Calculate totals based on configuration type
-            if (vesselType === 'K-Line') {
+            if (shippingLine === 'K-Line') {
                 // K-Line: Sum from BRV, ZEE, SOU
-                const brvAutos = parseInt(data.brvTotalAutos) || 0;
+                const brvAutos = parseInt(data.brvAutomobiles) || 0;
                 const brvHeavy = parseInt(data.brvHeavyEquipment) || 0;
                 const zeeAutos = parseInt(data.zeeTotalAutos) || 0;
                 const zeeElectric = parseInt(data.zeeElectricVehicles) || 0;
                 const souAutos = parseInt(data.souTotalAutos) || 0;
-                const souStatic = parseInt(data.souStaticCargo) || 0;
+                const souHeavy = parseInt(data.souHeavyEquipment) || 0;
 
                 data.totalAutomobilesDischarge = brvAutos + zeeAutos + souAutos + zeeElectric;
-                data.heavyEquipmentDischarge = brvHeavy + souStatic;
+                data.heavyEquipmentDischarge = brvHeavy + souHeavy;
                 data.brvTarget = brvAutos + brvHeavy;
                 data.zeeTarget = zeeAutos + zeeElectric;
-                data.souTarget = souAutos + souStatic;
-            } else if (vesselType === 'Glovis' || vesselType === 'MOL' || vesselType === 'Grimaldi') {
-                // SSI: Use direct values
-                data.totalAutomobilesDischarge = parseInt(data.ssiTotalAutomobiles) || 0;
-                data.heavyEquipmentDischarge = parseInt(data.ssiHeavyEquipment) || 0;
-                const ssiElectric = parseInt(data.ssiElectricVehicles) || 0;
-                const ssiStatic = parseInt(data.ssiStaticCargo) || 0;
+                data.souTarget = souAutos + souHeavy;
+            } else if (shippingLine === 'Glovis' || shippingLine === 'MOL' || shippingLine === 'Grimaldi') {
+                // Single Terminal: Use direct values
+                data.totalAutomobilesDischarge = parseInt(data.terminalAutomobiles) || 0;
+                data.heavyEquipmentDischarge = parseInt(data.terminalHeavyEquipment) || 0;
+                const terminalElectric = parseInt(data.terminalElectricVehicles) || 0;
+                const terminalStatic = parseInt(data.terminalStaticCargo) || 0;
 
                 // Add electric vehicles to automobile total
-                data.totalAutomobilesDischarge += ssiElectric;
-                data.heavyEquipmentDischarge += ssiStatic;
+                data.totalAutomobilesDischarge += terminalElectric;
+                data.heavyEquipmentDischarge += terminalStatic;
 
-                // Set targets (SSI is single terminal)
+                // Set targets (Single terminal)
                 data.brvTarget = 0;
                 data.zeeTarget = 0;
                 data.souTarget = data.totalAutomobilesDischarge + data.heavyEquipmentDischarge;
