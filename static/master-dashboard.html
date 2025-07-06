@@ -235,15 +235,18 @@
                 if (response.ok) {
                     ships = await response.json();
                     updateDashboard();
+                    return Promise.resolve();
                 } else {
                     console.error('Failed to load ships');
                     ships = [];
                     updateDashboard();
+                    return Promise.resolve();
                 }
             } catch (error) {
                 console.error('Error loading ships:', error);
                 ships = [];
                 updateDashboard();
+                return Promise.resolve();
             }
         }
 
@@ -295,24 +298,34 @@
             });
         }
 
-        function renderShips() {
+        function renderShips(statusFilter = '') {
             const container = document.getElementById('shipsContainer');
             
-            // Filter out completed ships - only show active operations
-            const activeShips = ships.filter(ship => ship.status !== 'complete');
+            // Filter ships based on the selected status
+            let filteredShips;
+            if (statusFilter === '') {
+                // Show only active ships when no filter is selected (default behavior)
+                filteredShips = ships.filter(ship => ship.status !== 'complete');
+            } else {
+                // Show ships matching the selected status
+                filteredShips = ships.filter(ship => ship.status === statusFilter);
+            }
 
-            if (activeShips.length === 0) {
+            if (filteredShips.length === 0) {
+                let message = statusFilter === 'complete' ? 'No completed operations' : 'No active ship operations';
+                let subMessage = statusFilter === 'complete' ? 'Completed operations will appear here' : 'Click "New Operation" to get started';
+                
                 container.innerHTML = `
                     <div class="text-center py-12 col-span-full">
                         <i class="fas fa-ship text-6xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500 text-lg">No active ship operations</p>
-                        <p class="text-gray-400">Click "New Operation" to get started</p>
+                        <p class="text-gray-500 text-lg">${message}</p>
+                        <p class="text-gray-400">${subMessage}</p>
                     </div>
                 `;
                 return;
             }
 
-            const shipsHtml = activeShips.map(ship => `
+            const shipsHtml = filteredShips.map(ship => `
                 <div class="ship-card rounded-xl p-6 text-white cursor-pointer ${getStatusClass(ship.status)}" onclick="viewShipDetails(${ship.id})">
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -468,12 +481,14 @@
 
         function filterShips() {
             const filter = document.getElementById('filterStatus').value;
-            // Implementation for filtering ships
-            renderShips();
+            renderShips(filter);
         }
 
         function refreshShips() {
-            loadShips();
+            const currentFilter = document.getElementById('filterStatus').value;
+            loadShips().then(() => {
+                renderShips(currentFilter);
+            });
         }
 
         async function markShipComplete(shipId) {
