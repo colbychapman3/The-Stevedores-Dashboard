@@ -812,8 +812,11 @@
         }
 
         function updateETC() {
+            const etcElement = document.getElementById('etcDisplay');
+            if (!etcElement) return;
+            
             const currentProgress = currentShip ? currentShip.progress : 0;
-            if (currentProgress > 0) {
+            if (currentProgress > 0 && currentShip && currentShip.totalVehicles) {
                 const remainingPercentage = 100 - currentProgress;
                 const currentRate = getCurrentRate();
                 if (currentRate > 0) {
@@ -821,12 +824,17 @@
                     const hoursRemaining = remainingVehicles / currentRate;
                     const now = new Date();
                     const etc = new Date(now.getTime() + (hoursRemaining * 60 * 60 * 1000));
-                    document.getElementById('etcDisplay').textContent = etc.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    etcElement.textContent = etc.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                } else {
+                    etcElement.textContent = '--:--';
                 }
+            } else {
+                etcElement.textContent = '--:--';
             }
         }
 
         function getCurrentRate() {
+            if (!hourlyData || hourlyData.length === 0) return 0;
             const currentHour = new Date().getHours();
             const hourData = hourlyData.find(h => parseInt(h.hour.split(':')[0]) === currentHour);
             return hourData ? hourData.cars : 0;
@@ -1098,13 +1106,18 @@
             try {
                 const response = await fetch(`/api/ships/${shipId}`);
                 if (response.ok) {
-                    currentShip = await response.json();
-                    if (currentShip && currentShip.id) {
+                    const shipData = await response.json();
+                    if (shipData && shipData.id) {
+                        currentShip = shipData;
                         populateShipData();
+                        initializeData();
+                        setTimeout(() => {
+                            initializeCharts();
+                        }, 100);
                         return;
                     }
                 }
-                console.error('Failed to load ship data');
+                console.error('Failed to load ship data - ship not found or invalid response');
                 loadSampleShipData();
             } catch (error) {
                 console.error('Error loading ship data:', error);
@@ -1178,12 +1191,22 @@
             if (!currentShip) return;
 
             // Set the page title
-            document.getElementById('vesselTitle').textContent = currentShip.vesselName || 'Ship Information Dashboard';
+            const titleElement = document.getElementById('vesselTitle');
+            if (titleElement) {
+                titleElement.textContent = currentShip.vesselName || 'Ship Information Dashboard';
+            }
 
             // Calculate real current rate based on progress and elapsed time
             const realCurrentRate = calculateCurrentRate();
-            document.getElementById('currentRateDisplay').textContent = realCurrentRate;
-            document.getElementById('completionDisplay').textContent = `${currentShip.progress}%`;
+            const currentRateElement = document.getElementById('currentRateDisplay');
+            const completionElement = document.getElementById('completionDisplay');
+            
+            if (currentRateElement) {
+                currentRateElement.textContent = realCurrentRate;
+            }
+            if (completionElement) {
+                completionElement.textContent = `${currentShip.progress}%`;
+            }
 
             // Update performance metrics with real data
             updatePerformanceMetrics();
@@ -1769,7 +1792,7 @@
             // Update current rate based on status
             let currentRate = 0;
             if (operationStatus === 'active' || operationStatus === 'discharge') {
-                currentRate = getCurrentRate();
+                currentRate = calculateCurrentRate() || 0;
             }
             const currentRateElement = document.getElementById('currentRateDisplay');
             if (currentRateElement) {
@@ -1780,7 +1803,7 @@
             if (operationStatus === 'complete') {
                 // Check if we have a valid ship ID from URL or currentShip
                 const urlParams = new URLSearchParams(window.location.search);
-                const shipId = urlParams.get('ship') || (currentShip ? currentShip.id : null);
+                const shipId = urlParams.get('ship') || (currentShip && currentShip.id ? currentShip.id : null);
                 
                 if (shipId) {
                     updateShipStatusAndRedirect('complete', shipId);
