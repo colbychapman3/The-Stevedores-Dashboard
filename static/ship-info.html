@@ -1104,11 +1104,13 @@
             container.innerHTML = html;
         }
 
-        async async function loadShipData(shipId) {
+        async function loadShipData(shipId) {
+            console.log('Attempting to load ship data for ID:', shipId);
             try {
                 const response = await fetch(`/api/ships/${shipId}`);
                 if (response.ok) {
                     const shipData = await response.json();
+                    console.log('Received ship data:', shipData);
                     if (shipData && shipData.id) {
                         currentShip = shipData;
                         populateShipData();
@@ -1119,7 +1121,7 @@
                         return;
                     }
                 }
-                console.error('Failed to load ship data - ship not found or invalid response');
+                console.log('No valid ship data found, loading default state');
                 loadSampleShipData();
             } catch (error) {
                 console.error('Error loading ship data:', error);
@@ -1190,7 +1192,10 @@
         }
 
         function populateShipData() {
-            if (!currentShip) return;
+            if (!currentShip) {
+                console.log('No current ship data available');
+                return;
+            }
 
             // Set the page title
             const titleElement = document.getElementById('vesselTitle');
@@ -1774,6 +1779,7 @@
             const currentDeckElement = document.getElementById('currentDeck');
             
             if (!dischargedElement || !totalVehiclesElement || !activeDriversElement || !operationStatusElement || !currentDeckElement) {
+                console.log('Some required elements are missing for updateRealTimeProgress');
                 return; // Exit if elements don't exist
             }
 
