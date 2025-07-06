@@ -1114,7 +1114,7 @@ This might indicate the document format is not recognized. Please check the cons
 
             for (let i = 0; i < vehicleTypeContainer.children.length; i++) {
                 const quantityInput = document.getElementById(`brvVehicleQuantity${i}`);
-                const quantity = parseInt(quantityInput.value) or 0;
+                const quantity = parseInt(quantityInput.value) || 0;
                 vehicleTypeSum += quantity;
             }
 
@@ -1123,19 +1123,19 @@ This might indicate the document format is not recognized. Please check the cons
             }
         }
 
-        function validateSsiTotals() {
-            const totalAutos = parseInt(document.getElementById('ssiAutomobiles').value) || 0;
+        function validateTerminalTotals() {
+            const totalAutos = parseInt(document.getElementById('terminalAutomobiles').value) || 0;
             let vehicleTypeSum = 0;
-            const vehicleTypeContainer = document.getElementById('ssiVehicleTypeContainer');
+            const vehicleTypeContainer = document.getElementById('terminalVehicleTypeContainer');
 
             for (let i = 0; i < vehicleTypeContainer.children.length; i++) {
-                const quantityInput = document.getElementById(`ssiVehicleQuantity${i}`);
+                const quantityInput = document.getElementById(`terminalVehicleQuantity${i}`);
                 const quantity = parseInt(quantityInput.value) || 0;
                 vehicleTypeSum += quantity;
             }
 
             if (vehicleTypeSum !== totalAutos) {
-                alert(`Total quantity of vehicle types in SSI must equal total autos: ${totalAutos}`);
+                alert(`Total quantity of vehicle types in Terminal must equal total autos: ${totalAutos}`);
             }
         }
         // Handle form submission
