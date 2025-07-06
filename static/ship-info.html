@@ -787,18 +787,27 @@
         }
 
         function updateElapsedTime() {
-            if (!operationStartTime) return;
+            if (!operationStartTime || !currentShip || !currentShip.id) {
+                const elapsedElement = document.getElementById('elapsedTimeDisplay');
+                if (elapsedElement) {
+                    elapsedElement.textContent = '0:00';
+                }
+                return;
+            }
             
             const now = new Date();
             const elapsed = Math.floor((now - operationStartTime) / (1000 * 60)); // minutes
             const hours = Math.floor(elapsed / 60);
             const minutes = elapsed % 60;
             
-            // Ensure we don't show negative time
-            if (elapsed < 0) {
-                document.getElementById('elapsedTimeDisplay').textContent = '0:00';
-            } else {
-                document.getElementById('elapsedTimeDisplay').textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            const elapsedElement = document.getElementById('elapsedTimeDisplay');
+            if (elapsedElement) {
+                // Ensure we don't show negative time
+                if (elapsed < 0) {
+                    elapsedElement.textContent = '0:00';
+                } else {
+                    elapsedElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+                }
             }
         }
 
@@ -1090,11 +1099,13 @@
                 const response = await fetch(`/api/ships/${shipId}`);
                 if (response.ok) {
                     currentShip = await response.json();
-                    populateShipData();
-                } else {
-                    console.error('Failed to load ship data');
-                    loadSampleShipData();
+                    if (currentShip && currentShip.id) {
+                        populateShipData();
+                        return;
+                    }
                 }
+                console.error('Failed to load ship data');
+                loadSampleShipData();
             } catch (error) {
                 console.error('Error loading ship data:', error);
                 loadSampleShipData();
@@ -1254,18 +1265,15 @@
 
             // Update completion button state
             const completeButton = document.getElementById('completeButton');
-            if (ship.status === 'complete') {
+            if (completeButton && currentShip.status === 'complete') {
                 completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
                 completeButton.disabled = true;
                 completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
-            } else {
+            } else if (completeButton) {
                 completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Mark Operation Complete';
                 completeButton.disabled = false;
                 completeButton.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors';
             }
-
-            // Update ETC calculation
-            updateETCCalculation();
         }
 
         function calculateCurrentRate() {
@@ -1429,23 +1437,38 @@
             const totalCurrent = brvValue + zeeValue + souValue;
 
             // Update slider values to reflect calculated progress
-            document.getElementById('brvProgress').value = brvValue;
-            document.getElementById('zeeProgress').value = zeeValue;
-            document.getElementById('souProgress').value = souValue;
+            const brvProgress = document.getElementById('brvProgress');
+            const zeeProgress = document.getElementById('zeeProgress');
+            const souProgress = document.getElementById('souProgress');
+            
+            if (brvProgress) brvProgress.value = brvValue;
+            if (zeeProgress) zeeProgress.value = zeeValue;
+            if (souProgress) souProgress.value = souValue;
 
             // Update displays
-            document.getElementById('brvValue').textContent = `${brvValue}/${brvMax}`;
-            document.getElementById('zeeValue').textContent = `${zeeValue}/${zeeMax}`;
-            document.getElementById('souValue').textContent = `${souValue}/${souMax}`;
+            const brvValueElement = document.getElementById('brvValue');
+            const zeeValueElement = document.getElementById('zeeValue');
+            const souValueElement = document.getElementById('souValue');
+            
+            if (brvValueElement) brvValueElement.textContent = `${brvValue}/${brvMax}`;
+            if (zeeValueElement) zeeValueElement.textContent = `${zeeValue}/${zeeMax}`;
+            if (souValueElement) souValueElement.textContent = `${souValue}/${souMax}`;
 
             // Update progress bars
-            document.getElementById('brvBar').style.width = `${(brvValue / brvMax) * 100}%`;
-            document.getElementById('zeeBar').style.width = `${(zeeValue / zeeMax) * 100}%`;
-            document.getElementById('souBar').style.width = `${(souValue / souMax) * 100}%`;
+            const brvBar = document.getElementById('brvBar');
+            const zeeBar = document.getElementById('zeeBar');
+            const souBar = document.getElementById('souBar');
+            
+            if (brvBar) brvBar.style.width = `${(brvValue / brvMax) * 100}%`;
+            if (zeeBar) zeeBar.style.width = `${(zeeValue / zeeMax) * 100}%`;
+            if (souBar) souBar.style.width = `${(souValue / souMax) * 100}%`;
 
             // Update total progress with real calculation
             const totalPercent = ((totalCurrent / totalMax) * 100).toFixed(1);
-            document.getElementById('totalProgress').textContent = `${totalPercent}%`;
+            const totalProgressElement = document.getElementById('totalProgress');
+            if (totalProgressElement) {
+                totalProgressElement.textContent = `${totalPercent}%`;
+            }
         }
 
         async function saveProgress() {
@@ -1719,23 +1742,39 @@
         }
 
         function updateRealTimeProgress() {
-            const discharged = parseInt(document.getElementById('dischargedCount').value) || 0;
-            const totalVehicles = parseInt(document.getElementById('totalVehicles').textContent) || 1250;
-            const activeDrivers = parseInt(document.getElementById('activeDrivers').value) || 0;
-            const operationStatus = document.getElementById('operationStatus').value;
-            const currentDeck = document.getElementById('currentDeck').value;
+            const dischargedElement = document.getElementById('dischargedCount');
+            const totalVehiclesElement = document.getElementById('totalVehicles');
+            const activeDriversElement = document.getElementById('activeDrivers');
+            const operationStatusElement = document.getElementById('operationStatus');
+            const currentDeckElement = document.getElementById('currentDeck');
+            
+            if (!dischargedElement || !totalVehiclesElement || !activeDriversElement || !operationStatusElement || !currentDeckElement) {
+                return; // Exit if elements don't exist
+            }
 
-            let overallProgress = Math.min(100, (discharged / totalVehicles) * 100);
+            const discharged = parseInt(dischargedElement.value) || 0;
+            const totalVehicles = parseInt(totalVehiclesElement.textContent) || (currentShip ? currentShip.totalVehicles : 0);
+            const activeDrivers = parseInt(activeDriversElement.value) || 0;
+            const operationStatus = operationStatusElement.value;
+            const currentDeck = currentDeckElement.value;
+
+            let overallProgress = totalVehicles > 0 ? Math.min(100, (discharged / totalVehicles) * 100) : 0;
 
             // Update completion display
-            document.getElementById('completionDisplay').textContent = overallProgress.toFixed(0) + '%';
+            const completionElement = document.getElementById('completionDisplay');
+            if (completionElement) {
+                completionElement.textContent = overallProgress.toFixed(0) + '%';
+            }
 
             // Update current rate based on status
             let currentRate = 0;
             if (operationStatus === 'active' || operationStatus === 'discharge') {
                 currentRate = getCurrentRate();
             }
-            document.getElementById('currentRateDisplay').textContent = currentRate;
+            const currentRateElement = document.getElementById('currentRateDisplay');
+            if (currentRateElement) {
+                currentRateElement.textContent = currentRate;
+            }
 
             // Auto-redirect to master dashboard if status is set to complete
             if (operationStatus === 'complete') {
