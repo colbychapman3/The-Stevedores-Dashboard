@@ -378,6 +378,15 @@
                     <div class="mt-3 text-xs text-blue-100">
                         Manager: ${ship.operationManager} | ${ship.startTime} - ${ship.estimatedCompletion}
                     </div>
+
+                    <div class="mt-3 flex space-x-2">
+                        <button onclick="updateProgress(${ship.id}, event)" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs px-2 py-1 rounded transition-colors">
+                            Update Progress
+                        </button>
+                        <button onclick="completeShip(${ship.id}, event)" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-xs px-2 py-1 rounded transition-colors">
+                            Mark Complete
+                        </button>
+                    </div>
                 </div>
             `).join('');
 
@@ -477,6 +486,68 @@
 
         function refreshShips() {
             loadShips();
+        }
+
+        async function updateProgress(shipId, event) {
+            event.stopPropagation();
+            
+            const newProgress = prompt('Enter new progress percentage (0-100):');
+            if (newProgress === null || newProgress === '') return;
+            
+            const progress = parseInt(newProgress);
+            if (isNaN(progress) || progress < 0 || progress > 100) {
+                alert('Please enter a valid number between 0 and 100');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/ships/${shipId}/progress`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ progress: progress })
+                });
+                
+                if (response.ok) {
+                    loadShips(); // Refresh the dashboard
+                } else {
+                    const error = await response.json();
+                    alert('Error updating progress: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating progress:', error);
+                alert('Error updating progress: ' + error.message);
+            }
+        }
+
+        async function completeShip(shipId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('Are you sure you want to mark this operation as complete?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/ships/${shipId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: 'complete' })
+                });
+                
+                if (response.ok) {
+                    loadShips(); // Refresh the dashboard
+                    alert('Operation marked as complete!');
+                } else {
+                    const error = await response.json();
+                    alert('Error completing operation: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error completing operation:', error);
+                alert('Error completing operation: ' + error.message);
+            }
         }
     </script>
 </body>
