@@ -636,7 +636,6 @@
                 initializeCharts();
             }, 100);
 
-            startTimeTracking();
             setupWidgetDragAndDrop();
         });
 
@@ -768,7 +767,14 @@
         }
 
         function startTimeTracking() {
-            operationStartTime = new Date('2024-01-15T07:00:00');
+            // Set operation start time based on current ship data
+            if (currentShip && currentShip.operationDate && currentShip.shiftStart) {
+                operationStartTime = new Date(currentShip.operationDate + 'T' + currentShip.shiftStart);
+            } else {
+                // Fallback to a reasonable default
+                operationStartTime = new Date();
+                operationStartTime.setHours(7, 0, 0, 0); // Start at 7 AM today
+            }
 
             setInterval(() => {
                 updateElapsedTime();
@@ -781,11 +787,19 @@
         }
 
         function updateElapsedTime() {
+            if (!operationStartTime) return;
+            
             const now = new Date();
             const elapsed = Math.floor((now - operationStartTime) / (1000 * 60)); // minutes
             const hours = Math.floor(elapsed / 60);
             const minutes = elapsed % 60;
-            document.getElementById('elapsedTimeDisplay').textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            
+            // Ensure we don't show negative time
+            if (elapsed < 0) {
+                document.getElementById('elapsedTimeDisplay').textContent = '0:00';
+            } else {
+                document.getElementById('elapsedTimeDisplay').textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            }
         }
 
         function updateETC() {
@@ -1091,7 +1105,7 @@
             // Create a default ship object to prevent errors
             currentShip = {
                 id: null,
-                vesselName: "No Vessel Selected",
+                vesselName: "No Ship Data Available",
                 vesselType: "Unknown",
                 shippingLine: "Unknown",
                 port: "Colonel Island",
@@ -1149,7 +1163,9 @@
         function populateShipData() {
             if (!currentShip) return;
             
-            document.getElementById('vesselTitle').textContent = currentShip.vesselName;
+            // Update vessel title - handle both cases
+            const vesselTitle = currentShip.id ? currentShip.vesselName : 'No Ship Data Available';
+            document.getElementById('vesselTitle').textContent = vesselTitle;
 
             // Calculate real current rate based on progress and elapsed time
             const realCurrentRate = calculateCurrentRate();
@@ -1231,8 +1247,8 @@
             document.getElementById('totalVehicles').textContent = currentShip.totalVehicles;
             document.getElementById('totalDrivers').textContent = currentShip.totalDrivers || 28;
 
-            document.getElementById('progressBar').style.width = `${ship.progress || 0}%`;
-            document.getElementById('progressText').textContent = `${ship.progress || 0}%`;
+            // Start time tracking after ship data is loaded
+            startTimeTracking();
 
             // Update completion button state
             const completeButton = document.getElementById('completeButton');
