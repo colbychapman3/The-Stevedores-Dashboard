@@ -527,7 +527,9 @@
                         <div class="text-sm text-gray-600">Estimated Completion Time</div>
                         <div class="text-2xl font-bold text-blue-600" id="calculatedETC">--:--</div>
                     </div>
-                </div>
+                ```python
+
+
             </div>
 
             <!-- Port Progress Simulator Widget -->
@@ -640,7 +642,7 @@
             hourlyData = [];
             deckData = [];
             brandData = {};
-            
+
             // Generate real hourly data based on current ship's progress and operation time
             generateRealHourlyData();
             generateRealDeckData();
@@ -654,31 +656,31 @@
 
         function generateRealHourlyData() {
             if (!currentShip) return;
-            
+
             const startTime = new Date(currentShip.operationDate + 'T' + (currentShip.shiftStart || '07:00'));
             const currentTime = new Date();
             const elapsedHours = Math.max(0, Math.floor((currentTime - startTime) / (1000 * 60 * 60)));
-            
+
             // Calculate expected rate based on total vehicles and shift duration
             const shiftDuration = 12; // Default 12 hours
             const expectedRate = Math.round(currentShip.totalVehicles / shiftDuration);
-            
+
             hourlyData = [];
             for (let i = 0; i < 12; i++) {
                 const hour = new Date(startTime.getTime() + (i * 60 * 60 * 1000));
                 const hourStr = hour.toTimeString().slice(0, 5);
-                
+
                 let actualCars = 0;
                 if (i < elapsedHours) {
                     // Calculate actual cars based on progress and some variation
                     const progressPerHour = currentShip.progress / elapsedHours;
                     actualCars = Math.round((currentShip.totalVehicles * progressPerHour / 100) + (Math.random() * 20 - 10));
                     actualCars = Math.max(0, actualCars);
-                    
+
                     // Simulate lunch break reduction
                     if (i === 5) actualCars = Math.round(actualCars * 0.4);
                 }
-                
+
                 hourlyData.push({
                     hour: hourStr,
                     cars: actualCars,
@@ -689,25 +691,25 @@
 
         function generateRealDeckData() {
             if (!currentShip) return;
-            
+
             const totalDecks = 10;
             const vehiclesPerDeck = Math.ceil(currentShip.totalVehicles / totalDecks);
             const totalDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-            
+
             deckData = [];
             let remainingDischarged = totalDischarged;
-            
+
             for (let i = 1; i <= totalDecks; i++) {
                 const deckTotal = Math.min(vehiclesPerDeck, currentShip.totalVehicles - ((i-1) * vehiclesPerDeck));
                 let deckDischarged = 0;
                 let deckComplete = false;
-                
+
                 if (remainingDischarged > 0) {
                     deckDischarged = Math.min(deckTotal, remainingDischarged);
                     remainingDischarged -= deckDischarged;
                     deckComplete = deckDischarged === deckTotal;
                 }
-                
+
                 deckData.push({
                     deck: i,
                     total: deckTotal,
@@ -719,11 +721,11 @@
 
         function generateRealBrandData() {
             if (!currentShip) return;
-            
+
             const totalAutomobiles = currentShip.totalAutomobilesDischarge || 0;
             const totalHeavy = currentShip.heavyEquipmentDischarge || 0;
             const totalDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-            
+
             // Distribute vehicles across brands based on typical patterns
             const brandDistribution = {
                 'Mercedes-Benz': 0.28,
@@ -733,15 +735,15 @@
                 'Heavy Equipment': 0.12,
                 'Static Cargo': 0.04
             };
-            
+
             brandData = {};
             let remainingDischarged = totalDischarged;
-            
+
             Object.entries(brandDistribution).forEach(([brand, percentage]) => {
                 const brandTotal = Math.round(currentShip.totalVehicles * percentage);
                 const brandDischarged = Math.min(brandTotal, Math.round(totalDischarged * percentage));
                 remainingDischarged -= brandDischarged;
-                
+
                 const zones = {
                     'Mercedes-Benz': {zone: 'MB Field', distance: '2.1 km'},
                     'BMW': {zone: 'BMW Field', distance: '1.8 km'},
@@ -750,7 +752,7 @@
                     'Heavy Equipment': {zone: 'Heavy Zone', distance: '3.2 km'},
                     'Static Cargo': {zone: 'Static Bay', distance: '2.8 km'}
                 };
-                
+
                 brandData[brand] = {
                     total: brandTotal,
                     discharged: brandDischarged,
@@ -881,7 +883,7 @@
             toggleDeckEdit();
         }
 
-        
+
 
         function populateInventoryTable() {
             const tbody = document.getElementById('inventoryTable');
@@ -1007,20 +1009,20 @@
 
         function populateBreakSchedule() {
             const container = document.getElementById('breakSchedule');
-            
+
             if (!currentShip) return;
-            
+
             const currentTime = new Date();
             const shiftStart = currentShip.shiftStart || '07:00';
             const operationDate = currentShip.operationDate;
-            
+
             // Calculate break times based on shift start
             const startTime = new Date(operationDate + 'T' + shiftStart);
             const morningBreakStart = new Date(startTime.getTime() + (3.5 * 60 * 60 * 1000)); // 3.5 hours after start
             const lunchBreakStart = new Date(startTime.getTime() + (5 * 60 * 60 * 1000)); // 5 hours after start
             const afternoonBreakStart = new Date(startTime.getTime() + (8.5 * 60 * 60 * 1000)); // 8.5 hours after start
             const finalBreakStart = new Date(startTime.getTime() + (11 * 60 * 60 * 1000)); // 11 hours after start
-            
+
             const breaks = [
                 {
                     time: `${morningBreakStart.toTimeString().slice(0,5)}-${new Date(morningBreakStart.getTime() + 15*60*1000).toTimeString().slice(0,5)}`,
@@ -1104,10 +1106,10 @@
                 shiftStart: "07:00",
                 shiftEnd: "19:00"
             };
-            
+
             // Set operation start time for real calculations
             operationStartTime = new Date(currentShip.operationDate + 'T' + currentShip.shiftStart);
-            
+
             populateShipData();
         }
 
@@ -1158,6 +1160,20 @@
                         </div>
                     </div>
                 </div>
+
+                    <!-- Completion Actions -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex space-x-4">
+                            <button id="completeButton" onclick="markOperationComplete()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-check-circle mr-2"></i>Mark Operation Complete
+                            </button>
+                            <button onclick="updateProgress()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-percentage mr-2"></i>Update Progress
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             `;
 
             document.getElementById('shipDetails').innerHTML = detailsHtml;
@@ -1169,15 +1185,33 @@
             // Set the values to the real time progress totals and targets
             document.getElementById('totalVehicles').textContent = currentShip.totalVehicles;
             document.getElementById('totalDrivers').textContent = currentShip.totalDrivers || 28;
+
+            document.getElementById('progressBar').style.width = `${ship.progress || 0}%`;
+            document.getElementById('progressText').textContent = `${ship.progress || 0}%`;
+
+            // Update completion button state
+            const completeButton = document.getElementById('completeButton');
+            if (ship.status === 'complete') {
+                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
+                completeButton.disabled = true;
+                completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
+            } else {
+                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Mark Operation Complete';
+                completeButton.disabled = false;
+                completeButton.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors';
+            }
+
+            // Update ETC calculation
+            updateETCCalculation();
         }
 
         function calculateCurrentRate() {
             if (!currentShip || !operationStartTime) return 0;
-            
+
             const now = new Date();
             const elapsedHours = (now - operationStartTime) / (1000 * 60 * 60);
             const vehiclesDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-            
+
             if (elapsedHours > 0) {
                 return Math.round(vehiclesDischarged / elapsedHours);
             }
@@ -1186,23 +1220,23 @@
 
         function updatePerformanceMetrics() {
             if (!currentShip) return;
-            
+
             // Calculate real turnaround times based on current operation
             const baseTime = 12; // Base turnaround time in minutes
             const efficiencyFactor = currentShip.progress / 100;
             const avgTurnaround = (baseTime + (Math.random() * 2 - 1)).toFixed(1);
             const bestTurnaround = (baseTime * 0.7).toFixed(1);
             const worstTurnaround = (baseTime * 1.5).toFixed(1);
-            
+
             document.getElementById('avgTurnaround').textContent = `${avgTurnaround} min`;
             document.getElementById('bestTurnaround').textContent = `${bestTurnaround} min`;
             document.getElementById('worstTurnaround').textContent = `${worstTurnaround} min`;
-            
+
             // Update best/worst hour based on real hourly data
             if (hourlyData.length > 0) {
                 const bestHourData = hourlyData.reduce((max, hour) => hour.cars > max.cars ? hour : max);
                 const worstHourData = hourlyData.filter(h => h.cars > 0).reduce((min, hour) => hour.cars < min.cars ? hour : min, {cars: Infinity, hour: ''});
-                
+
                 if (bestHourData.cars > 0) {
                     document.getElementById('bestHour').textContent = `${bestHourData.hour} (${bestHourData.cars} cars)`;
                 }
@@ -1308,18 +1342,18 @@
 
         function updatePortProgress() {
             if (!currentShip) return;
-            
+
             // Use real ship targets or defaults
             const brvMax = currentShip.brvTarget || 904;
             const zeeMax = currentShip.zeeTarget || 300;
             const souMax = currentShip.souTarget || 200;
-            
+
             // Calculate current values based on ship progress
             const overallProgress = currentShip.progress / 100;
             const brvValue = Math.round(brvMax * overallProgress);
             const zeeValue = Math.round(zeeMax * Math.max(0, overallProgress - 0.4)); // ZEE starts after 40% BRV
             const souValue = Math.round(souMax * Math.max(0, overallProgress - 0.7)); // SOU starts after 70% overall
-            
+
             const totalMax = brvMax + zeeMax + souMax;
             const totalCurrent = brvValue + zeeValue + souValue;
 
@@ -1459,6 +1493,94 @@
 
         function goBack() {
             window.history.back();
+        }
+
+        async function markOperationComplete() {
+            if (!confirm('Are you sure you want to mark this operation as complete? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const shipId = new URLSearchParams(window.location.search).get('ship');
+
+                // Update status to complete
+                const statusResponse = await fetch(`/api/ships/${shipId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'complete'
+                    })
+                });
+
+                if (statusResponse.ok) {
+                    // Update progress to 100%
+                    const progressResponse = await fetch(`/api/ships/${shipId}/progress`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            progress: 100
+                        })
+                    });
+
+                    if (progressResponse.ok) {
+                        alert('Operation marked as complete successfully!');
+                        loadShipDetails(); // Refresh the page data
+
+                        // Update button state
+                        const completeButton = document.getElementById('completeButton');
+                        completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
+                        completeButton.disabled = true;
+                        completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
+                    }
+                } else {
+                    const error = await statusResponse.json();
+                    alert('Error marking operation complete: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error marking operation complete:', error);
+                alert('Error marking operation complete: ' + error.message);
+            }
+        }
+
+        async function updateProgress() {
+            const currentProgress = parseFloat(document.getElementById('progressBar').style.width) || 0;
+            const newProgress = prompt(`Enter new progress percentage (current: ${currentProgress}%):`, currentProgress);
+
+            if (newProgress === null || newProgress === '') return;
+
+            const progress = parseFloat(newProgress);
+            if (isNaN(progress) || progress < 0 || progress > 100) {
+                alert('Please enter a valid percentage between 0 and 100');
+                return;
+            }
+
+            try {
+                const shipId = new URLSearchParams(window.location.search).get('ship');
+                const response = await fetch(`/api/ships/${shipId}/progress`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        progress: progress
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Progress updated successfully!');
+                    loadShipDetails(); // Refresh the page data
+                } else {
+                    const error = await response.json();
+                    alert('Error updating progress: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating progress:', error);
+                alert('Error updating progress: ' + error.message);
+            }
         }
 
         function goToMaster() {
