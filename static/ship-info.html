@@ -178,7 +178,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Discharged</label>
                     <input type="number" id="dischargedCount" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent" 
                            placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
-                    <p class="text-xs text-gray-500 mt-1">Total: <span id="totalVehicles">1250</span></p>
+                    <p class="text-xs text-gray-500 mt-1">Total: <span id="totalVehicles">0</span></p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Current Deck</label>
@@ -199,7 +199,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Active Drivers</label>
                     <input type="number" id="activeDrivers" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
                            placeholder="Enter count" onchange="updateRealTimeProgress()" min="0">
-                    <p class="text-xs text-gray-500 mt-1">Available: <span id="totalDrivers">77</span></p>
+                    <p class="text-xs text-gray-500 mt-1">Available: <span id="totalDrivers">0</span></p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Operation Status</label>
@@ -235,11 +235,11 @@
                     <div class="mt-4 grid grid-cols-2 gap-4">
                         <div class="text-center p-3 bg-green-50 rounded-lg">
                             <div class="text-sm text-gray-600">Best Hour</div>
-                            <div class="text-lg font-bold text-green-600" id="bestHour">14:00 (125 cars)</div>
+                            <div class="text-lg font-bold text-green-600" id="bestHour">--:-- (0 cars)</div>
                         </div>
                         <div class="text-center p-3 bg-red-50 rounded-lg">
                             <div class="text-sm text-gray-600">Worst Hour</div>
-                            <div class="text-lg font-bold text-red-600" id="worstHour">12:00 (45 cars)</div>
+                            <div class="text-lg font-bold text-red-600" id="worstHour">--:-- (0 cars)</div>
                         </div>
                     </div>
                 </div>
@@ -508,19 +508,19 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Vehicles Remaining</label>
                         <input type="number" id="vehiclesRemaining" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               placeholder="1003" value="1003" onchange="calculateETC()">
+                               placeholder="Enter remaining vehicles" onchange="calculateETC()">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Rate (cars/hour)</label>
                         <input type="number" id="currentRate" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               placeholder="180.2" value="180.2" step="0.1" onchange="calculateETC()">
+                               placeholder="Enter current rate" step="0.1" onchange="calculateETC()">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Current Time</label>
                         <input type="time" id="currentTime" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                               value="16:09" onchange="calculateETC()">
+                               onchange="calculateETC()">
                     </div>
 
                     <button onclick="calculateETC()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition duration-200">
@@ -545,8 +545,8 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">BRV Progress</label>
                         <div class="flex items-center space-x-3">
-                            <input type="range" id="brvProgress" min="0" max="904" value="520" class="flex-1" onchange="updatePortProgress()">
-                            <span class="text-sm font-medium text-gray-700 w-16" id="brvValue">520/904</span>
+                            <input type="range" id="brvProgress" min="0" max="904" value="0" class="flex-1" onchange="updatePortProgress()">
+                            <span class="text-sm font-medium text-gray-700 w-16" id="brvValue">0/904</span>
                         </div>
                     </div>
 
@@ -574,7 +574,7 @@
 
                     <div class="mt-4 p-4 bg-white rounded-lg border border-green-200">
                         <div class="text-sm text-gray-600">Total Progress</div>
-                        <div class="text-2xl font-bold text-green-600" id="totalProgress">37.0%</div>
+                        <div class="text-2xl font-bold text-green-600" id="totalProgress">0.0%</div>
                     </div>
                 </div>
             </div>
@@ -646,15 +646,17 @@
             deckData = [];
             brandData = {};
 
-            // Generate real hourly data based on current ship's progress and operation time
-            generateRealHourlyData();
-            generateRealDeckData();
-            generateRealBrandData();
+            // Only generate data if we have a valid ship
+            if (currentShip && currentShip.id) {
+                generateRealHourlyData();
+                generateRealDeckData();
+                generateRealBrandData();
 
-            populateDeckProgress();
-            populateInventoryTable();
-            populateBreakSchedule();
-            updateHourlyQuantityDisplay();
+                populateDeckProgress();
+                populateInventoryTable();
+                populateBreakSchedule();
+                updateHourlyQuantityDisplay();
+            }
         }
 
         function generateRealHourlyData() {
@@ -1086,37 +1088,9 @@
         }
 
         function loadSampleShipData() {
-            currentShip = {
-                id: 1,
-                vesselName: "Atlantic Voyager",
-                vesselType: "Auto Carrier",
-                berth: "Berth 1",
-                status: "active",
-                operationType: "Discharge Only",
-                autoOpsLead: "Colby Chapman",
-                autoOpsAssistant: "Cole Bailey",
-                heavyOpsLead: "Spencer Wilkins",
-                heavyOpsAssistant: "Bruce Banner",
-                operationManager: "John Smith",
-                totalVehicles: 1250,
-                totalAutomobilesDischarge: 1100,
-                heavyEquipmentDischarge: 150,
-                progress: 65,
-                operationDate: "2024-01-15",
-                company: "APS Stevedoring",
-                port: "Colonel Island",
-                brvTarget: 904,
-                zeeTarget: 300,
-                souTarget: 200,
-                totalDrivers: 77,
-                shiftStart: "07:00",
-                shiftEnd: "19:00"
-            };
-
-            // Set operation start time for real calculations
-            operationStartTime = new Date(currentShip.operationDate + 'T' + currentShip.shiftStart);
-
-            populateShipData();
+            // No sample data - redirect to master dashboard if no ship ID
+            alert('No ship data available. Please create a new operation first.');
+            window.location.href = '/master';
         }
 
         function populateShipData() {
@@ -1225,7 +1199,15 @@
         }
 
         function updatePerformanceMetrics() {
-            if (!currentShip) return;
+            if (!currentShip) {
+                // Set default empty values
+                document.getElementById('avgTurnaround').textContent = '0.0 min';
+                document.getElementById('bestTurnaround').textContent = '0.0 min';
+                document.getElementById('worstTurnaround').textContent = '0.0 min';
+                document.getElementById('bestHour').textContent = '--:-- (0 cars)';
+                document.getElementById('worstHour').textContent = '--:-- (0 cars)';
+                return;
+            }
 
             // Calculate real turnaround times based on current operation
             const baseTime = 12; // Base turnaround time in minutes

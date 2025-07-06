@@ -1088,10 +1088,18 @@ This might indicate the document format is not recognized. Please check the cons
             document.getElementById('wizardInterface').classList.remove('hidden');
         }
 
-        // Set default date to today
+        // Set default date to today and time
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('operationDate').value = today;
+            
+            // Set current time for ETC calculation
+            const now = new Date();
+            const currentTimeStr = now.toTimeString().slice(0, 5);
+            const currentTimeInput = document.getElementById('currentTime');
+            if (currentTimeInput) {
+                currentTimeInput.value = currentTimeStr;
+            }
         });
 
         function addVehicleType(facility) {
