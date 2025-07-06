@@ -1102,17 +1102,17 @@ This might indicate the document format is not recognized. Please check the cons
             const newDiv = document.createElement('div');
             newDiv.className = "grid grid-cols-3 gap-4 mb-4";
             newDiv.innerHTML = `
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Vehicle Type</label>
-                    <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="${facility}VehicleType${index}" name="${facility}VehicleType${index}" placeholder="e.g., Sedan">
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type</label>
+                    <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="${facility}VehicleType${index}" name="${facility}VehicleType${index}" placeholder="e.g., Sedan">
                 </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
-                    <input type="number" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="${facility}VehicleQuantity${index}" name="${facility}VehicleQuantity${index}" placeholder="e.g., 100" onchange="validate${facility.charAt(0).toUpperCase() + facility.slice(1)}Totals()">
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                    <input type="number" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="${facility}VehicleQuantity${index}" name="${facility}VehicleQuantity${index}" placeholder="e.g., 100">
                 </div>
-                <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Location</label>
-                    <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="${facility}VehicleLocation${index}" name="${facility}VehicleLocation${index}" placeholder="e.g., North Terminal">
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <input type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="${facility}VehicleLocation${index}" name="${facility}VehicleLocation${index}" placeholder="e.g., North Terminal">
                 </div>
             `;
             container.appendChild(newDiv);
@@ -1139,40 +1139,99 @@ This might indicate the document format is not recognized. Please check the cons
             return vehicleTypes;
         }
 
-        function validateBrvTotals() {
-            const totalAutos = parseInt(document.getElementById('brvAutomobiles').value) || 0;
-            let vehicleTypeSum = 0;
-            const vehicleTypeContainer = document.getElementById('brvVehicleTypeContainer');
+        function validateTotals() {
+            let warnings = [];
+            
+            // Validate BRV if K-Line is selected
+            const shippingLine = document.getElementById('shippingLine').value;
+            if (shippingLine === 'K-Line') {
+                // BRV validation
+                const brvTotalAutos = parseInt(document.getElementById('brvAutomobiles')?.value) || 0;
+                if (brvTotalAutos > 0) {
+                    let brvVehicleTypeSum = 0;
+                    const brvContainer = document.getElementById('brvVehicleTypeContainer');
+                    if (brvContainer) {
+                        for (let i = 0; i < brvContainer.children.length; i++) {
+                            const quantityInput = document.getElementById(`brvVehicleQuantity${i}`);
+                            if (quantityInput) {
+                                brvVehicleTypeSum += parseInt(quantityInput.value) || 0;
+                            }
+                        }
+                        if (brvVehicleTypeSum !== brvTotalAutos) {
+                            warnings.push(`BRV: Vehicle type quantities (${brvVehicleTypeSum}) don't match total autos (${brvTotalAutos})`);
+                        }
+                    }
+                }
 
-            for (let i = 0; i < vehicleTypeContainer.children.length; i++) {
-                const quantityInput = document.getElementById(`brvVehicleQuantity${i}`);
-                const quantity = parseInt(quantityInput.value) || 0;
-                vehicleTypeSum += quantity;
+                // ZEE validation
+                const zeeTotalAutos = parseInt(document.getElementById('zeeTotalAutos')?.value) || 0;
+                if (zeeTotalAutos > 0) {
+                    let zeeVehicleTypeSum = 0;
+                    const zeeContainer = document.getElementById('zeeVehicleTypeContainer');
+                    if (zeeContainer) {
+                        for (let i = 0; i < zeeContainer.children.length; i++) {
+                            const quantityInput = document.getElementById(`zeeVehicleQuantity${i}`);
+                            if (quantityInput) {
+                                zeeVehicleTypeSum += parseInt(quantityInput.value) || 0;
+                            }
+                        }
+                        if (zeeVehicleTypeSum !== zeeTotalAutos) {
+                            warnings.push(`ZEE: Vehicle type quantities (${zeeVehicleTypeSum}) don't match total autos (${zeeTotalAutos})`);
+                        }
+                    }
+                }
+
+                // SOU validation
+                const souTotalAutos = parseInt(document.getElementById('souTotalAutos')?.value) || 0;
+                if (souTotalAutos > 0) {
+                    let souVehicleTypeSum = 0;
+                    const souContainer = document.getElementById('souVehicleTypeContainer');
+                    if (souContainer) {
+                        for (let i = 0; i < souContainer.children.length; i++) {
+                            const quantityInput = document.getElementById(`souVehicleQuantity${i}`);
+                            if (quantityInput) {
+                                souVehicleTypeSum += parseInt(quantityInput.value) || 0;
+                            }
+                        }
+                        if (souVehicleTypeSum !== souTotalAutos) {
+                            warnings.push(`SOU: Vehicle type quantities (${souVehicleTypeSum}) don't match total autos (${souTotalAutos})`);
+                        }
+                    }
+                }
+            } else {
+                // Terminal validation for other shipping lines
+                const terminalTotalAutos = parseInt(document.getElementById('terminalAutomobiles')?.value) || 0;
+                if (terminalTotalAutos > 0) {
+                    let terminalVehicleTypeSum = 0;
+                    const terminalContainer = document.getElementById('terminalVehicleTypeContainer');
+                    if (terminalContainer) {
+                        for (let i = 0; i < terminalContainer.children.length; i++) {
+                            const quantityInput = document.getElementById(`terminalVehicleQuantity${i}`);
+                            if (quantityInput) {
+                                terminalVehicleTypeSum += parseInt(quantityInput.value) || 0;
+                            }
+                        }
+                        if (terminalVehicleTypeSum !== terminalTotalAutos) {
+                            warnings.push(`Terminal: Vehicle type quantities (${terminalVehicleTypeSum}) don't match total autos (${terminalTotalAutos})`);
+                        }
+                    }
+                }
             }
 
-            if (vehicleTypeSum !== totalAutos) {
-                alert(`Total quantity of vehicle types in BRV must equal total autos: ${totalAutos}`);
-            }
-        }
-
-        function validateTerminalTotals() {
-            const totalAutos = parseInt(document.getElementById('terminalAutomobiles').value) || 0;
-            let vehicleTypeSum = 0;
-            const vehicleTypeContainer = document.getElementById('terminalVehicleTypeContainer');
-
-            for (let i = 0; i < vehicleTypeContainer.children.length; i++) {
-                const quantityInput = document.getElementById(`terminalVehicleQuantity${i}`);
-                const quantity = parseInt(quantityInput.value) || 0;
-                vehicleTypeSum += quantity;
-            }
-
-            if (vehicleTypeSum !== totalAutos) {
-                alert(`Total quantity of vehicle types in Terminal must equal total autos: ${totalAutos}`);
-            }
+            return warnings;
         }
         // Handle form submission
         document.getElementById('operationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            // Validate totals and show warnings
+            const warnings = validateTotals();
+            if (warnings.length > 0) {
+                const proceed = confirm(`Warning: The following totals don't match:\n\n${warnings.join('\n')}\n\nDo you want to proceed anyway?`);
+                if (!proceed) {
+                    return;
+                }
+            }
 
             // Show processing state
             const submitBtn = document.querySelector('button[type="submit"]');
