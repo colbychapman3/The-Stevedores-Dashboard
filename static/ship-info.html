@@ -1088,12 +1088,67 @@
         }
 
         function loadSampleShipData() {
-            // No sample data - redirect to master dashboard if no ship ID
-            alert('No ship data available. Please create a new operation first.');
-            window.location.href = '/master';
+            // Create a default ship object to prevent errors
+            currentShip = {
+                id: null,
+                vesselName: "No Vessel Selected",
+                vesselType: "Unknown",
+                shippingLine: "Unknown",
+                port: "Colonel Island",
+                operationDate: new Date().toISOString().split('T')[0],
+                company: "APS Stevedoring",
+                operationType: "Unknown",
+                berth: "Unknown",
+                operationManager: "Unknown",
+                autoOpsLead: "Unknown",
+                autoOpsAssistant: "Unknown",
+                heavyOpsLead: "Unknown",
+                heavyOpsAssistant: "Unknown",
+                totalVehicles: 0,
+                totalAutomobilesDischarge: 0,
+                heavyEquipmentDischarge: 0,
+                totalElectricVehicles: 0,
+                totalStaticCargo: 0,
+                brvTarget: 0,
+                zeeTarget: 0,
+                souTarget: 0,
+                expectedRate: 0,
+                totalDrivers: 0,
+                shiftStart: "07:00",
+                shiftEnd: "19:00",
+                breakDuration: 60,
+                targetCompletion: "",
+                ticoVans: 0,
+                ticoStationWagons: 0,
+                status: "No Data",
+                progress: 0,
+                createdAt: new Date().toISOString(),
+                startTime: "07:00",
+                estimatedCompletion: "19:00"
+            };
+            
+            // Show message about no data
+            document.getElementById('vesselTitle').textContent = 'No Ship Data Available';
+            
+            // Show create operation button
+            const headerElement = document.querySelector('header .flex.justify-between .flex.space-x-4');
+            if (headerElement) {
+                headerElement.innerHTML = `
+                    <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-plus mr-2"></i>Create New Operation
+                    </a>
+                    <a href="/master" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Master Dashboard
+                    </a>
+                `;
+            }
+            
+            populateShipData();
         }
 
         function populateShipData() {
+            if (!currentShip) return;
+            
             document.getElementById('vesselTitle').textContent = currentShip.vesselName;
 
             // Calculate real current rate based on progress and elapsed time
@@ -1108,6 +1163,7 @@
                 <div class="text-center mb-4">
                     <div class="text-2xl font-bold text-gray-900">${currentShip.vesselName}</div>
                     <div class="text-sm text-gray-600">${currentShip.vesselType}</div>
+                    ${!currentShip.id ? '<div class="text-sm text-orange-600 mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>No active operation data</div>' : ''}
                 </div>
                 <div class="space-y-3 text-sm">
                     <div class="flex justify-between">
@@ -1143,6 +1199,7 @@
 
                     <!-- Completion Actions -->
                     <div class="mt-6 pt-4 border-t border-gray-200">
+                        ${currentShip.id ? `
                         <div class="flex space-x-4">
                             <button id="completeButton" onclick="markOperationComplete()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
                                 <i class="fas fa-check-circle mr-2"></i>Mark Operation Complete
@@ -1151,6 +1208,14 @@
                                 <i class="fas fa-percentage mr-2"></i>Update Progress
                             </button>
                         </div>
+                        ` : `
+                        <div class="text-center">
+                            <div class="text-gray-600 mb-4">No operation data to manage</div>
+                            <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                                <i class="fas fa-plus mr-2"></i>Create New Operation
+                            </a>
+                        </div>
+                        `}
                     </div>
                 </div>
             </div>
