@@ -303,17 +303,19 @@
                 statusText.textContent = 'Available';
             }
 
-            // Update occupied berths
+            // Update occupied berths (only for non-complete ships)
             ships.forEach(ship => {
-                const berthNumber = ship.berth.replace('Berth ', '');
-                const berthElement = document.getElementById(`berth${berthNumber}`);
-                const indicator = berthElement.querySelector('.berth-indicator');
-                const statusText = berthElement.querySelector('.text-sm');
+                if (ship.status !== 'complete') {
+                    const berthNumber = ship.berth.replace('Berth ', '');
+                    const berthElement = document.getElementById(`berth${berthNumber}`);
+                    const indicator = berthElement.querySelector('.berth-indicator');
+                    const statusText = berthElement.querySelector('.text-sm');
 
-                if (berthElement) {
-                    berthElement.className = 'berth-slot bg-blue-100 rounded-lg p-4 text-center cursor-pointer hover:bg-blue-200 transition-colors';
-                    indicator.className = 'berth-indicator w-4 h-4 bg-blue-500 rounded-full mx-auto mb-2';
-                    statusText.textContent = ship.vesselName;
+                    if (berthElement) {
+                        berthElement.className = 'berth-slot bg-blue-100 rounded-lg p-4 text-center cursor-pointer hover:bg-blue-200 transition-colors';
+                        indicator.className = 'berth-indicator w-4 h-4 bg-blue-500 rounded-full mx-auto mb-2';
+                        statusText.textContent = ship.vesselName;
+                    }
                 }
             });
         }
