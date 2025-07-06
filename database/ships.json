@@ -26,11 +26,11 @@
     "breakDuration": 60,
     "ticoVans": 4,
     "ticoStationWagons": 0,
-    "status": "active",
-    "progress": 27,
+    "status": "complete",
+    "progress": 100,
     "createdAt": "2025-07-03T00:10:29.010548",
     "startTime": "07:00",
     "estimatedCompletion": "19:00",
-    "updatedAt": "2025-07-04T19:42:58.857894"
+    "updatedAt": "2025-07-06T13:20:04.877074"
   }
 ]
