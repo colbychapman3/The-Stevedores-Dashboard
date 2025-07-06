@@ -317,11 +317,14 @@
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
-                                <input type="number" id="brvTotalAutos" name="brvTotalAutos" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 500">
+                                <input type="number" id="brvAutomobiles" name="brvAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., 500" onchange="validateBrvTotals()">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                                <textarea id="brvVehicleTypes" name="brvVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="e.g., Sedan: 300, SUV: 150, Truck: 50" rows="2"></textarea>
+                                <div id="brvVehicleTypes">
+                                    <button type="button" onclick="addVehicleType('brv')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Vehicle Type</button>
+                                    <div id="brvVehicleTypeContainer"></div>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
@@ -430,12 +433,15 @@
                         </h3>
                         <div class="grid md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Autos</label>
-                                <input type="number" id="ssiTotalAutomobiles" name="ssiTotalAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 400">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Total Automobiles</label>
+                                <input type="number" id="ssiAutomobiles" name="ssiAutomobiles" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., 400" onchange="validateSsiTotals()">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Vehicle Type & Quantity</label>
-                                <textarea id="ssiVehicleTypes" name="ssiVehicleTypes" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent" placeholder="e.g., Sedan: 250, SUV: 100, Hatchback: 50" rows="2"></textarea>
+                                 <div id="ssiVehicleTypes">
+                                    <button type="button" onclick="addVehicleType('ssi')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add Vehicle Type</button>
+                                    <div id="ssiVehicleTypeContainer"></div>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Total Heavy</label>
@@ -1040,6 +1046,68 @@ This might indicate the document format is not recognized. Please check the cons
             document.getElementById('operationDate').value = today;
         });
 
+        function addVehicleType(facility) {
+            const containerId = `${facility}VehicleTypeContainer`;
+            const container = document.getElementById(containerId);
+            const index = container.children.length;
+
+            const newDiv = document.createElement('div');
+            newDiv.className = "grid grid-cols-2 gap-4 mb-4";
+            newDiv.innerHTML = `
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Vehicle Type</label>
+                    <input type="text" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="${facility}VehicleType${index}" name="${facility}VehicleType${index}" placeholder="e.g., Sedan">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
+                    <input type="number" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="${facility}VehicleQuantity${index}" name="${facility}VehicleQuantity${index}" placeholder="e.g., 100" onchange="validate${facility.charAt(0).toUpperCase() + facility.slice(1)}Totals()">
+                </div>
+            `;
+            container.appendChild(newDiv);
+        }
+
+        function getVehicleTypeData(facility) {
+            const container = document.getElementById(`${facility}VehicleTypeContainer`);
+            const vehicleTypes = [];
+            for (let i = 0; i < container.children.length; i++) {
+                const type = document.getElementById(`${facility}VehicleType${i}`).value;
+                const quantity = parseInt(document.getElementById(`${facility}VehicleQuantity${i}`).value) || 0;
+                vehicleTypes.push({ type, quantity });
+            }
+            return vehicleTypes;
+        }
+
+        function validateBrvTotals() {
+            const totalAutos = parseInt(document.getElementById('brvAutomobiles').value) || 0;
+            let vehicleTypeSum = 0;
+            const vehicleTypeContainer = document.getElementById('brvVehicleTypeContainer');
+
+            for (let i = 0; i < vehicleTypeContainer.children.length; i++) {
+                const quantityInput = document.getElementById(`brvVehicleQuantity${i}`);
+                const quantity = parseInt(quantityInput.value) or 0;
+                vehicleTypeSum += quantity;
+            }
+
+            if (vehicleTypeSum !== totalAutos) {
+                alert(`Total quantity of vehicle types in BRV must equal total autos: ${totalAutos}`);
+            }
+        }
+
+        function validateSsiTotals() {
+            const totalAutos = parseInt(document.getElementById('ssiAutomobiles').value) || 0;
+            let vehicleTypeSum = 0;
+            const vehicleTypeContainer = document.getElementById('ssiVehicleTypeContainer');
+
+            for (let i = 0; i < vehicleTypeContainer.children.length; i++) {
+                const quantityInput = document.getElementById(`ssiVehicleQuantity${i}`);
+                const quantity = parseInt(quantityInput.value) || 0;
+                vehicleTypeSum += quantity;
+            }
+
+            if (vehicleTypeSum !== totalAutos) {
+                alert(`Total quantity of vehicle types in SSI must equal total autos: ${totalAutos}`);
+            }
+        }
         // Handle form submission
         document.getElementById('operationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
