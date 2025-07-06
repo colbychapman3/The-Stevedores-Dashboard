@@ -92,7 +92,7 @@
                         <i class="fas fa-arrow-left text-xl lg:text-2xl"></i>
                     </button>
                     <div>
-                        <h1 class="text-xl lg:text-3xl font-bold text-gray-900">Ship Information Dashboard</h1>
+                        <h1 id="vesselTitle" class="text-xl lg:text-3xl font-bold text-gray-900">Ship Information Dashboard</h1>
                         <p class="text-sm lg:text-base text-gray-600 hidden sm:block">Comprehensive Analytics & Operations Management</p>
                     </div>
                 </div>
@@ -1142,7 +1142,10 @@
             };
             
             // Show message about no data
-            document.getElementById('vesselTitle').textContent = 'No Ship Data Available';
+            const titleElement = document.getElementById('vesselTitle');
+            if (titleElement) {
+                titleElement.textContent = 'No Ship Data Available';
+            }
             
             // Show create operation button
             const headerElement = document.querySelector('header .flex.justify-between .flex.space-x-4');
@@ -1162,6 +1165,9 @@
 
         function populateShipData() {
             if (!currentShip) return;
+
+            // Set the page title
+            document.getElementById('vesselTitle').textContent = currentShip.vesselName || 'Ship Information Dashboard';
 
             // Calculate real current rate based on progress and elapsed time
             const realCurrentRate = calculateCurrentRate();
@@ -1721,11 +1727,7 @@
 
             let overallProgress = Math.min(100, (discharged / totalVehicles) * 100);
 
-            // Only update these elements if they exist
-            const calculatedProgressEl = document.getElementById('calculatedProgress');
-            if (calculatedProgressEl) {
-                calculatedProgressEl.textContent = overallProgress.toFixed(0) + '%';
-            }
+            // Update completion display
             document.getElementById('completionDisplay').textContent = overallProgress.toFixed(0) + '%';
 
             // Update current rate based on status
@@ -1736,14 +1738,24 @@
             document.getElementById('currentRateDisplay').textContent = currentRate;
 
             // Auto-redirect to master dashboard if status is set to complete
-            if (operationStatus === 'complete' && currentShip && currentShip.id) {
-                updateShipStatusAndRedirect('complete');
+            if (operationStatus === 'complete') {
+                // Check if we have a valid ship ID from URL or currentShip
+                const urlParams = new URLSearchParams(window.location.search);
+                const shipId = urlParams.get('ship') || (currentShip ? currentShip.id : null);
+                
+                if (shipId) {
+                    updateShipStatusAndRedirect('complete', shipId);
+                } else {
+                    // If no ship ID, just redirect to master dashboard
+                    alert('Operation marked as complete! Redirecting to master dashboard...');
+                    window.location.href = '/master';
+                }
             }
         }
 
-        async function updateShipStatusAndRedirect(status) {
+        async function updateShipStatusAndRedirect(status, shipId) {
             try {
-                const response = await fetch(`/api/ships/${currentShip.id}/status`, {
+                const response = await fetch(`/api/ships/${shipId}/status`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1756,7 +1768,7 @@
                 if (response.ok) {
                     // Also update progress to 100% if completing
                     if (status === 'complete') {
-                        await fetch(`/api/ships/${currentShip.id}/progress`, {
+                        await fetch(`/api/ships/${shipId}/progress`, {
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
