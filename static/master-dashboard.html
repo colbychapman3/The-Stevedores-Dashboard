@@ -41,20 +41,20 @@
                         <p class="text-gray-600">Multi-Ship Operations Dashboard</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 lg:space-x-4">
-                    <div class="text-right">
-                        <div class="text-xs lg:text-sm text-gray-500">Current Time</div>
-                        <div id="currentTime" class="text-sm lg:text-lg font-semibold text-gray-900"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-xs text-gray-500">Current Time</div>
+                        <div id="currentTime" class="text-sm font-semibold text-gray-900"></div>
                     </div>
-                    <div class="flex space-x-4">
-                        <button onclick="goToAnalytics()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                            <i class="fas fa-chart-line mr-2"></i>Analytics
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <button onclick="goToAnalytics()" class="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                            <i class="fas fa-chart-line sm:mr-2"></i><span class="hidden sm:inline"> Analytics</span>
                         </button>
-                        <button onclick="goToCalendar()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                            <i class="fas fa-calendar-alt mr-2"></i>Calendar View
+                        <button onclick="goToCalendar()" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                            <i class="fas fa-calendar-alt sm:mr-2"></i><span class="hidden sm:inline"> Calendar</span>
                         </button>
-                        <button onclick="window.location.href='/wizard'" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                            <i class="fas fa-plus mr-2"></i>New Operation
+                        <button onclick="window.location.href='/wizard'" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                            <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline"> New</span>
                         </button>
                     </div>
                 </div>

@@ -96,18 +96,18 @@
                         <p class="text-sm lg:text-base text-gray-600 hidden sm:block">Comprehensive Analytics & Operations Management</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="toggleCustomizeMode()" id="customizeBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-cog mr-2"></i>Customize
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="toggleCustomizeMode()" id="customizeBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-cog sm:mr-2"></i><span class="hidden sm:inline"> Customize</span>
                     </button>
-                    <button onclick="generateReport()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-file-pdf mr-2"></i>Generate Report
+                    <button onclick="generateReport()" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-file-pdf sm:mr-2"></i><span class="hidden sm:inline"> Report</span>
                     </button>
-                    <button onclick="updateProgress()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-edit mr-2"></i>Update Progress
+                    <button onclick="updateProgress()" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-edit sm:mr-2"></i><span class="hidden sm:inline"> Update</span>
                     </button>
-                    <button onclick="goToMaster()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-tachometer-alt mr-2"></i>Master Dashboard
+                    <button onclick="goToMaster()" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-tachometer-alt sm:mr-2"></i><span class="hidden sm:inline"> Master</span>
                     </button>
                 </div>
             </div>
