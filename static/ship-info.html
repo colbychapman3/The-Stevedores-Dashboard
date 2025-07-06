@@ -92,7 +92,7 @@
                         <i class="fas fa-arrow-left text-xl lg:text-2xl"></i>
                     </button>
                     <div>
-                        <h1 id="vesselTitle" class="text-xl lg:text-3xl font-bold text-gray-900">Ship Information</h1>
+                        <h1 class="text-xl lg:text-3xl font-bold text-gray-900">Ship Information Dashboard</h1>
                         <p class="text-sm lg:text-base text-gray-600 hidden sm:block">Comprehensive Analytics & Operations Management</p>
                     </div>
                 </div>
@@ -1162,10 +1162,6 @@
 
         function populateShipData() {
             if (!currentShip) return;
-            
-            // Update vessel title - handle both cases
-            const vesselTitle = currentShip.id ? currentShip.vesselName : 'No Ship Data Available';
-            document.getElementById('vesselTitle').textContent = vesselTitle;
 
             // Calculate real current rate based on progress and elapsed time
             const realCurrentRate = calculateCurrentRate();
@@ -1725,7 +1721,11 @@
 
             let overallProgress = Math.min(100, (discharged / totalVehicles) * 100);
 
-            document.getElementById('calculatedProgress').textContent = overallProgress.toFixed(0) + '%';
+            // Only update these elements if they exist
+            const calculatedProgressEl = document.getElementById('calculatedProgress');
+            if (calculatedProgressEl) {
+                calculatedProgressEl.textContent = overallProgress.toFixed(0) + '%';
+            }
             document.getElementById('completionDisplay').textContent = overallProgress.toFixed(0) + '%';
 
             // Update current rate based on status
@@ -1734,6 +1734,50 @@
                 currentRate = getCurrentRate();
             }
             document.getElementById('currentRateDisplay').textContent = currentRate;
+
+            // Auto-redirect to master dashboard if status is set to complete
+            if (operationStatus === 'complete' && currentShip && currentShip.id) {
+                updateShipStatusAndRedirect('complete');
+            }
+        }
+
+        async function updateShipStatusAndRedirect(status) {
+            try {
+                const response = await fetch(`/api/ships/${currentShip.id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: status
+                    })
+                });
+
+                if (response.ok) {
+                    // Also update progress to 100% if completing
+                    if (status === 'complete') {
+                        await fetch(`/api/ships/${currentShip.id}/progress`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                progress: 100
+                            })
+                        });
+                    }
+
+                    // Show confirmation and redirect
+                    alert('Operation status updated successfully! Redirecting to master dashboard...');
+                    window.location.href = '/master';
+                } else {
+                    const error = await response.json();
+                    alert('Error updating status: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Error updating status: ' + error.message);
+            }
         }
 
         function generateReport() {
