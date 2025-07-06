@@ -67,6 +67,7 @@ def create_ship():
         'id': new_id,
         'vesselName': data.get('vesselName', ''),
         'vesselType': data.get('vesselType', ''),
+        'shippingLine': data.get('shippingLine', ''),
         'port': data.get('port', ''),
         'operationDate': data.get('operationDate', ''),
         'company': data.get('company', ''),
@@ -77,9 +78,11 @@ def create_ship():
         'autoOpsAssistant': data.get('autoOpsAssistant', ''),
         'heavyOpsLead': data.get('heavyOpsLead', ''),
         'heavyOpsAssistant': data.get('heavyOpsAssistant', ''),
-        'totalVehicles': data.get('totalAutomobilesDischarge', 0) + data.get('heavyEquipmentDischarge', 0),
+        'totalVehicles': data.get('totalVehicles', 0),
         'totalAutomobilesDischarge': data.get('totalAutomobilesDischarge', 0),
         'heavyEquipmentDischarge': data.get('heavyEquipmentDischarge', 0),
+        'totalElectricVehicles': data.get('totalElectricVehicles', 0),
+        'totalStaticCargo': data.get('totalStaticCargo', 0),
         'brvTarget': data.get('brvTarget', 0),
         'zeeTarget': data.get('zeeTarget', 0),
         'souTarget': data.get('souTarget', 0),
@@ -88,13 +91,14 @@ def create_ship():
         'shiftStart': data.get('shiftStart', ''),
         'shiftEnd': data.get('shiftEnd', ''),
         'breakDuration': data.get('breakDuration', 0),
+        'targetCompletion': data.get('targetCompletion', ''),
         'ticoVans': data.get('ticoVans', 0),
         'ticoStationWagons': data.get('ticoStationWagons', 0),
         'status': 'active',
         'progress': 0,
         'createdAt': datetime.now().isoformat(),
         'startTime': data.get('shiftStart', ''),
-        'estimatedCompletion': data.get('shiftEnd', '')
+        'estimatedCompletion': data.get('targetCompletion', data.get('shiftEnd', ''))
     }
     
     ships_data.append(ship)

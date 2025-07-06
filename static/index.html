@@ -1180,56 +1180,75 @@ This might indicate the document format is not recognized. Please check the cons
             submitBtn.textContent = 'Generating Dashboard...';
             submitBtn.disabled = true;
 
-            // Collect all form data
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+            // Collect form data properly
+            const data = {};
+            
+            // Step 1: Vessel Information
+            data.vesselName = document.getElementById('vesselName').value || '';
+            data.shippingLine = document.getElementById('shippingLine').value || '';
+            data.vesselType = document.getElementById('vesselType').value || '';
+            data.port = document.getElementById('port').value || '';
+            data.operationDate = document.getElementById('operationDate').value || '';
+            data.company = document.getElementById('company').value || '';
+            data.operationType = document.getElementById('operationType').value || '';
+            data.berthLocation = document.getElementById('berthLocation').value || '';
+            data.operationManager = document.getElementById('operationManager').value || '';
+            data.autoOpsLead = document.getElementById('autoOpsLead').value || '';
+            data.autoOpsAssistant = document.getElementById('autoOpsAssistant').value || '';
+            data.heavyOpsLead = document.getElementById('heavyOpsLead').value || '';
+            data.heavyOpsAssistant = document.getElementById('heavyOpsAssistant').value || '';
 
-            // Get shipping line to determine configuration
+            // Step 2: Cargo Configuration - determine configuration type
             const shippingLine = data.shippingLine;
 
-            // Calculate totals based on configuration type
             if (shippingLine === 'K-Line') {
-                // K-Line: Sum from BRV, ZEE, SOU
-                const brvAutos = parseInt(data.brvAutomobiles) || 0;
-                const brvHeavy = parseInt(data.brvHeavyEquipment) || 0;
-                const zeeAutos = parseInt(data.zeeTotalAutos) || 0;
-                const zeeElectric = parseInt(data.zeeElectricVehicles) || 0;
-                const souAutos = parseInt(data.souTotalAutos) || 0;
-                const souHeavy = parseInt(data.souHeavyEquipment) || 0;
+                // K-Line: Collect from BRV, ZEE, SOU
+                const brvAutos = parseInt(document.getElementById('brvAutomobiles')?.value) || 0;
+                const brvHeavy = parseInt(document.getElementById('brvHeavyEquipment')?.value) || 0;
+                const brvElectric = parseInt(document.getElementById('brvTotalElectric')?.value) || 0;
+                
+                const zeeAutos = parseInt(document.getElementById('zeeTotalAutos')?.value) || 0;
+                const zeeHeavy = parseInt(document.getElementById('zeeTotalHeavy')?.value) || 0;
+                const zeeElectric = parseInt(document.getElementById('zeeElectricVehicles')?.value) || 0;
+                
+                const souAutos = parseInt(document.getElementById('souTotalAutos')?.value) || 0;
+                const souHeavy = parseInt(document.getElementById('souHeavyEquipment')?.value) || 0;
+                const souElectric = parseInt(document.getElementById('souTotalElectric')?.value) || 0;
 
-                data.totalAutomobilesDischarge = brvAutos + zeeAutos + souAutos + zeeElectric;
-                data.heavyEquipmentDischarge = brvHeavy + souHeavy;
-                data.brvTarget = brvAutos + brvHeavy;
-                data.zeeTarget = zeeAutos + zeeElectric;
-                data.souTarget = souAutos + souHeavy;
-            } else if (shippingLine === 'Glovis' || shippingLine === 'MOL' || shippingLine === 'Grimaldi') {
-                // Single Terminal: Use direct values
-                data.totalAutomobilesDischarge = parseInt(data.terminalAutomobiles) || 0;
-                data.heavyEquipmentDischarge = parseInt(data.terminalHeavyEquipment) || 0;
-                const terminalElectric = parseInt(data.terminalElectricVehicles) || 0;
-                const terminalStatic = parseInt(data.terminalStaticCargo) || 0;
+                data.totalAutomobilesDischarge = brvAutos + zeeAutos + souAutos;
+                data.heavyEquipmentDischarge = brvHeavy + zeeHeavy + souHeavy;
+                data.totalElectricVehicles = brvElectric + zeeElectric + souElectric;
+                data.brvTarget = brvAutos + brvHeavy + brvElectric;
+                data.zeeTarget = zeeAutos + zeeHeavy + zeeElectric;
+                data.souTarget = souAutos + souHeavy + souElectric;
+            } else {
+                // Single Terminal: Glovis, MOL, Grimaldi
+                const terminalAutos = parseInt(document.getElementById('terminalAutomobiles')?.value) || 0;
+                const terminalHeavy = parseInt(document.getElementById('terminalHeavyEquipment')?.value) || 0;
+                const terminalElectric = parseInt(document.getElementById('terminalElectricVehicles')?.value) || 0;
+                const terminalStatic = parseInt(document.getElementById('terminalStaticCargo')?.value) || 0;
 
-                // Add electric vehicles to automobile total
-                data.totalAutomobilesDischarge += terminalElectric;
-                data.heavyEquipmentDischarge += terminalStatic;
-
-                // Set targets (Single terminal)
+                data.totalAutomobilesDischarge = terminalAutos;
+                data.heavyEquipmentDischarge = terminalHeavy;
+                data.totalElectricVehicles = terminalElectric;
+                data.totalStaticCargo = terminalStatic;
                 data.brvTarget = 0;
                 data.zeeTarget = 0;
-                data.souTarget = data.totalAutomobilesDischarge + data.heavyEquipmentDischarge;
+                data.souTarget = terminalAutos + terminalHeavy + terminalElectric + terminalStatic;
             }
 
-            // Convert other numeric fields
-            const numericFields = [
-                'expectedRate', 'totalDrivers', 'breakDuration',
-                'ticoVans', 'ticoStationWagons'
-            ];
+            // Step 3: Operational Parameters
+            data.expectedRate = parseFloat(document.getElementById('expectedRate')?.value) || 0;
+            data.totalDrivers = parseInt(document.getElementById('totalDrivers')?.value) || 0;
+            data.shiftStart = document.getElementById('shiftStart')?.value || '';
+            data.shiftEnd = document.getElementById('shiftEnd')?.value || '';
+            data.breakDuration = parseInt(document.getElementById('breakDuration')?.value) || 0;
+            data.targetCompletion = document.getElementById('targetCompletion')?.value || '';
+            data.ticoVans = parseInt(document.getElementById('numVans')?.value) || 0;
+            data.ticoStationWagons = parseInt(document.getElementById('numStationWagons')?.value) || 0;
 
-            numericFields.forEach(field => {
-                if (data[field]) {
-                    data[field] = parseInt(data[field]) || 0;
-                }
-            });
+            // Calculate total vehicles
+            data.totalVehicles = (data.totalAutomobilesDischarge || 0) + (data.heavyEquipmentDischarge || 0) + (data.totalElectricVehicles || 0);
 
             console.log('Submitting data:', data);
 
