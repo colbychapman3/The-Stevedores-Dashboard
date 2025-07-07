@@ -642,17 +642,13 @@
         });
 
         function initializeData() {
-            // Initialize with empty arrays - will be populated with real data
+            // Initialize with empty arrays - no fake data generation
             hourlyData = [];
             deckData = [];
             brandData = {};
 
-            // Only generate data if we have a valid ship
+            // Only populate UI elements if we have a valid ship
             if (currentShip && currentShip.id) {
-                generateRealHourlyData();
-                generateRealDeckData();
-                generateRealBrandData();
-
                 populateDeckProgress();
                 populateInventoryTable();
                 populateBreakSchedule();
@@ -661,111 +657,18 @@
         }
 
         function generateRealHourlyData() {
-            if (!currentShip) return;
-
-            const startTime = new Date(currentShip.operationDate + 'T' + (currentShip.shiftStart || '07:00'));
-            const currentTime = new Date();
-            const elapsedHours = Math.max(0, Math.floor((currentTime - startTime) / (1000 * 60 * 60)));
-
-            // Calculate expected rate based on total vehicles and shift duration
-            const shiftDuration = 12; // Default 12 hours
-            const expectedRate = Math.round(currentShip.totalVehicles / shiftDuration);
-
+            // No fake data generation - hourly data will be populated through real user input
             hourlyData = [];
-            for (let i = 0; i < 12; i++) {
-                const hour = new Date(startTime.getTime() + (i * 60 * 60 * 1000));
-                const hourStr = hour.toTimeString().slice(0, 5);
-
-                let actualCars = 0;
-                if (i < elapsedHours) {
-                    // Calculate actual cars based on progress and some variation
-                    const progressPerHour = currentShip.progress / elapsedHours;
-                    actualCars = Math.round((currentShip.totalVehicles * progressPerHour / 100) + (Math.random() * 20 - 10));
-                    actualCars = Math.max(0, actualCars);
-
-                    // Simulate lunch break reduction
-                    if (i === 5) actualCars = Math.round(actualCars * 0.4);
-                }
-
-                hourlyData.push({
-                    hour: hourStr,
-                    cars: actualCars,
-                    target: expectedRate
-                });
-            }
         }
 
         function generateRealDeckData() {
-            if (!currentShip) return;
-
-            const totalDecks = 10;
-            const vehiclesPerDeck = Math.ceil(currentShip.totalVehicles / totalDecks);
-            const totalDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-
+            // No fake data generation - deck data will be populated through real user input
             deckData = [];
-            let remainingDischarged = totalDischarged;
-
-            for (let i = 1; i <= totalDecks; i++) {
-                const deckTotal = Math.min(vehiclesPerDeck, currentShip.totalVehicles - ((i-1) * vehiclesPerDeck));
-                let deckDischarged = 0;
-                let deckComplete = false;
-
-                if (remainingDischarged > 0) {
-                    deckDischarged = Math.min(deckTotal, remainingDischarged);
-                    remainingDischarged -= deckDischarged;
-                    deckComplete = deckDischarged === deckTotal;
-                }
-
-                deckData.push({
-                    deck: i,
-                    total: deckTotal,
-                    discharged: deckDischarged,
-                    complete: deckComplete
-                });
-            }
         }
 
         function generateRealBrandData() {
-            if (!currentShip) return;
-
-            const totalAutomobiles = currentShip.totalAutomobilesDischarge || 0;
-            const totalHeavy = currentShip.heavyEquipmentDischarge || 0;
-            const totalDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-
-            // Distribute vehicles across brands based on typical patterns
-            const brandDistribution = {
-                'Mercedes-Benz': 0.28,
-                'BMW': 0.22,
-                'Land Rover': 0.18,
-                'POV': 0.16,
-                'Heavy Equipment': 0.12,
-                'Static Cargo': 0.04
-            };
-
+            // No fake data generation - brand data will be populated through real user input or document uploads
             brandData = {};
-            let remainingDischarged = totalDischarged;
-
-            Object.entries(brandDistribution).forEach(([brand, percentage]) => {
-                const brandTotal = Math.round(currentShip.totalVehicles * percentage);
-                const brandDischarged = Math.min(brandTotal, Math.round(totalDischarged * percentage));
-                remainingDischarged -= brandDischarged;
-
-                const zones = {
-                    'Mercedes-Benz': {zone: 'MB Field', distance: '2.1 km'},
-                    'BMW': {zone: 'BMW Field', distance: '1.8 km'},
-                    'Land Rover': {zone: 'LR Field', distance: '2.3 km'},
-                    'POV': {zone: 'General Yard', distance: '1.5 km'},
-                    'Heavy Equipment': {zone: 'Heavy Zone', distance: '3.2 km'},
-                    'Static Cargo': {zone: 'Static Bay', distance: '2.8 km'}
-                };
-
-                brandData[brand] = {
-                    total: brandTotal,
-                    discharged: brandDischarged,
-                    zone: zones[brand].zone,
-                    distance: zones[brand].distance
-                };
-            });
         }
 
         function startTimeTracking() {
@@ -844,6 +747,18 @@
 
         function populateDeckProgress() {
             const container = document.getElementById('deckProgressContainer');
+            
+            if (deckData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-layer-group text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No deck data available</p>
+                        <p class="text-sm text-gray-400 mt-2">Use the edit button to add deck information</p>
+                    </div>
+                `;
+                return;
+            }
+
             const html = deckData.map(deck => {
                 const progress = (deck.discharged / deck.total) * 100;
                 const isComplete = deck.complete;
@@ -925,6 +840,20 @@
 
         function populateInventoryTable() {
             const tbody = document.getElementById('inventoryTable');
+            
+            if (Object.keys(brandData).length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                            <i class="fas fa-boxes text-4xl text-gray-300 mb-4"></i>
+                            <p>No inventory data available</p>
+                            <p class="text-sm text-gray-400 mt-2">Upload documents or manually enter data to see inventory breakdown</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
             const html = Object.entries(brandData).map(([brand, data]) => {
                 const progress = (data.discharged / data.total) * 100;
                 const remaining = data.total - data.discharged;
@@ -1264,28 +1193,14 @@
         }
 
         function updatePerformanceMetrics() {
-            if (!currentShip) {
-                // Set default empty values
-                document.getElementById('avgTurnaround').textContent = '0.0 min';
-                document.getElementById('bestTurnaround').textContent = '0.0 min';
-                document.getElementById('worstTurnaround').textContent = '0.0 min';
-                document.getElementById('bestHour').textContent = '--:-- (0 cars)';
-                document.getElementById('worstHour').textContent = '--:-- (0 cars)';
-                return;
-            }
+            // Set default empty values - no fake data
+            document.getElementById('avgTurnaround').textContent = '--';
+            document.getElementById('bestTurnaround').textContent = '--';
+            document.getElementById('worstTurnaround').textContent = '--';
+            document.getElementById('bestHour').textContent = '--:-- (0 cars)';
+            document.getElementById('worstHour').textContent = '--:-- (0 cars)';
 
-            // Calculate real turnaround times based on current operation
-            const baseTime = 12; // Base turnaround time in minutes
-            const efficiencyFactor = currentShip.progress / 100;
-            const avgTurnaround = (baseTime + (Math.random() * 2 - 1)).toFixed(1);
-            const bestTurnaround = (baseTime * 0.7).toFixed(1);
-            const worstTurnaround = (baseTime * 1.5).toFixed(1);
-
-            document.getElementById('avgTurnaround').textContent = `${avgTurnaround} min`;
-            document.getElementById('bestTurnaround').textContent = `${bestTurnaround} min`;
-            document.getElementById('worstTurnaround').textContent = `${worstTurnaround} min`;
-
-            // Update best/worst hour based on real hourly data
+            // Only update if we have real performance data
             if (hourlyData.length > 0) {
                 const bestHourData = hourlyData.reduce((max, hour) => hour.cars > max.cars ? hour : max);
                 const worstHourData = hourlyData.filter(h => h.cars > 0).reduce((min, hour) => hour.cars < min.cars ? hour : min, {cars: Infinity, hour: ''});
