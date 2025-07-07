@@ -406,7 +406,7 @@
         </div>
 
         <!-- Performance Metrics -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div class="grid grid-cols-1 gap-8 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">Driver Turnaround Times</h3>
                 <div class="space-y-3">
@@ -422,13 +422,6 @@
                         <span class="text-sm font-medium">Worst Time</span>
                         <span class="text-lg font-bold text-red-600" id="worstTurnaround">18.7 min</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Break Schedule</h3>
-                <div class="space-y-2" id="breakSchedule">
-                    <!-- Break schedule will be populated here -->
                 </div>
             </div>
         </div>
@@ -651,7 +644,6 @@
             if (currentShip && currentShip.id) {
                 populateDeckProgress();
                 populateInventoryTable();
-                populateBreakSchedule();
                 updateHourlyQuantityDisplay();
             }
         }
@@ -977,70 +969,7 @@
             updateHourlyQuantityDisplay();
         }
 
-        function populateBreakSchedule() {
-            const container = document.getElementById('breakSchedule');
-
-            if (!currentShip || !currentShip.id) {
-                container.innerHTML = `
-                    <div class="text-center py-8">
-                        <i class="fas fa-coffee text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500">No break schedule available</p>
-                        <p class="text-sm text-gray-400 mt-2">Break schedule will be calculated when operation starts</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const currentTime = new Date();
-            const shiftStart = currentShip.shiftStart || '07:00';
-            const operationDate = currentShip.operationDate;
-
-            // Calculate break times based on shift start
-            const startTime = new Date(operationDate + 'T' + shiftStart);
-            const morningBreakStart = new Date(startTime.getTime() + (3.5 * 60 * 60 * 1000)); // 3.5 hours after start
-            const lunchBreakStart = new Date(startTime.getTime() + (5 * 60 * 60 * 1000)); // 5 hours after start
-            const afternoonBreakStart = new Date(startTime.getTime() + (8.5 * 60 * 60 * 1000)); // 8.5 hours after start
-            const finalBreakStart = new Date(startTime.getTime() + (11 * 60 * 60 * 1000)); // 11 hours after start
-
-            const breaks = [
-                {
-                    time: `${morningBreakStart.toTimeString().slice(0,5)}-${new Date(morningBreakStart.getTime() + 15*60*1000).toTimeString().slice(0,5)}`,
-                    type: 'Morning Break',
-                    status: currentTime > morningBreakStart ? 'complete' : 'upcoming'
-                },
-                {
-                    time: `${lunchBreakStart.toTimeString().slice(0,5)}-${new Date(lunchBreakStart.getTime() + 60*60*1000).toTimeString().slice(0,5)}`,
-                    type: 'Lunch Break',
-                    status: currentTime > lunchBreakStart ? 'complete' : 'upcoming'
-                },
-                {
-                    time: `${afternoonBreakStart.toTimeString().slice(0,5)}-${new Date(afternoonBreakStart.getTime() + 15*60*1000).toTimeString().slice(0,5)}`,
-                    type: 'Afternoon Break',
-                    status: currentTime > afternoonBreakStart ? 'complete' : 'upcoming'
-                },
-                {
-                    time: `${finalBreakStart.toTimeString().slice(0,5)}-${new Date(finalBreakStart.getTime() + 15*60*1000).toTimeString().slice(0,5)}`,
-                    type: 'Final Break',
-                    status: currentTime > finalBreakStart ? 'complete' : 'upcoming'
-                }
-            ];
-
-            const html = breaks.map(brk => {
-                const statusColor = brk.status === 'complete' ? 'green' : 'orange';
-                return `
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="font-medium">${brk.type}</span>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-gray-600">${brk.time}</span>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800">
-                                ${brk.status}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            container.innerHTML = html;
-        }
+        
 
         async function loadShipData(shipId) {
             console.log('Attempting to load ship data for ID:', shipId);
