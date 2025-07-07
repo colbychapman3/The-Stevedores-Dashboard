@@ -122,7 +122,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Current Rate</p>
-                        <p class="text-2xl font-bold text-blue-600" id="currentRateDisplay">0</p>
+                        <p class="text-2xl font-bold text-blue-600"><span id="currentRateValue">0</span></p>
                         <p class="text-xs text-gray-500">cars/hour</p>
                     </div>
                     <div class="bg-blue-100 p-3 rounded-full">
@@ -134,7 +134,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Completion</p>
-                        <p class="text-2xl font-bold text-green-600" id="completionDisplay">0%</p>
+                        <p class="text-2xl font-bold text-green-600" id="completionValue">0%</p>
                         <p class="text-xs text-gray-500">of operation</p>
                     </div>
                     <div class="bg-green-100 p-3 rounded-full">
@@ -673,11 +673,16 @@
         let widgetOrder = ['hourly-productivity', 'deck-progress', 'zone-allocation', 'hourly-tracker'];
         let enabledWidgets = new Set(['hourly-productivity', 'deck-progress', 'zone-allocation', 'hourly-tracker']);
 
+        // Global variables for auto-update
+        let autoUpdateInterval;
+        let currentShipId = null;
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const shipId = urlParams.get('ship');
             if (shipId) {
+                currentShipId = shipId;
                 loadShipData(shipId);
             } else {
                 // Load sample data for demo
@@ -695,6 +700,246 @@
 
             setupWidgetDragAndDrop();
         });
+
+        // Auto-update functions
+        function startAutoUpdate() {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+            }
+
+            // Update every 30 seconds
+            autoUpdateInterval = setInterval(() => {
+                updateWidgets();
+                updateElapsedTime();
+            }, 30000);
+
+            // Also update elapsed time every minute
+            setInterval(updateElapsedTime, 60000);
+        }
+
+        function updateWidgets() {
+            if (!currentShipId) return;
+
+             loadShipData(currentShipId);
+        }
+
+        function updateMetricWidgets(ship) {
+            // Update Current Rate
+            const currentRateElement = document.getElementById('currentRateValue');
+             if (currentRateElement) {
+                const currentRate = calculateCurrentRate();
+                currentRateElement.textContent = currentRate;
+             }
+
+            // Update Completion Percentage
+            const completionElement = document.getElementById('completionValue');
+
+            if (completionElement) {
+                 completionElement.textContent = `${ship.progress}%`;
+            }
+
+
+            // Update ETC (Estimated Time of Completion)
+            const etcElement = document.getElementById('etcDisplay');
+            if(etcElement){
+                updateETC();
+            }
+
+            // Update Elapsed Time
+           updateElapsedTime();
+
+        }
+
+        function calculateCurrentRate() {
+            if (!currentShip || !operationStartTime) return 0;
+
+            const now = new Date();
+            const elapsedHours = (now - operationStartTime) / (1000 * 60 * 60);
+            const vehiclesDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
+
+            if (elapsedHours > 0) {
+                return Math.round(vehiclesDischarged / elapsedHours);
+            }
+            return 0;
+        }
+
+        function calculateETC() {
+            const etcElement = document.getElementById('etcDisplay');
+            if (!etcElement) return;
+
+            const currentProgress = currentShip ? currentShip.progress : 0;
+            if (currentProgress > 0 && currentShip && currentShip.totalVehicles) {
+                const remainingPercentage = 100 - currentProgress;
+                const currentRate = getCurrentRate();
+                if (currentRate > 0) {
+                    const remainingVehicles = (currentShip.totalVehicles * remainingPercentage) / 100;
+                    const hoursRemaining = remainingVehicles / currentRate;
+                    const now = new Date();
+                    const etc = new Date(now.getTime() + (hoursRemaining * 60 * 60 * 1000));
+                    etcElement.textContent = etc.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                } else {
+                    etcElement.textContent = '--:--';
+                }
+            } else {
+                etcElement.textContent = '--:--';
+            }
+        }
+
+        function populateShipData(ship) {
+            // Store ship data for auto-updates
+            localStorage.setItem('currentShipData', JSON.stringify(ship));
+
+             if (!ship) {
+                console.log('No current ship data available');
+                return;
+            }
+
+            currentShip = ship;
+
+            // Set the page title
+            const titleElement = document.getElementById('vesselTitle');
+            if (titleElement) {
+                titleElement.textContent = ship.vesselName || 'Ship Information Dashboard';
+            }
+
+            // Calculate real current rate based on progress and elapsed time
+            const realCurrentRate = calculateCurrentRate();
+            const currentRateElement = document.getElementById('currentRateValue');
+            const completionElement = document.getElementById('completionValue');
+
+            if (currentRateElement) {
+                currentRateElement.textContent = realCurrentRate;
+            }
+            if (completionElement) {
+                completionElement.textContent = `${ship.progress}%`;
+            }
+
+            // Update performance metrics with real data
+            updatePerformanceMetrics();
+
+            const detailsHtml = `
+                <div class="text-center mb-4">
+                    <div class="text-2xl font-bold text-gray-900">${ship.vesselName}</div>
+                    <div class="text-sm text-gray-600">${ship.vesselType}</div>
+                    ${!ship.id ? '<div class="text-sm text-orange-600 mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>No active operation data</div>' : ''}
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date:</span>
+                        <span class="font-semibold">${ship.operationDate}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Berth:</span>
+                        <span class="font-semibold">${ship.berth}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Operation:</span>
+                        <span class="font-semibold">${ship.operationType}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Status:</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ${ship.status}
+                        </span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Vehicles:</span>
+                        <span class="font-semibold">${ship.totalVehicles.toLocaleString()}</span>
+                    </div>
+                    <div class="pt-3 border-t border-gray-200">
+                        <div class="text-xs text-gray-500 mb-2">Team Leads</div>
+                        <div class="text-xs">
+                            <div><strong>Auto:</strong> ${ship.autoOpsLead}</div>
+                            <div><strong>Heavy:</strong> ${ship.heavyOpsLead}</div>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Completion Actions -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        ${ship.id ? `
+                        <div class="flex space-x-4">
+                            <button id="completeButton" onclick="markOperationComplete()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-check-circle mr-2"></i>Mark Operation Complete
+                            </button>
+                            <button onclick="updateProgress()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-percentage mr-2"></i>Update Progress
+                            </button>
+                        </div>
+                        ` : `
+                        <div class="text-center">
+                            <div class="text-gray-600 mb-4">No operation data to manage</div>
+                            <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
+                                <i class="fas fa-plus mr-2"></i>Create New Operation
+                            </a>
+                        </div>
+                        `}
+                    </div>
+                </div>
+            </div>
+            `;
+
+            document.getElementById('shipDetails').innerHTML = detailsHtml;
+
+            // Initialize new widgets with real data
+            calculateETC();
+            updatePortProgress();
+
+            // Set the values to the real time progress totals and targets
+            document.getElementById('totalVehicles').textContent = ship.totalVehicles;
+            document.getElementById('totalDrivers').textContent = ship.totalDrivers || 28;
+
+            // Start time tracking after ship data is loaded
+            startTimeTracking();
+
+            // Update completion button state
+            const completeButton = document.getElementById('completeButton');
+            if (completeButton && ship.status === 'complete') {
+                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
+                completeButton.disabled = true;
+                completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
+            } else if (completeButton) {
+                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>MarkOperation Complete';
+                completeButton.disabled = false;
+                completeButton.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors';
+            }
+
+            // Initialize metric widgets
+            updateMetricWidgets(ship);
+        }
+
+        async function loadShipData(shipId) {
+            console.log('Attempting to load ship data for ID:', shipId);
+            try {
+                const response = await fetch(`/api/ships/${shipId}`);
+                if (response.ok) {
+                    const shipData = await response.json();
+                    console.log('Received ship data:', shipData);
+                    if (shipData && shipData.id) {
+                        currentShip = shipData;
+                        populateShipData(shipData);
+                        initializeData();
+                        setTimeout(() => {
+                            initializeCharts();
+                        }, 100);
+
+                           startAutoUpdate();
+                        return;
+                    }
+                }
+                console.log('No valid ship data found, loading default state');
+                loadSampleShipData();
+            } catch (error) {
+                console.error('Error loading ship data:', error);
+                loadSampleShipData();
+            }
+        }
+
+        function loadSampleShipData() {
+            // No sample data - show empty state
+            currentShip = null;
+            populateShipData({});
+        }
 
         function initializeData() {
             // Initialize real operational data based on current ship
@@ -736,7 +981,7 @@
             brandData = {};
         }
 
-        function startTimeTracking() {
+         function startTimeTracking() {
             // Set operation start time based on current ship data
             if (currentShip && currentShip.operationDate && currentShip.shiftStart) {
                 operationStartTime = new Date(currentShip.operationDate + 'T' + currentShip.shiftStart);
@@ -757,63 +1002,9 @@
             updateETC();
         }
 
-        function updateElapsedTime() {
-            if (!operationStartTime || !currentShip || !currentShip.id) {
-                const elapsedElement = document.getElementById('elapsedTimeDisplay');
-                if (elapsedElement) {
-                    elapsedElement.textContent = '0:00';
-                }
-                return;
-            }
-
-            const now = new Date();
-            const elapsed = Math.floor((now - operationStartTime) / (1000 * 60)); // minutes
-            const hours = Math.floor(elapsed / 60);
-            const minutes = elapsed % 60;
-
-            const elapsedElement = document.getElementById('elapsedTimeDisplay');
-            if (elapsedElement) {
-                // Ensure we don't show negative time
-                if (elapsed < 0) {
-                    elapsedElement.textContent = '0:00';
-                } else {
-                    elapsedElement.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
-                }
-            }
-        }
-
-        function updateETC() {
-            const etcElement = document.getElementById('etcDisplay');
-            if (!etcElement) return;
-
-            const currentProgress = currentShip ? currentShip.progress : 0;
-            if (currentProgress > 0 && currentShip && currentShip.totalVehicles) {
-                const remainingPercentage = 100 - currentProgress;
-                const currentRate = getCurrentRate();
-                if (currentRate > 0) {
-                    const remainingVehicles = (currentShip.totalVehicles * remainingPercentage) / 100;
-                    const hoursRemaining = remainingVehicles / currentRate;
-                    const now = new Date();
-                    const etc = new Date(now.getTime() + (hoursRemaining * 60 * 60 * 1000));
-                    etcElement.textContent = etc.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                } else {
-                    etcElement.textContent = '--:--';
-                }
-            } else {
-                etcElement.textContent = '--:--';
-            }
-        }
-
-        function getCurrentRate() {
-            if (!hourlyData || hourlyData.length === 0) return 0;
-            const currentHour = new Date().getHours();
-            const hourData = hourlyData.find(h => parseInt(h.hour.split(':')[0]) === currentHour);
-            return hourData ? hourData.cars : 0;
-        }
-
         function populateDeckProgress() {
             const container = document.getElementById('deckProgressContainer');
-            
+
             if (deckData.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8">
@@ -902,11 +1093,9 @@
             toggleDeckEdit();
         }
 
-
-
         function populateInventoryTable() {
             const tbody = document.getElementById('inventoryTable');
-            
+
             // Initialize with real operational data if available
             if (Object.keys(brandData).length === 0 && currentShip) {
                 // Create initial brand data based on ship information
@@ -1053,372 +1242,6 @@
         function removeHourlyQuantity(hour) {
             delete hourlyQuantities[hour];
             updateHourlyQuantityDisplay();
-        }
-
-        
-
-        async function loadShipData(shipId) {
-            console.log('Attempting to load ship data for ID:', shipId);
-            try {
-                const response = await fetch(`/api/ships/${shipId}`);
-                if (response.ok) {
-                    const shipData = await response.json();
-                    console.log('Received ship data:', shipData);
-                    if (shipData && shipData.id) {
-                        currentShip = shipData;
-                        populateShipData();
-                        initializeData();
-                        setTimeout(() => {
-                            initializeCharts();
-                        }, 100);
-                        return;
-                    }
-                }
-                console.log('No valid ship data found, loading default state');
-                loadSampleShipData();
-            } catch (error) {
-                console.error('Error loading ship data:', error);
-                loadSampleShipData();
-            }
-        }
-
-        function loadSampleShipData() {
-            // No sample data - show empty state
-            currentShip = null;
-            populateShipData();
-        }
-
-        function populateShipData() {
-            if (!currentShip) {
-                console.log('No current ship data available');
-                return;
-            }
-
-            // Set the page title
-            const titleElement = document.getElementById('vesselTitle');
-            if (titleElement) {
-                titleElement.textContent = currentShip.vesselName || 'Ship Information Dashboard';
-            }
-
-            // Calculate real current rate based on progress and elapsed time
-            const realCurrentRate = calculateCurrentRate();
-            const currentRateElement = document.getElementById('currentRateDisplay');
-            const completionElement = document.getElementById('completionDisplay');
-
-            if (currentRateElement) {
-                currentRateElement.textContent = realCurrentRate;
-            }
-            if (completionElement) {
-                completionElement.textContent = `${currentShip.progress}%`;
-            }
-
-            // Update performance metrics with real data
-            updatePerformanceMetrics();
-
-            const detailsHtml = `
-                <div class="text-center mb-4">
-                    <div class="text-2xl font-bold text-gray-900">${currentShip.vesselName}</div>
-                    <div class="text-sm text-gray-600">${currentShip.vesselType}</div>
-                    ${!currentShip.id ? '<div class="text-sm text-orange-600 mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>No active operation data</div>' : ''}
-                </div>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Date:</span>
-                        <span class="font-semibold">${currentShip.operationDate}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Berth:</span>
-                        <span class="font-semibold">${currentShip.berth}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Operation:</span>
-                        <span class="font-semibold">${currentShip.operationType}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Status:</span>
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            ${currentShip.status}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Vehicles:</span>
-                        <span class="font-semibold">${currentShip.totalVehicles.toLocaleString()}</span>
-                    </div>
-                    <div class="pt-3 border-t border-gray-200">
-                        <div class="text-xs text-gray-500 mb-2">Team Leads</div>
-                        <div class="text-xs">
-                            <div><strong>Auto:</strong> ${currentShip.autoOpsLead}</div>
-                            <div><strong>Heavy:</strong> ${currentShip.heavyOpsLead}</div>
-                        </div>
-                    </div>
-                </div>
-
-                    <!-- Completion Actions -->
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                        ${currentShip.id ? `
-                        <div class="flex space-x-4">
-                            <button id="completeButton" onclick="markOperationComplete()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-                                <i class="fas fa-check-circle mr-2"></i>Mark Operation Complete
-                            </button>
-                            <button onclick="updateProgress()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors">
-                                <i class="fas fa-percentage mr-2"></i>Update Progress
-                            </button>
-                        </div>
-                        ` : `
-                        <div class="text-center">
-                            <div class="text-gray-600 mb-4">No operation data to manage</div>
-                            <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block">
-                                <i class="fas fa-plus mr-2"></i>Create New Operation
-                            </a>
-                        </div>
-                        `}
-                    </div>
-                </div>
-            </div>
-            `;
-
-            document.getElementById('shipDetails').innerHTML = detailsHtml;
-
-            // Initialize new widgets with real data
-            calculateETC();
-            updatePortProgress();
-
-            // Set the values to the real time progress totals and targets
-            document.getElementById('totalVehicles').textContent = currentShip.totalVehicles;
-            document.getElementById('totalDrivers').textContent = currentShip.totalDrivers || 28;
-
-            // Start time tracking after ship data is loaded
-            startTimeTracking();
-
-            // Update completion button state
-            const completeButton = document.getElementById('completeButton');
-            if (completeButton && currentShip.status === 'complete') {
-                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
-                completeButton.disabled = true;
-                completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
-            } else if (completeButton) {
-                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>MarkOperation Complete';
-                completeButton.disabled = false;
-                completeButton.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors';
-            }
-        }
-
-        function calculateCurrentRate() {
-            if (!currentShip || !operationStartTime) return 0;
-
-            const now = new Date();
-            const elapsedHours = (now - operationStartTime) / (1000 * 60 * 60);
-            const vehiclesDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-
-            if (elapsedHours > 0) {
-                return Math.round(vehiclesDischarged / elapsedHours);
-            }
-            return 0;
-        }
-
-        function updatePerformanceMetrics() {
-            // Calculate real turnaround times based on operation data
-            calculateDriverTurnaroundTimes();
-
-            // Calculate real hourly performance from hourlyQuantities data
-            if (Object.keys(hourlyQuantities).length > 0) {
-                const quantities = Object.entries(hourlyQuantities).map(([hour, qty]) => ({hour: parseInt(hour), cars: qty}));
-                const bestHour = quantities.reduce((max, current) => current.cars > max.cars ? current : max);
-                const worstHour = quantities.reduce((min, current) => current.cars < min.cars ? current : min);
-                
-                document.getElementById('bestHour').textContent = `Hour ${bestHour.hour} (${bestHour.cars} cars)`;
-                document.getElementById('worstHour').textContent = `Hour ${worstHour.hour} (${worstHour.cars} cars)`;
-            } else {
-                document.getElementById('bestHour').textContent = 'No data available';
-                document.getElementById('worstHour').textContent = 'No data available';
-            }
-        }
-
-        function calculateDriverTurnaroundTimes() {
-            // Calculate turnaround times based on current operation data
-            if (!currentShip || !operationStartTime) {
-                document.getElementById('avgTurnaround').textContent = 'No data';
-                document.getElementById('bestTurnaround').textContent = 'No data';
-                document.getElementById('worstTurnaround').textContent = 'No data';
-                return;
-            }
-
-            const now = new Date();
-            const elapsedHours = (now - operationStartTime) / (1000 * 60 * 60);
-            
-            // Only calculate after at least 1 hour of operation
-            if (elapsedHours < 1) {
-                document.getElementById('avgTurnaround').textContent = 'Calculating...';
-                document.getElementById('bestTurnaround').textContent = 'Calculating...';
-                document.getElementById('worstTurnaround').textContent = 'Calculating...';
-                return;
-            }
-
-            const totalDrivers = currentShip.totalDrivers || 28;
-            const vehiclesDischarged = Math.round(currentShip.totalVehicles * currentShip.progress / 100);
-            
-            // Calculate average turnaround time
-            // Formula: (Total time available / Total vehicles discharged) * Number of drivers
-            const averageTurnaroundMinutes = vehiclesDischarged > 0 ? 
-                (elapsedHours * 60) / (vehiclesDischarged / totalDrivers) : 0;
-
-            // Calculate best and worst times based on efficiency variations
-            const bestTurnaroundMinutes = averageTurnaroundMinutes * 0.7; // 30% better than average
-            const worstTurnaroundMinutes = averageTurnaroundMinutes * 1.5; // 50% worse than average
-
-            // Update the display
-            document.getElementById('avgTurnaround').textContent = 
-                averageTurnaroundMinutes > 0 ? `${averageTurnaroundMinutes.toFixed(1)} min` : 'No data';
-            document.getElementById('bestTurnaround').textContent = 
-                bestTurnaroundMinutes > 0 ? `${bestTurnaroundMinutes.toFixed(1)} min` : 'No data';
-            document.getElementById('worstTurnaround').textContent = 
-                worstTurnaroundMinutes > 0 ? `${worstTurnaroundMinutes.toFixed(1)} min` : 'No data';
-        }
-
-        function initializeCharts() {
-            try {
-                // Hourly Productivity Chart
-                const hourlyCanvas = document.getElementById('hourlyProductivityChart');
-                if (hourlyCanvas) {
-                    const hourlyCtx = hourlyCanvas.getContext('2d');
-                    new Chart(hourlyCtx, {
-                        type: 'line',
-                        data: {
-                            labels: hourlyData.map(h => h.hour),
-                            datasets: [{
-                                label: 'Actual Cars/Hour',
-                                data: hourlyData.map(h => h.cars),
-                                borderColor: '#3b82f6',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                tension: 0.1
-                            }, {
-                                label: 'Target Rate',
-                                data: hourlyData.map(h => h.target),
-                                borderColor: '#ef4444',
-                                backgroundColor: 'transparent',
-                                borderDash: [5, 5],
-                                tension: 0
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Cars per Hour'
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-
-                // Brand Distribution Chart
-                const brandCanvas = document.getElementById('brandDistributionChart');
-                if (brandCanvas) {
-                    const brandCtx = brandCanvas.getContext('2d');
-                    new Chart(brandCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: Object.keys(brandData),
-                            datasets: [{
-                                data: Object.values(brandData).map(d => d.total),
-                                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4']
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        padding: 20,
-                                        usePointStyle: true
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Error initializing charts:', error);
-            }
-        }
-
-        function calculateETC() {
-            const vehiclesRemaining = parseInt(document.getElementById('vehiclesRemaining').value) || 0;
-            const currentRate = parseFloat(document.getElementById('currentRate').value) || 0;
-            const currentTimeStr = document.getElementById('currentTime').value;
-
-            if (vehiclesRemaining <= 0 || currentRate <= 0 || !currentTimeStr) {
-                document.getElementById('calculatedETC').textContent = '--:--';
-                return;
-            }
-
-            const hoursRemaining = vehiclesRemaining / currentRate;
-            const currentTime = new Date();
-            const [hours, minutes] = currentTimeStr.split(':');
-            currentTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-            const completionTime = new Date(currentTime.getTime() + (hoursRemaining * 60 * 60 * 1000));
-            const formattedTime = completionTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-            document.getElementById('calculatedETC').textContent = formattedTime;
-        }
-
-        function updatePortProgress() {
-            if (!currentShip) return;
-
-            // Use real ship targets or defaults
-            const brvMax = currentShip.brvTarget || 904;
-            const zeeMax = currentShip.zeeTarget || 300;
-            const souMax = currentShip.souTarget || 200;
-
-            // Calculate current values based on ship progress
-            const overallProgress = currentShip.progress / 100;
-            const brvValue = Math.round(brvMax * overallProgress);
-            const zeeValue = Math.round(zeeMax * Math.max(0, overallProgress - 0.4)); // ZEE starts after 40% BRV
-            const souValue = Math.round(souMax * Math.max(0, overallProgress - 0.7)); // SOU starts after 70% overall
-
-            const totalMax = brvMax + zeeMax + souMax;
-            const totalCurrent = brvValue + zeeValue + souValue;
-
-            // Update slider values to reflect calculated progress
-            const brvProgress = document.getElementById('brvProgress');
-            const zeeProgress = document.getElementById('zeeProgress');
-            const souProgress = document.getElementById('souProgress');
-
-            if (brvProgress) brvProgress.value = brvValue;
-            if (zeeProgress) zeeProgress.value = zeeValue;
-            if (souProgress) souProgress.value = souValue;
-
-            // Update displays
-            const brvValueElement = document.getElementById('brvValue');
-            const zeeValueElement = document.getElementById('zeeValue');
-            const souValueElement = document.getElementById('souValue');
-
-            if (brvValueElement) brvValueElement.textContent = `${brvValue}/${brvMax}`;
-            if (zeeValueElement) zeeValueElement.textContent = `${zeeValue}/${zeeMax}`;
-            if (souValueElement) souValueElement.textContent = `${souValue}/${souMax}`;
-
-            // Update progress bars
-            const brvBar = document.getElementById('brvBar');
-            const zeeBar = document.getElementById('zeeBar');
-            const souBar = document.getElementById('souBar');
-
-            if (brvBar) brvBar.style.width = `${(brvValue / brvMax) * 100}%`;
-            if (zeeBar) zeeBar.style.width = `${(zeeValue / zeeMax) * 100}%`;
-            if (souBar) souBar.style.width = `${(souValue / souMax) * 100}%`;
-
-            // Update total progress with real calculation
-            const totalPercent = ((totalCurrent / totalMax) * 100).toFixed(1);
-            const totalProgressElement = document.getElementById('totalProgress');
-            if (totalProgressElement) {
-                totalProgressElement.textContent = `${totalPercent}%`;
-            }
         }
 
         async function saveProgress() {
@@ -1691,7 +1514,7 @@
             });
         }
 
-        function updateRealTimeProgress() {
+         function updateRealTimeProgress() {
             const dischargedElement = document.getElementById('dischargedCount');
             const totalVehiclesElement = document.getElementById('totalVehicles');
             const activeDriversElement = document.getElementById('activeDrivers');
@@ -1712,7 +1535,7 @@
             let overallProgress = totalVehicles > 0 ? Math.min(100, (discharged / totalVehicles) * 100) : 0;
 
             // Update completion display
-            const completionElement = document.getElementById('completionDisplay');
+            const completionElement = document.getElementById('completionValue');
             if (completionElement) {
                 completionElement.textContent = overallProgress.toFixed(0) + '%';
             }
@@ -1728,7 +1551,7 @@
             if (operationStatus === 'active' || operationStatus === 'discharge') {
                 currentRate = calculateCurrentRate() || 0;
             }
-            const currentRateElement = document.getElementById('currentRateDisplay');
+            const currentRateElement = document.getElementById('currentRateValue');
             if (currentRateElement) {
                 currentRateElement.textContent = currentRate;
             }
