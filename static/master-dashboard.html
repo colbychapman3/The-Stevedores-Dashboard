@@ -131,7 +131,7 @@
                         <i class="fas fa-car text-2xl text-yellow-600"></i>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Vehicles</p>
+                        <p class="text-sm font-medium text-gray-500">Total Units</p>
                         <p id="totalVehicles" class="text-2xl font-bold text-gray-900">0</p>
                     </div>
                 </div>
@@ -659,18 +659,18 @@
                 <div class="space-y-4">
                     <div class="flex items-center mb-4">
                         <i class="fas fa-car text-2xl text-yellow-600 mr-3"></i>
-                        <h3 class="text-xl font-bold text-gray-900">Vehicle Breakdown</h3>
+                        <h3 class="text-xl font-bold text-gray-900">Unit Breakdown</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-blue-50 p-4 rounded-lg text-center">
                             <i class="fas fa-car text-2xl text-blue-600 mb-2"></i>
                             <p class="text-2xl font-bold text-blue-600">${totalAutomobiles.toLocaleString()}</p>
-                            <p class="text-sm text-gray-600">Automobiles</p>
+                            <p class="text-sm text-gray-600">Total Autos</p>
                         </div>
                         <div class="bg-orange-50 p-4 rounded-lg text-center">
                             <i class="fas fa-truck text-2xl text-orange-600 mb-2"></i>
                             <p class="text-2xl font-bold text-orange-600">${totalHeavyEquipment.toLocaleString()}</p>
-                            <p class="text-sm text-gray-600">Heavy Equipment</p>
+                            <p class="text-sm text-gray-600">Total Heavy</p>
                         </div>
                         <div class="bg-green-50 p-4 rounded-lg text-center">
                             <i class="fas fa-bolt text-2xl text-green-600 mb-2"></i>
@@ -680,7 +680,7 @@
                         <div class="bg-purple-50 p-4 rounded-lg text-center">
                             <i class="fas fa-calculator text-2xl text-purple-600 mb-2"></i>
                             <p class="text-2xl font-bold text-purple-600">${totalVehicles.toLocaleString()}</p>
-                            <p class="text-sm text-gray-600">Total Vehicles</p>
+                            <p class="text-sm text-gray-600">Total Units</p>
                         </div>
                     </div>
             `;
@@ -696,8 +696,8 @@
                         <div class="bg-gray-50 p-3 rounded border">
                             <div class="font-medium text-gray-900 mb-2">${ship.vesselName}</div>
                             <div class="grid grid-cols-2 gap-2 text-sm">
-                                <div>Automobiles: ${(ship.totalAutomobilesDischarge || 0).toLocaleString()}</div>
-                                <div>Heavy Equipment: ${(ship.heavyEquipmentDischarge || 0).toLocaleString()}</div>
+                                <div>Total Autos: ${(ship.totalAutomobilesDischarge || 0).toLocaleString()}</div>
+                                <div>Total Heavy: ${(ship.heavyEquipmentDischarge || 0).toLocaleString()}</div>
                                 <div>Electric Vehicles: ${(ship.totalElectricVehicles || 0).toLocaleString()}</div>
                                 <div>Progress: ${ship.progress}%</div>
                             </div>
@@ -718,7 +718,7 @@
             }
             
             content += `</div>`;
-            showModal('Vehicle Details', content);
+            showModal('Unit Details', content);
         }
 
         function showBerthsDetails() {
