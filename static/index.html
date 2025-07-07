@@ -1418,8 +1418,8 @@ This might indicate the document format is not recognized. Please check the cons
                     <button onclick="window.location.href='/analytics'" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
                         <i class="fas fa-chart-bar mr-2"></i>Analytics
                     </button>
-                    <button onclick="downloadProject()" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-download mr-2"></i>Download Project
+                    <button onclick="alert('Download feature temporarily disabled to prevent automatic downloads')" class="bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold cursor-not-allowed">
+                        <i class="fas fa-download mr-2"></i>Download Disabled
                     </button>
                 </div>
             </div>
@@ -1438,29 +1438,8 @@ This might indicate the document format is not recognized. Please check the cons
         }
 
         async function downloadProject() {
-            try {
-                // Show loading state
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating Download...';
-                button.disabled = true;
-
-                // Create the download package
-                const response = await fetch('/create-download');
-                const result = await response.json();
-
-                if (result.success) {
-                    // Redirect to download URL
-                    window.open(result.download_url, '_blank');
-
-                    // Show success message
-                    alert('✅ Project packaged successfully! Download should start automatically.');
-                } else {
-                    alert('❌ Failed to create download package: ' + result.message);
-                }
-
-                // Restore button
-                button.innerHTML = originalText;
+            alert('Download feature is currently disabled to prevent automatic downloads to your computer.');
+            return;nalText;
                 button.disabled = false;
 
             } catch (error) {
