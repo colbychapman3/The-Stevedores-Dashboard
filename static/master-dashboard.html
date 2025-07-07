@@ -64,35 +64,6 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Document Upload Section -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
-            </h2>
-            <div class="flex items-center justify-center w-full">
-                <label for="masterDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
-                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
-                    </div>
-                    <input id="masterDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleMasterFileUpload(event)">
-                </label>
-            </div>
-            <div id="masterUploadStatus" class="mt-4 hidden">
-                <div class="flex items-center justify-center">
-                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
-                    <span class="text-blue-600">Processing document...</span>
-                </div>
-            </div>
-            <div id="masterUploadSuccess" class="mt-4 hidden">
-                <div class="flex items-center justify-center text-green-600">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    <span>Document processed successfully!</span>
-                </div>
-            </div>
-        </div>
-
         <!-- Overview Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow duration-200" onclick="showActiveShipsDetails()">
@@ -206,6 +177,35 @@
                     <i class="fas fa-ship text-6xl text-gray-300 mb-4"></i>
                     <p class="text-gray-500 text-lg">No active ship operations</p>
                     <p class="text-gray-400">Click "New Operation" to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Upload Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents
+            </h2>
+            <div class="flex items-center justify-center w-full">
+                <label for="masterDocumentUpload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fas fa-file-upload text-2xl text-blue-500 mb-2"></i>
+                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="text-xs text-gray-500">PDF, CSV, or TXT files (Max 16MB)</p>
+                    </div>
+                    <input id="masterDocumentUpload" type="file" class="hidden" accept=".pdf,.csv,.txt" onchange="handleMasterFileUpload(event)">
+                </label>
+            </div>
+            <div id="masterUploadStatus" class="mt-4 hidden">
+                <div class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+                    <span class="text-blue-600">Processing document...</span>
+                </div>
+            </div>
+            <div id="masterUploadSuccess" class="mt-4 hidden">
+                <div class="flex items-center justify-center text-green-600">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>Document processed successfully!</span>
                 </div>
             </div>
         </div>
