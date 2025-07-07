@@ -45,6 +45,69 @@
     color: #374151;
     min-height: 100vh;
 }
+
+/* Dark mode support with system preferences */
+@media (prefers-color-scheme: dark) {
+    .dashboard-card {
+        background: rgba(31, 41, 55, 0.95);
+        border: 1px solid rgba(75, 85, 99, 0.3);
+        color: #f3f4f6;
+    }
+    
+    .dashboard-container {
+        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+        color: #f3f4f6;
+    }
+    
+    .wizard-container {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    }
+    
+    .kpi-card:hover {
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    
+    /* Form inputs in dark mode */
+    input, select, textarea {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        background-color: #4b5563;
+        border-color: #6b7280;
+    }
+    
+    /* Upload zones in dark mode */
+    .photo-upload-zone {
+        background-color: #374151;
+        border-color: #4b5563;
+    }
+    
+    .photo-upload-zone:hover {
+        background-color: #4b5563;
+        border-color: #6b7280;
+    }
+}
+
+/* Light mode explicit styles */
+@media (prefers-color-scheme: light) {
+    .dashboard-card {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #374151;
+    }
+    
+    .dashboard-container {
+        background: linear-gradient(135deg, #e0f2f7 0%, #a5d8ef 100%);
+        color: #374151;
+    }
+    
+    .wizard-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+}
 .progress-ring {
     transform: rotate(-90deg);
 }
