@@ -370,12 +370,12 @@
                             <span class="font-bold text-indigo-600" id="totalRecorded">0 vehicles</span>
                         </div>
                         <div class="flex justify-between items-center text-sm mt-1">
-                            <span class="font-medium text-gray-700">Remaining Vehicles:</span>
-                            <span class="font-bold text-green-600" id="remainingVehicles">0 vehicles</span>
+                            <span class="font-medium text-gray-700">Remaining Autos:</span>
+                            <span class="font-bold text-green-600" id="remainingVehicles">0 autos</span>
                         </div>
                         <div class="flex justify-between items-center text-sm mt-1">
                             <span class="font-medium text-gray-700">Average/Hour:</span>
-                            <span class="font-bold text-green-600" id="averagePerHour">0 vehicles/hour</span>
+                            <span class="font-bold text-green-600" id="averagePerHour">0 autos/hour</span>
                         </div>
                     </div>
                 </div>
@@ -1217,8 +1217,8 @@
             const average = Object.keys(hourlyQuantities).length > 0 ? (total / Object.keys(hourlyQuantities).length).toFixed(1) : 0;
 
             totalElement.textContent = `${total.toLocaleString()} vehicles`;
-            remainingElement.textContent = `${remaining.toLocaleString()} vehicles`;
-            averageElement.textContent = `${average} vehicles/hour`;
+            remainingElement.textContent = `${remaining.toLocaleString()} autos`;
+            averageElement.textContent = `${average} autos/hour`;
         }
 
         function getHourLabel(hour) {
