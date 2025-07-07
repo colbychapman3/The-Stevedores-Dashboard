@@ -796,12 +796,12 @@
                 }
                 return;
             }
-            
+
             const now = new Date();
             const elapsed = Math.floor((now - operationStartTime) / (1000 * 60)); // minutes
             const hours = Math.floor(elapsed / 60);
             const minutes = elapsed % 60;
-            
+
             const elapsedElement = document.getElementById('elapsedTimeDisplay');
             if (elapsedElement) {
                 // Ensure we don't show negative time
@@ -816,7 +816,7 @@
         function updateETC() {
             const etcElement = document.getElementById('etcDisplay');
             if (!etcElement) return;
-            
+
             const currentProgress = currentShip ? currentShip.progress : 0;
             if (currentProgress > 0 && currentShip && currentShip.totalVehicles) {
                 const remainingPercentage = 100 - currentProgress;
@@ -1130,64 +1130,8 @@
         }
 
         function loadSampleShipData() {
-            // Create a default ship object to prevent errors
-            currentShip = {
-                id: null,
-                vesselName: "No Ship Data Available",
-                vesselType: "Unknown",
-                shippingLine: "Unknown",
-                port: "Colonel Island",
-                operationDate: new Date().toISOString().split('T')[0],
-                company: "APS Stevedoring",
-                operationType: "Unknown",
-                berth: "Unknown",
-                operationManager: "Unknown",
-                autoOpsLead: "Unknown",
-                autoOpsAssistant: "Unknown",
-                heavyOpsLead: "Unknown",
-                heavyOpsAssistant: "Unknown",
-                totalVehicles: 0,
-                totalAutomobilesDischarge: 0,
-                heavyEquipmentDischarge: 0,
-                totalElectricVehicles: 0,
-                totalStaticCargo: 0,
-                brvTarget: 0,
-                zeeTarget: 0,
-                souTarget: 0,
-                expectedRate: 0,
-                totalDrivers: 0,
-                shiftStart: "07:00",
-                shiftEnd: "19:00",
-                breakDuration: 60,
-                targetCompletion: "",
-                ticoVans: 0,
-                ticoStationWagons: 0,
-                status: "No Data",
-                progress: 0,
-                createdAt: new Date().toISOString(),
-                startTime: "07:00",
-                estimatedCompletion: "19:00"
-            };
-            
-            // Show message about no data
-            const titleElement = document.getElementById('vesselTitle');
-            if (titleElement) {
-                titleElement.textContent = 'No Ship Data Available';
-            }
-            
-            // Show create operation button in header
-            const headerButtons = document.querySelector('header .flex.justify-between .flex.flex-wrap');
-            if (headerButtons) {
-                headerButtons.innerHTML = `
-                    <a href="/wizard" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
-                        <i class="fas fa-plus sm:mr-2"></i><span class="hidden sm:inline"> Create New Operation</span>
-                    </a>
-                    <a href="/master" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
-                        <i class="fas fa-tachometer-alt sm:mr-2"></i><span class="hidden sm:inline"> Master Dashboard</span>
-                    </a>
-                `;
-            }
-            
+            // No sample data - show empty state
+            currentShip = null;
             populateShipData();
         }
 
@@ -1207,7 +1151,7 @@
             const realCurrentRate = calculateCurrentRate();
             const currentRateElement = document.getElementById('currentRateDisplay');
             const completionElement = document.getElementById('completionDisplay');
-            
+
             if (currentRateElement) {
                 currentRateElement.textContent = realCurrentRate;
             }
@@ -1300,7 +1244,7 @@
                 completeButton.disabled = true;
                 completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
             } else if (completeButton) {
-                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Mark Operation Complete';
+                completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>MarkOperation Complete';
                 completeButton.disabled = false;
                 completeButton.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors';
             }
@@ -1470,7 +1414,7 @@
             const brvProgress = document.getElementById('brvProgress');
             const zeeProgress = document.getElementById('zeeProgress');
             const souProgress = document.getElementById('souProgress');
-            
+
             if (brvProgress) brvProgress.value = brvValue;
             if (zeeProgress) zeeProgress.value = zeeValue;
             if (souProgress) souProgress.value = souValue;
@@ -1479,7 +1423,7 @@
             const brvValueElement = document.getElementById('brvValue');
             const zeeValueElement = document.getElementById('zeeValue');
             const souValueElement = document.getElementById('souValue');
-            
+
             if (brvValueElement) brvValueElement.textContent = `${brvValue}/${brvMax}`;
             if (zeeValueElement) zeeValueElement.textContent = `${zeeValue}/${zeeMax}`;
             if (souValueElement) souValueElement.textContent = `${souValue}/${souMax}`;
@@ -1488,7 +1432,7 @@
             const brvBar = document.getElementById('brvBar');
             const zeeBar = document.getElementById('zeeBar');
             const souBar = document.getElementById('souBar');
-            
+
             if (brvBar) brvBar.style.width = `${(brvValue / brvMax) * 100}%`;
             if (zeeBar) zeeBar.style.width = `${(zeeValue / zeeMax) * 100}%`;
             if (souBar) souBar.style.width = `${(souValue / souMax) * 100}%`;
@@ -1777,7 +1721,7 @@
             const activeDriversElement = document.getElementById('activeDrivers');
             const operationStatusElement = document.getElementById('operationStatus');
             const currentDeckElement = document.getElementById('currentDeck');
-            
+
             if (!dischargedElement || !totalVehiclesElement || !activeDriversElement || !operationStatusElement || !currentDeckElement) {
                 console.log('Some required elements are missing for updateRealTimeProgress');
                 return; // Exit if elements don't exist
@@ -1818,7 +1762,7 @@
                 // Check if we have a valid ship ID from URL or currentShip
                 const urlParams = new URLSearchParams(window.location.search);
                 const shipId = urlParams.get('ship') || (currentShip && currentShip.id ? currentShip.id : null);
-                
+
                 if (shipId) {
                     updateShipStatusAndRedirect('complete', shipId);
                 } else {
