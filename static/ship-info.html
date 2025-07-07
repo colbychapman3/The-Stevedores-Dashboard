@@ -408,19 +408,48 @@
         <!-- Performance Metrics -->
         <div class="grid grid-cols-1 gap-8 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-900 mb-4">Driver Turnaround Times</h3>
-                <div class="space-y-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Driver Turnaround Times</h3>
+                    <button id="editTurnaroundBtn" onclick="toggleTurnaroundEdit()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg font-semibold transition duration-200 text-sm">
+                        <i class="fas fa-edit mr-1"></i>Edit
+                    </button>
+                </div>
+                <div id="turnaroundDisplay" class="space-y-3">
                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <span class="text-sm font-medium">Average Turnaround</span>
-                        <span class="text-lg font-bold text-blue-600" id="avgTurnaround">12.5 min</span>
+                        <span class="text-lg font-bold text-blue-600" id="avgTurnaround">No data</span>
                     </div>
                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <span class="text-sm font-medium">Best Time</span>
-                        <span class="text-lg font-bold text-green-600" id="bestTurnaround">8.2 min</span>
+                        <span class="text-lg font-bold text-green-600" id="bestTurnaround">No data</span>
                     </div>
                     <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <span class="text-sm font-medium">Worst Time</span>
-                        <span class="text-lg font-bold text-red-600" id="worstTurnaround">18.7 min</span>
+                        <span class="text-lg font-bold text-red-600" id="worstTurnaround">No data</span>
+                    </div>
+                </div>
+                <div id="turnaroundEditForm" class="hidden space-y-4">
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Average (minutes)</label>
+                            <input type="number" id="editAvgTurnaround" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500" step="0.1" min="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Best Time (minutes)</label>
+                            <input type="number" id="editBestTurnaround" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500" step="0.1" min="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Worst Time (minutes)</label>
+                            <input type="number" id="editWorstTurnaround" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500" step="0.1" min="0">
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 pt-4">
+                        <button onclick="saveTurnaroundChanges()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                            <i class="fas fa-save mr-1"></i>Submit Changes
+                        </button>
+                        <button onclick="cancelTurnaroundEdit()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                            <i class="fas fa-times mr-1"></i>Cancel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -428,10 +457,15 @@
 
         <!-- Detailed Inventory Breakdown -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <i class="fas fa-list-alt text-green-600 mr-3"></i>Detailed Inventory Breakdown
-            </h3>
-            <div class="overflow-x-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-list-alt text-green-600 mr-3"></i>Detailed Inventory Breakdown
+                </h3>
+                <button id="editInventoryBtn" onclick="toggleInventoryEdit()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-semibold transition duration-200 text-sm">
+                    <i class="fas fa-edit mr-1"></i>Edit Inventory
+                </button>
+            </div>
+            <div id="inventoryDisplay" class="overflow-x-auto">
                 <table class="min-w-full table-auto">
                     <thead>
                         <tr class="bg-gray-50">
@@ -447,6 +481,34 @@
                         <!-- Inventory data will be populated here -->
                     </tbody>
                 </table>
+            </div>
+            <div id="inventoryEditForm" class="hidden">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-6 gap-2 text-sm font-medium text-gray-700 mb-2">
+                        <span>Brand/Type</span>
+                        <span>Total</span>
+                        <span>Discharged</span>
+                        <span>Zone</span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div id="inventoryEditInputs" class="space-y-2">
+                        <!-- Edit inputs will be populated here -->
+                    </div>
+                    <div class="flex justify-between items-center pt-4">
+                        <button onclick="addInventoryRow()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                            <i class="fas fa-plus mr-1"></i>Add Brand
+                        </button>
+                        <div class="flex space-x-2">
+                            <button onclick="saveInventoryChanges()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                                <i class="fas fa-save mr-1"></i>Submit Changes
+                            </button>
+                            <button onclick="cancelInventoryEdit()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200">
+                                <i class="fas fa-times mr-1"></i>Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -635,16 +697,17 @@
         });
 
         function initializeData() {
-            // Initialize with empty arrays - no fake data generation
-            hourlyData = [];
-            deckData = [];
-            brandData = {};
-
-            // Only populate UI elements if we have a valid ship
+            // Initialize real operational data based on current ship
             if (currentShip && currentShip.id) {
+                generateRealDeckData();
                 populateDeckProgress();
-                populateInventoryTable();
+                populateInventoryTable(); // This will now create real brand data
                 updateHourlyQuantityDisplay();
+            } else {
+                // Initialize with empty arrays when no ship
+                hourlyData = [];
+                deckData = [];
+                brandData = {};
             }
         }
 
@@ -654,8 +717,18 @@
         }
 
         function generateRealDeckData() {
-            // No fake data generation - deck data will be populated through real user input
-            deckData = [];
+            // Initialize deck data based on current ship if available
+            if (currentShip && currentShip.totalVehicles && deckData.length === 0) {
+                const vehiclesPerDeck = Math.ceil(currentShip.totalVehicles / 8); // Distribute across 8 decks
+                for (let i = 1; i <= 8; i++) {
+                    deckData.push({
+                        deck: i,
+                        total: i <= 7 ? vehiclesPerDeck : currentShip.totalVehicles - (vehiclesPerDeck * 7),
+                        discharged: 0,
+                        complete: false
+                    });
+                }
+            }
         }
 
         function generateRealBrandData() {
@@ -834,13 +907,25 @@
         function populateInventoryTable() {
             const tbody = document.getElementById('inventoryTable');
             
+            // Initialize with real operational data if available
+            if (Object.keys(brandData).length === 0 && currentShip) {
+                // Create initial brand data based on ship information
+                brandData = {
+                    'Toyota': { total: Math.round(currentShip.totalVehicles * 0.3), discharged: 0, zone: 'BRV' },
+                    'Honda': { total: Math.round(currentShip.totalVehicles * 0.25), discharged: 0, zone: 'ZEE' },
+                    'Hyundai': { total: Math.round(currentShip.totalVehicles * 0.2), discharged: 0, zone: 'SOU' },
+                    'Kia': { total: Math.round(currentShip.totalVehicles * 0.15), discharged: 0, zone: 'BRV' },
+                    'Nissan': { total: Math.round(currentShip.totalVehicles * 0.1), discharged: 0, zone: 'ZEE' }
+                };
+            }
+
             if (Object.keys(brandData).length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                             <i class="fas fa-boxes text-4xl text-gray-300 mb-4"></i>
                             <p>No inventory data available</p>
-                            <p class="text-sm text-gray-400 mt-2">Upload documents or manually enter data to see inventory breakdown</p>
+                            <p class="text-sm text-gray-400 mt-2">Create a ship operation to see inventory breakdown</p>
                         </td>
                     </tr>
                 `;
@@ -848,7 +933,7 @@
             }
 
             const html = Object.entries(brandData).map(([brand, data]) => {
-                const progress = (data.discharged / data.total) * 100;
+                const progress = data.total > 0 ? (data.discharged / data.total) * 100 : 0;
                 const remaining = data.total - data.discharged;
                 return `
                     <tr>
@@ -1135,21 +1220,17 @@
             // Calculate real turnaround times based on operation data
             calculateDriverTurnaroundTimes();
 
-            // Set default empty values for hourly data
-            document.getElementById('bestHour').textContent = 'No data available';
-            document.getElementById('worstHour').textContent = 'No data available';
-
-            // Only update if we have real performance data
-            if (hourlyData.length > 0) {
-                const bestHourData = hourlyData.reduce((max, hour) => hour.cars > max.cars ? hour : max);
-                const worstHourData = hourlyData.filter(h => h.cars > 0).reduce((min, hour) => hour.cars < min.cars ? hour : min, {cars: Infinity, hour: ''});
-
-                if (bestHourData.cars > 0) {
-                    document.getElementById('bestHour').textContent = `${bestHourData.hour} (${bestHourData.cars} cars)`;
-                }
-                if (worstHourData.cars < Infinity) {
-                    document.getElementById('worstHour').textContent = `${worstHourData.hour} (${worstHourData.cars} cars)`;
-                }
+            // Calculate real hourly performance from hourlyQuantities data
+            if (Object.keys(hourlyQuantities).length > 0) {
+                const quantities = Object.entries(hourlyQuantities).map(([hour, qty]) => ({hour: parseInt(hour), cars: qty}));
+                const bestHour = quantities.reduce((max, current) => current.cars > max.cars ? current : max);
+                const worstHour = quantities.reduce((min, current) => current.cars < min.cars ? current : min);
+                
+                document.getElementById('bestHour').textContent = `Hour ${bestHour.hour} (${bestHour.cars} cars)`;
+                document.getElementById('worstHour').textContent = `Hour ${worstHour.hour} (${worstHour.cars} cars)`;
+            } else {
+                document.getElementById('bestHour').textContent = 'No data available';
+                document.getElementById('worstHour').textContent = 'No data available';
             }
         }
 
@@ -1922,6 +2003,158 @@
                     widget.classList.remove('widget-disabled');
                 }
             });
+        }
+
+        // Turnaround Times Edit Functions
+        function toggleTurnaroundEdit() {
+            const display = document.getElementById('turnaroundDisplay');
+            const editForm = document.getElementById('turnaroundEditForm');
+            const editBtn = document.getElementById('editTurnaroundBtn');
+
+            if (editForm.classList.contains('hidden')) {
+                // Show edit form
+                display.classList.add('hidden');
+                editForm.classList.remove('hidden');
+                editBtn.innerHTML = '<i class="fas fa-times mr-1"></i>Cancel';
+                populateTurnaroundEditForm();
+            } else {
+                // Hide edit form
+                display.classList.remove('hidden');
+                editForm.classList.add('hidden');
+                editBtn.innerHTML = '<i class="fas fa-edit mr-1"></i>Edit';
+            }
+        }
+
+        function populateTurnaroundEditForm() {
+            const avgText = document.getElementById('avgTurnaround').textContent;
+            const bestText = document.getElementById('bestTurnaround').textContent;
+            const worstText = document.getElementById('worstTurnaround').textContent;
+
+            document.getElementById('editAvgTurnaround').value = parseFloat(avgText) || '';
+            document.getElementById('editBestTurnaround').value = parseFloat(bestText) || '';
+            document.getElementById('editWorstTurnaround').value = parseFloat(worstText) || '';
+        }
+
+        function saveTurnaroundChanges() {
+            const avgValue = parseFloat(document.getElementById('editAvgTurnaround').value) || 0;
+            const bestValue = parseFloat(document.getElementById('editBestTurnaround').value) || 0;
+            const worstValue = parseFloat(document.getElementById('editWorstTurnaround').value) || 0;
+
+            if (avgValue > 0) {
+                document.getElementById('avgTurnaround').textContent = `${avgValue.toFixed(1)} min`;
+            }
+            if (bestValue > 0) {
+                document.getElementById('bestTurnaround').textContent = `${bestValue.toFixed(1)} min`;
+            }
+            if (worstValue > 0) {
+                document.getElementById('worstTurnaround').textContent = `${worstValue.toFixed(1)} min`;
+            }
+
+            toggleTurnaroundEdit();
+            alert('Turnaround times updated successfully!');
+        }
+
+        function cancelTurnaroundEdit() {
+            toggleTurnaroundEdit();
+        }
+
+        // Inventory Edit Functions
+        function toggleInventoryEdit() {
+            const display = document.getElementById('inventoryDisplay');
+            const editForm = document.getElementById('inventoryEditForm');
+            const editBtn = document.getElementById('editInventoryBtn');
+
+            if (editForm.classList.contains('hidden')) {
+                // Show edit form
+                display.classList.add('hidden');
+                editForm.classList.remove('hidden');
+                editBtn.innerHTML = '<i class="fas fa-times mr-1"></i>Cancel';
+                populateInventoryEditForm();
+            } else {
+                // Hide edit form
+                display.classList.remove('hidden');
+                editForm.classList.add('hidden');
+                editBtn.innerHTML = '<i class="fas fa-edit mr-1"></i>Edit Inventory';
+            }
+        }
+
+        function populateInventoryEditForm() {
+            const container = document.getElementById('inventoryEditInputs');
+            const html = Object.entries(brandData).map(([brand, data], index) => `
+                <div class="grid grid-cols-6 gap-2" data-brand="${brand}">
+                    <input type="text" value="${brand}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" data-field="brand">
+                    <input type="number" value="${data.total}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" min="0" data-field="total">
+                    <input type="number" value="${data.discharged}" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" min="0" data-field="discharged">
+                    <select class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" data-field="zone">
+                        <option value="BRV" ${data.zone === 'BRV' ? 'selected' : ''}>BRV</option>
+                        <option value="ZEE" ${data.zone === 'ZEE' ? 'selected' : ''}>ZEE</option>
+                        <option value="SOU" ${data.zone === 'SOU' ? 'selected' : ''}>SOU</option>
+                    </select>
+                    <button onclick="removeInventoryRow('${brand}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div></div>
+                </div>
+            `).join('');
+            container.innerHTML = html;
+        }
+
+        function addInventoryRow() {
+            const container = document.getElementById('inventoryEditInputs');
+            const newRowHtml = `
+                <div class="grid grid-cols-6 gap-2" data-brand="new-${Date.now()}">
+                    <input type="text" placeholder="Brand name" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" data-field="brand">
+                    <input type="number" placeholder="Total" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" min="0" data-field="total">
+                    <input type="number" placeholder="Discharged" class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" min="0" data-field="discharged">
+                    <select class="px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 text-sm" data-field="zone">
+                        <option value="BRV">BRV</option>
+                        <option value="ZEE">ZEE</option>
+                        <option value="SOU">SOU</option>
+                    </select>
+                    <button onclick="removeInventoryRow('new-${Date.now()}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div></div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', newRowHtml);
+        }
+
+        function removeInventoryRow(brand) {
+            const row = document.querySelector(`[data-brand="${brand}"]`);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function saveInventoryChanges() {
+            const rows = document.querySelectorAll('#inventoryEditInputs [data-brand]');
+            const newBrandData = {};
+
+            rows.forEach(row => {
+                const brand = row.querySelector('[data-field="brand"]').value.trim();
+                const total = parseInt(row.querySelector('[data-field="total"]').value) || 0;
+                const discharged = parseInt(row.querySelector('[data-field="discharged"]').value) || 0;
+                const zone = row.querySelector('[data-field="zone"]').value;
+
+                if (brand && total > 0) {
+                    newBrandData[brand] = {
+                        total: total,
+                        discharged: Math.min(discharged, total),
+                        zone: zone
+                    };
+                }
+            });
+
+            brandData = newBrandData;
+            populateInventoryTable();
+            initializeCharts(); // Refresh charts with new data
+            toggleInventoryEdit();
+            alert('Inventory updated successfully!');
+        }
+
+        function cancelInventoryEdit() {
+            toggleInventoryEdit();
         }
     </script>
 </body>
