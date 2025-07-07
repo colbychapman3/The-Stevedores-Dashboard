@@ -537,41 +537,124 @@
 
         // Interactive stat box functions
         function showActiveShipsDetails() {
+            const activeShips = ships.filter(ship => ship.status !== 'complete');
+            
             let content = `
                 <div class="space-y-4">
                     <div class="flex items-center mb-4">
                         <i class="fas fa-ship text-2xl text-blue-600 mr-3"></i>
                         <h3 class="text-xl font-bold text-gray-900">Active Ships Details</h3>
                     </div>
+            `;
+
+            if (activeShips.length === 0) {
+                content += `
                     <div class="text-center py-8">
                         <i class="fas fa-ship text-4xl text-gray-300 mb-4"></i>
                         <p class="text-gray-500">No active ships currently</p>
                         <p class="text-gray-400 text-sm mt-2">Ships will appear here when operations are created</p>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                content += `<div class="grid gap-4">`;
+                activeShips.forEach(ship => {
+                    content += `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-semibold text-blue-900">${ship.vesselName}</h4>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">${ship.status}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div><strong>Berth:</strong> ${ship.berth}</div>
+                                <div><strong>Progress:</strong> ${ship.progress}%</div>
+                                <div><strong>Vehicles:</strong> ${ship.totalVehicles.toLocaleString()}</div>
+                                <div><strong>Operation:</strong> ${ship.operationType}</div>
+                                <div><strong>Auto Lead:</strong> ${ship.autoOpsLead}</div>
+                                <div><strong>Heavy Lead:</strong> ${ship.heavyOpsLead}</div>
+                            </div>
+                            <div class="mt-2">
+                                <button onclick="viewShipDetails(${ship.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">
+                                    View Details
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                content += `</div>`;
+            }
+            
+            content += `</div>`;
             showModal('Active Ships', content);
         }
 
         function showTeamsDetails() {
             const activeShips = ships.filter(ship => ship.status !== 'complete');
+            
             let content = `
                 <div class="space-y-4">
                     <div class="flex items-center mb-4">
                         <i class="fas fa-users text-2xl text-green-600 mr-3"></i>
                         <h3 class="text-xl font-bold text-gray-900">Teams Deployed</h3>
                     </div>
+            `;
+
+            if (activeShips.length === 0) {
+                content += `
                     <div class="text-center py-8">
                         <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
                         <p class="text-gray-500">No teams currently deployed</p>
                         <p class="text-gray-400 text-sm mt-2">Teams will appear here when ship operations are active</p>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                content += `<div class="grid gap-4">`;
+                activeShips.forEach(ship => {
+                    content += `
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-green-900 mb-3">${ship.vesselName} - ${ship.berth}</h4>
+                            <div class="grid gap-3">
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-car text-blue-600 mr-2"></i>
+                                        <span class="font-medium">Auto Operations Team</span>
+                                    </div>
+                                    <div class="text-sm">
+                                        <div><strong>Lead:</strong> ${ship.autoOpsLead}</div>
+                                        <div><strong>Assistant:</strong> ${ship.autoOpsAssistant}</div>
+                                        <div><strong>Drivers:</strong> ${ship.totalDrivers || 'N/A'}</div>
+                                    </div>
+                                </div>
+                                <div class="bg-white p-3 rounded border">
+                                    <div class="flex items-center mb-2">
+                                        <i class="fas fa-truck text-orange-600 mr-2"></i>
+                                        <span class="font-medium">Heavy Equipment Team</span>
+                                    </div>
+                                    <div class="text-sm">
+                                        <div><strong>Lead:</strong> ${ship.heavyOpsLead}</div>
+                                        <div><strong>Assistant:</strong> ${ship.heavyOpsAssistant}</div>
+                                        <div><strong>Operation:</strong> ${ship.operationType}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                content += `</div>`;
+            }
+            
+            content += `</div>`;
             showModal('Teams Deployed', content);
         }
 
         function showVehiclesDetails() {
+            const activeShips = ships.filter(ship => ship.status !== 'complete');
+            
+            // Calculate totals from real data
+            const totalAutomobiles = activeShips.reduce((sum, ship) => sum + (ship.totalAutomobilesDischarge || 0), 0);
+            const totalHeavyEquipment = activeShips.reduce((sum, ship) => sum + (ship.heavyEquipmentDischarge || 0), 0);
+            const totalElectricVehicles = activeShips.reduce((sum, ship) => sum + (ship.totalElectricVehicles || 0), 0);
+            const totalVehicles = activeShips.reduce((sum, ship) => sum + (ship.totalVehicles || 0), 0);
+            
             let content = `
                 <div class="space-y-4">
                     <div class="flex items-center mb-4">
@@ -581,35 +664,74 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-blue-50 p-4 rounded-lg text-center">
                             <i class="fas fa-car text-2xl text-blue-600 mb-2"></i>
-                            <p class="text-2xl font-bold text-blue-600">0</p>
+                            <p class="text-2xl font-bold text-blue-600">${totalAutomobiles.toLocaleString()}</p>
                             <p class="text-sm text-gray-600">Automobiles</p>
                         </div>
                         <div class="bg-orange-50 p-4 rounded-lg text-center">
                             <i class="fas fa-truck text-2xl text-orange-600 mb-2"></i>
-                            <p class="text-2xl font-bold text-orange-600">0</p>
+                            <p class="text-2xl font-bold text-orange-600">${totalHeavyEquipment.toLocaleString()}</p>
                             <p class="text-sm text-gray-600">Heavy Equipment</p>
                         </div>
                         <div class="bg-green-50 p-4 rounded-lg text-center">
                             <i class="fas fa-bolt text-2xl text-green-600 mb-2"></i>
-                            <p class="text-2xl font-bold text-green-600">0</p>
+                            <p class="text-2xl font-bold text-green-600">${totalElectricVehicles.toLocaleString()}</p>
                             <p class="text-sm text-gray-600">Electric Vehicles</p>
                         </div>
                         <div class="bg-purple-50 p-4 rounded-lg text-center">
                             <i class="fas fa-calculator text-2xl text-purple-600 mb-2"></i>
-                            <p class="text-2xl font-bold text-purple-600">0</p>
+                            <p class="text-2xl font-bold text-purple-600">${totalVehicles.toLocaleString()}</p>
                             <p class="text-sm text-gray-600">Total Vehicles</p>
                         </div>
                     </div>
+            `;
+
+            if (activeShips.length > 0) {
+                content += `
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-900 mb-3">Vehicle Details by Ship</h4>
+                        <div class="space-y-3">
+                `;
+                activeShips.forEach(ship => {
+                    content += `
+                        <div class="bg-gray-50 p-3 rounded border">
+                            <div class="font-medium text-gray-900 mb-2">${ship.vesselName}</div>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div>Automobiles: ${(ship.totalAutomobilesDischarge || 0).toLocaleString()}</div>
+                                <div>Heavy Equipment: ${(ship.heavyEquipmentDischarge || 0).toLocaleString()}</div>
+                                <div>Electric Vehicles: ${(ship.totalElectricVehicles || 0).toLocaleString()}</div>
+                                <div>Progress: ${ship.progress}%</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                content += `
+                        </div>
+                    </div>
+                `;
+            } else {
+                content += `
                     <div class="text-center py-4">
                         <p class="text-gray-500">No vehicles currently being processed</p>
                         <p class="text-gray-400 text-sm mt-2">Vehicle data will appear when operations are active</p>
                     </div>
-                </div>
-            `;
+                `;
+            }
+            
+            content += `</div>`;
             showModal('Vehicle Details', content);
         }
 
         function showBerthsDetails() {
+            const activeShips = ships.filter(ship => ship.status !== 'complete');
+            
+            // Create berth occupancy map
+            const berthMap = {};
+            activeShips.forEach(ship => {
+                if (ship.berth) {
+                    berthMap[ship.berth] = ship;
+                }
+            });
+            
             let content = `
                 <div class="space-y-4">
                     <div class="flex items-center mb-4">
@@ -620,25 +742,49 @@
             `;
 
             for (let i = 1; i <= 6; i++) {
-                content += `
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                        <div class="flex items-center mb-2">
-                            <div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
-                            <h4 class="font-semibold text-gray-700">Berth ${i}</h4>
+                const berthName = `Berth ${i}`;
+                const ship = berthMap[berthName];
+                
+                if (ship) {
+                    content += `
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                                <h4 class="font-semibold text-blue-900">${berthName}</h4>
+                            </div>
+                            <div class="text-sm">
+                                <div class="font-medium text-blue-900">${ship.vesselName}</div>
+                                <div class="text-blue-700">Status: ${ship.status}</div>
+                                <div class="text-blue-700">Progress: ${ship.progress}%</div>
+                                <div class="text-blue-700">Vehicles: ${ship.totalVehicles.toLocaleString()}</div>
+                                <div class="text-xs text-blue-600 mt-1">${ship.operationType}</div>
+                            </div>
+                            <button onclick="viewShipDetails(${ship.id})" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+                                View Details
+                            </button>
                         </div>
-                        <div class="text-sm text-gray-500">
-                            <p>Available</p>
-                            <p class="text-xs">No active operations</p>
+                    `;
+                } else {
+                    content += `
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                                <h4 class="font-semibold text-gray-700">${berthName}</h4>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <p>Available</p>
+                                <p class="text-xs">No active operations</p>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
 
             content += `
                     </div>
-                    <div class="text-center py-4">
-                        <p class="text-gray-500">All berths are currently available</p>
-                        <p class="text-gray-400 text-sm mt-2">Berth assignments will appear when ships are scheduled</p>
+                    <div class="mt-4 text-center">
+                        <p class="text-gray-600">Berths occupied: ${Object.keys(berthMap).length} of 6</p>
+                        <p class="text-gray-400 text-sm mt-1">Real-time berth status based on active operations</p>
                     </div>
                 </div>
             `;
