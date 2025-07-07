@@ -980,7 +980,16 @@
         function populateBreakSchedule() {
             const container = document.getElementById('breakSchedule');
 
-            if (!currentShip) return;
+            if (!currentShip || !currentShip.id) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-coffee text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No break schedule available</p>
+                        <p class="text-sm text-gray-400 mt-2">Break schedule will be calculated when operation starts</p>
+                    </div>
+                `;
+                return;
+            }
 
             const currentTime = new Date();
             const shiftStart = currentShip.shiftStart || '07:00';
@@ -1194,11 +1203,11 @@
 
         function updatePerformanceMetrics() {
             // Set default empty values - no fake data
-            document.getElementById('avgTurnaround').textContent = '--';
-            document.getElementById('bestTurnaround').textContent = '--';
-            document.getElementById('worstTurnaround').textContent = '--';
-            document.getElementById('bestHour').textContent = '--:-- (0 cars)';
-            document.getElementById('worstHour').textContent = '--:-- (0 cars)';
+            document.getElementById('avgTurnaround').textContent = 'No data';
+            document.getElementById('bestTurnaround').textContent = 'No data';
+            document.getElementById('worstTurnaround').textContent = 'No data';
+            document.getElementById('bestHour').textContent = 'No data available';
+            document.getElementById('worstHour').textContent = 'No data available';
 
             // Only update if we have real performance data
             if (hourlyData.length > 0) {
