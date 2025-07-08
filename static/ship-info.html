@@ -1282,7 +1282,19 @@
             if (totalUpdated > 0) {
                 populateDeckProgress();
                 toggleDeckEdit();
-                alert(`Deck progress updated successfully! (${totalUpdated} decks updated)`);
+                
+                // Update overall progress based on deck data
+                const totalVehicles = deckData.reduce((sum, deck) => sum + deck.total, 0);
+                const totalDischarged = deckData.reduce((sum, deck) => sum + deck.discharged, 0);
+                const overallProgress = totalVehicles > 0 ? Math.round((totalDischarged / totalVehicles) * 100) : 0;
+                
+                // Update the completion display
+                const completionElement = document.getElementById('completionValue');
+                if (completionElement) {
+                    completionElement.textContent = `${overallProgress}%`;
+                }
+                
+                alert(`Deck progress updated successfully! (${totalUpdated} decks updated, Overall progress: ${overallProgress}%)`);
             } else {
                 alert('No deck data to update');
             }
@@ -1575,15 +1587,18 @@
         }
 
         async function markOperationComplete() {
+            if (!currentShip || !currentShip.id) {
+                alert('No active ship operation to complete');
+                return;
+            }
+
             if (!confirm('Are you sure you want to mark this operation as complete? This action cannot be undone.')) {
                 return;
             }
 
             try {
-                const shipId = new URLSearchParams(window.location.search).get('ship');
-
                 // Update status to complete
-                const statusResponse = await fetch(`/api/ships/${shipId}/status`, {
+                const statusResponse = await fetch(`/api/ships/${currentShip.id}/status`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1595,7 +1610,7 @@
 
                 if (statusResponse.ok) {
                     // Update progress to 100%
-                    const progressResponse = await fetch(`/api/ships/${shipId}/progress`, {
+                    const progressResponse = await fetch(`/api/ships/${currentShip.id}/progress`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
@@ -1606,18 +1621,28 @@
                     });
 
                     if (progressResponse.ok) {
-                        alert('Operation marked as complete successfully!');
-                        loadShipDetails(); // Refresh the page data
-
+                        // Update local data
+                        currentShip.status = 'complete';
+                        currentShip.progress = 100;
+                        
+                        // Update displays
+                        document.getElementById('completionValue').textContent = '100%';
+                        
                         // Update button state
                         const completeButton = document.getElementById('completeButton');
-                        completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
-                        completeButton.disabled = true;
-                        completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
+                        if (completeButton) {
+                            completeButton.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Operation Complete';
+                            completeButton.disabled = true;
+                            completeButton.className = 'flex-1 bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed';
+                        }
+                        
+                        alert('Operation marked as complete successfully!');
+                    } else {
+                        throw new Error('Failed to update progress');
                     }
                 } else {
                     const error = await statusResponse.json();
-                    alert('Error marking operation complete: ' + (error.error || 'Unknown error'));
+                    throw new Error(error.error || 'Failed to update status');
                 }
             } catch (error) {
                 console.error('Error marking operation complete:', error);

@@ -1310,7 +1310,21 @@ async function submitOperation() {
                 console.error('Error creating operation:', error);
                 alert('Error creating operation: ' + error.message);
             }
-}
+        }
+
+        // Handle form submission
+        document.getElementById('operationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Validate totals and show warnings
+            const warnings = validateTotals();
+            if (warnings.length > 0) {
+                const proceed = confirm('Warning:\n' + warnings.join('\n') + '\n\nDo you want to proceed anyway?');
+                if (!proceed) return;
+            }
+
+            await submitForm();
+        });
         // Handle form submission
         document.getElementById('operationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
