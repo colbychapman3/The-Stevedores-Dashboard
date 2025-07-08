@@ -1069,8 +1069,9 @@
             // Initialize real operational data based on current ship
             if (currentShip && currentShip.id) {
                 generateRealDeckData();
+                generateRealBrandData();
                 populateDeckProgress();
-                populateInventoryTable(); // This will now create real brand data
+                populateInventoryTable();
                 updateHourlyQuantityDisplay();
             } else {
                 // Initialize with empty arrays when no ship
@@ -1101,8 +1102,23 @@
         }
 
         function generateRealBrandData() {
-            // No fake data generation - brand data will be populated through real user input or document uploads
-            brandData = {};
+            // Initialize with sample data if no brand data exists and we have a ship
+            if (Object.keys(brandData).length === 0 && currentShip && currentShip.totalVehicles) {
+                if (currentShip.vesselType === 'Auto Only') {
+                    brandData = {
+                        'Mercedes': { total: currentShip.totalVehicles, discharged: 0, zone: 'SOU' }
+                    };
+                } else {
+                    const totalVehicles = currentShip.totalVehicles;
+                    brandData = {
+                        'Toyota': { total: Math.round(totalVehicles * 0.3), discharged: 0, zone: 'BRV' },
+                        'Honda': { total: Math.round(totalVehicles * 0.25), discharged: 0, zone: 'ZEE' },
+                        'Hyundai': { total: Math.round(totalVehicles * 0.2), discharged: 0, zone: 'SOU' },
+                        'Kia': { total: Math.round(totalVehicles * 0.15), discharged: 0, zone: 'BRV' },
+                        'Nissan': { total: Math.round(totalVehicles * 0.1), discharged: 0, zone: 'ZEE' }
+                    };
+                }
+            }
         }
 
          function startTimeTracking() {
@@ -1210,12 +1226,13 @@
             const container = document.getElementById('deckEditInputs');
             
             // If no deck data exists, create initial deck structure
-            if (deckData.length === 0 && currentShip && currentShip.totalVehicles) {
-                const vehiclesPerDeck = Math.ceil(currentShip.totalVehicles / 8);
+            if (deckData.length === 0) {
+                const totalVehicles = currentShip && currentShip.totalVehicles ? currentShip.totalVehicles : 1000;
+                const vehiclesPerDeck = Math.ceil(totalVehicles / 8);
                 for (let i = 1; i <= 8; i++) {
                     deckData.push({
                         deck: i,
-                        total: i <= 7 ? vehiclesPerDeck : currentShip.totalVehicles - (vehiclesPerDeck * 7),
+                        total: i <= 7 ? vehiclesPerDeck : totalVehicles - (vehiclesPerDeck * 7),
                         discharged: 0,
                         complete: false
                     });

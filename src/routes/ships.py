@@ -62,34 +62,44 @@ def create_ship():
     # Generate new ID
     new_id = max([s['id'] for s in ships_data], default=0) + 1
     
-    # Create ship record
+    # Validate required fields
+    vessel_name = data.get('vesselName', '').strip()
+    if not vessel_name:
+        return jsonify({'error': 'Vessel name is required'}), 400
+    
+    # Set default date if not provided
+    operation_date = data.get('operationDate')
+    if not operation_date:
+        operation_date = datetime.now().strftime('%Y-%m-%d')
+    
+    # Create ship record with proper defaults
     ship = {
         'id': new_id,
-        'vesselName': data.get('vesselName', ''),
-        'vesselType': data.get('vesselType', ''),
-        'shippingLine': data.get('shippingLine', ''),
-        'port': data.get('port', ''),
-        'operationDate': data.get('operationDate', ''),
-        'company': data.get('company', ''),
-        'operationType': data.get('operationType', ''),
-        'berth': data.get('berthLocation', ''),
-        'operationManager': data.get('operationManager', ''),
-        'autoOpsLead': data.get('autoOpsLead', ''),
-        'autoOpsAssistant': data.get('autoOpsAssistant', ''),
-        'heavyOpsLead': data.get('heavyOpsLead', ''),
-        'heavyOpsAssistant': data.get('heavyOpsAssistant', ''),
-        'totalVehicles': data.get('totalVehicles', 0),
-        'totalAutomobilesDischarge': data.get('totalAutomobilesDischarge', 0),
+        'vesselName': vessel_name,
+        'vesselType': data.get('vesselType', 'Auto Only'),
+        'shippingLine': data.get('shippingLine', 'Unknown'),
+        'port': data.get('port', 'Colonel Island'),
+        'operationDate': operation_date,
+        'company': data.get('company', 'APS Stevedoring'),
+        'operationType': data.get('operationType', 'Discharge Only'),
+        'berth': data.get('berthLocation', 'Berth 1'),
+        'operationManager': data.get('operationManager', 'Manager'),
+        'autoOpsLead': data.get('autoOpsLead', 'Lead'),
+        'autoOpsAssistant': data.get('autoOpsAssistant', 'Assistant'),
+        'heavyOpsLead': data.get('heavyOpsLead', 'Heavy Lead'),
+        'heavyOpsAssistant': data.get('heavyOpsAssistant', 'Heavy Assistant'),
+        'totalVehicles': max(data.get('totalVehicles', 100), 1),
+        'totalAutomobilesDischarge': data.get('totalAutomobilesDischarge', data.get('totalVehicles', 100)),
         'heavyEquipmentDischarge': data.get('heavyEquipmentDischarge', 0),
         'totalElectricVehicles': data.get('totalElectricVehicles', 0),
         'totalStaticCargo': data.get('totalStaticCargo', 0),
         'brvTarget': data.get('brvTarget', 0),
         'zeeTarget': data.get('zeeTarget', 0),
-        'souTarget': data.get('souTarget', 0),
-        'expectedRate': data.get('expectedRate', 0),
-        'totalDrivers': data.get('totalDrivers', 0),
-        'shiftStart': data.get('shiftStart', ''),
-        'shiftEnd': data.get('shiftEnd', ''),
+        'souTarget': data.get('souTarget', data.get('totalVehicles', 100)),
+        'expectedRate': max(data.get('expectedRate', 150), 1),
+        'totalDrivers': max(data.get('totalDrivers', 30), 1),
+        'shiftStart': data.get('shiftStart', '07:00'),
+        'shiftEnd': data.get('shiftEnd', '15:00'),
         'breakDuration': data.get('breakDuration', 0),
         'targetCompletion': data.get('targetCompletion', ''),
         'ticoVans': data.get('ticoVans', 0),
@@ -97,8 +107,9 @@ def create_ship():
         'status': 'active',
         'progress': 0,
         'createdAt': datetime.now().isoformat(),
-        'startTime': data.get('shiftStart', ''),
-        'estimatedCompletion': data.get('targetCompletion', data.get('shiftEnd', ''))
+        'startTime': data.get('shiftStart', '07:00'),
+        'estimatedCompletion': data.get('targetCompletion', data.get('shiftEnd', '15:00')),
+        'updatedAt': datetime.now().isoformat()
     }
     
     ships_data.append(ship)
