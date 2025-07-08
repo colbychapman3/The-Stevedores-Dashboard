@@ -1170,6 +1170,11 @@
         function populateDeckProgress() {
             const container = document.getElementById('deckProgressContainer');
 
+            if (!container) {
+                console.warn('Deck progress container not found');
+                return;
+            }
+
             if (deckData.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8">
@@ -1182,8 +1187,8 @@
             }
 
             const html = deckData.map(deck => {
-                const progress = (deck.discharged / deck.total) * 100;
-                const isComplete = deck.complete;
+                const progress = deck.total > 0 ? (deck.discharged / deck.total) * 100 : 0;
+                const isComplete = deck.complete || progress >= 100;
                 return `
                     <div class="flex items-center justify-between p-3 rounded-lg ${isComplete ? 'deck-complete' : 'bg-gray-50'}">
                         <div class="flex items-center">
@@ -1193,7 +1198,7 @@
                         <div class="flex items-center space-x-3">
                             <span class="text-sm ${isComplete ? 'text-white' : 'text-gray-600'}">${deck.discharged}/${deck.total}</span>
                             <div class="w-24 bg-gray-200 rounded-full h-2">
-                                <div class="bg-current h-2 rounded-full" style="width: ${progress}%"></div>
+                                <div class="bg-current h-2 rounded-full" style="width: ${Math.min(progress, 100)}%"></div>
                             </div>
                             <span class="text-xs ${isComplete ? 'text-white' : 'text-gray-500'}">${Math.round(progress)}%</span>
                         </div>
@@ -1254,19 +1259,33 @@
         }
 
         function saveDeckChanges() {
+            let totalUpdated = 0;
+            
             deckData.forEach((deck, index) => {
-                const total = parseInt(document.getElementById(`deckTotal_${index}`).value) || 0;
-                const discharged = parseInt(document.getElementById(`deckDischarged_${index}`).value) || 0;
-                const complete = document.getElementById(`deckComplete_${index}`).checked;
+                const totalInput = document.getElementById(`deckTotal_${index}`);
+                const dischargedInput = document.getElementById(`deckDischarged_${index}`);
+                const completeInput = document.getElementById(`deckComplete_${index}`);
 
-                deck.total = total;
-                deck.discharged = Math.min(discharged, total); // Ensure discharged doesn't exceed total
-                deck.complete = complete;
+                if (totalInput && dischargedInput && completeInput) {
+                    const total = parseInt(totalInput.value) || 0;
+                    const discharged = parseInt(dischargedInput.value) || 0;
+                    const complete = completeInput.checked;
+
+                    deck.total = total;
+                    deck.discharged = Math.min(discharged, total); // Ensure discharged doesn't exceed total
+                    deck.complete = complete;
+                    
+                    totalUpdated++;
+                }
             });
 
-            populateDeckProgress();
-            toggleDeckEdit();
-            alert('Deck progress updated successfully!');
+            if (totalUpdated > 0) {
+                populateDeckProgress();
+                toggleDeckEdit();
+                alert(`Deck progress updated successfully! (${totalUpdated} decks updated)`);
+            } else {
+                alert('No deck data to update');
+            }
         }
 
         function cancelDeckEdit() {
@@ -1547,7 +1566,12 @@
         }
 
         function goBack() {
-            window.history.back();
+            // Try to go back in history, fallback to master dashboard
+            if (document.referrer && document.referrer.includes(window.location.hostname)) {
+                window.history.back();
+            } else {
+                window.location.href = '/master';
+            }
         }
 
         async function markOperationComplete() {
@@ -1643,7 +1667,49 @@
         }
 
         function updateProgress() {
-            document.getElementById('progressSlider').focus();
+            const currentProgress = currentShip ? currentShip.progress : 0;
+            const newProgress = prompt(`Enter new progress percentage (current: ${currentProgress}%):`, currentProgress);
+
+            if (newProgress === null || newProgress === '') return;
+
+            const progress = parseFloat(newProgress);
+            if (isNaN(progress) || progress < 0 || progress > 100) {
+                alert('Please enter a valid percentage between 0 and 100');
+                return;
+            }
+
+            if (!currentShip || !currentShip.id) {
+                alert('No active ship operation to update');
+                return;
+            }
+
+            updateShipProgress(progress);
+        }
+
+        async function updateShipProgress(progress) {
+            try {
+                const response = await fetch(`/api/ships/${currentShip.id}/progress`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        progress: progress
+                    })
+                });
+
+                if (response.ok) {
+                    currentShip.progress = progress;
+                    document.getElementById('completionValue').textContent = `${progress}%`;
+                    alert('Progress updated successfully!');
+                } else {
+                    const error = await response.json();
+                    alert('Error updating progress: ' + (error.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error updating progress:', error);
+                alert('Error updating progress: ' + error.message);
+            }
         }
 
         function handleShipFileUpload(event) {
@@ -1709,9 +1775,26 @@
             const operationStatusElement = document.getElementById('operationStatus');
             const currentDeckElement = document.getElementById('currentDeck');
 
-            if (!dischargedElement || !totalVehiclesElement || !activeDriversElement || !operationStatusElement || !currentDeckElement) {
-                console.log('Some required elements are missing for updateRealTimeProgress');
-                return; // Exit if elements don't exist
+            // Check if required elements exist
+            if (!dischargedElement) {
+                console.warn('dischargedCount element not found');
+                return;
+            }
+            if (!totalVehiclesElement) {
+                console.warn('totalVehicles element not found');
+                return;
+            }
+            if (!activeDriversElement) {
+                console.warn('activeDrivers element not found'); 
+                return;
+            }
+            if (!operationStatusElement) {
+                console.warn('operationStatus element not found');
+                return;
+            }
+            if (!currentDeckElement) {
+                console.warn('currentDeck element not found');
+                return;
             }
 
             const discharged = parseInt(dischargedElement.value) || 0;
