@@ -1887,11 +1887,22 @@
         }
 
         function goToMaster() {
-            window.location.href = '/master';
+            try {
+                console.log('Navigating to master dashboard...');
+                window.location.href = '/master';
+            } catch (error) {
+                console.error('Error navigating to master dashboard:', error);
+                alert('Error navigating to master dashboard. Please try again.');
+            }
         }
 
         function updateProgress() {
-            const currentProgress = currentShip ? currentShip.progress : 0;
+            if (!currentShip) {
+                alert('No ship data available. Please refresh the page or select a ship operation.');
+                return;
+            }
+
+            const currentProgress = currentShip.progress || 0;
             const newProgress = prompt(`Enter new progress percentage (current: ${currentProgress}%):`, currentProgress);
 
             if (newProgress === null || newProgress === '') return;
@@ -1902,8 +1913,16 @@
                 return;
             }
 
-            if (!currentShip || !currentShip.id) {
-                alert('No active ship operation to update');
+            if (!currentShip.id) {
+                // If no ship ID, just update locally
+                currentShip.progress = progress;
+                document.getElementById('completionValue').textContent = `${progress}%`;
+                const calculatedProgressElement = document.getElementById('calculatedProgress');
+                if (calculatedProgressElement) {
+                    calculatedProgressElement.textContent = `${progress}%`;
+                }
+                alert('Progress updated locally!');
+                console.log('Progress updated locally to:', progress + '%');
                 return;
             }
 
@@ -2124,44 +2143,76 @@
         }
 
         function generateReport() {
+            if (!currentShip || !currentShip.vesselName) {
+                alert('No ship data available to generate report');
+                return;
+            }
+
             const reportData = {
-                vessel: currentShip.vesselName,
-                date: currentShip.operationDate,
-                progress: currentShip.progress,
-                hourlyData: hourlyData,
-                deckData: deckData,
-                brandData: brandData
+                vessel: currentShip.vesselName || 'Unknown Vessel',
+                date: currentShip.operationDate || new Date().toISOString().split('T')[0],
+                progress: currentShip.progress || 0,
+                hourlyData: hourlyData || [],
+                deckData: deckData || [],
+                brandData: brandData || {}
             };
 
-            // Generate a simple text report (in production, you'd generate PDF/Markdown)
+            // Generate a simple text report
             let report = `VESSEL OPERATION REPORT\n`;
             report += `========================\n\n`;
             report += `Vessel: ${reportData.vessel}\n`;
             report += `Date: ${reportData.date}\n`;
-            report += `Progress: ${reportData.progress}%\n\n`;
+            report += `Progress: ${reportData.progress}%\n`;
+            report += `Total Vehicles: ${currentShip.totalVehicles || 'N/A'}\n`;
+            report += `Operation Type: ${currentShip.operationType || 'N/A'}\n`;
+            report += `Berth: ${currentShip.berth || 'N/A'}\n`;
+            report += `Status: ${currentShip.status || 'N/A'}\n\n`;
 
-            report += `HOURLY PRODUCTIVITY:\n`;
-            hourlyData.forEach(hour => {
-                if (hour.cars > 0) {
-                    report += `${hour.hour}: ${hour.cars} cars/hour\n`;
-                }
-            });
+            if (Object.keys(hourlyQuantities).length > 0) {
+                report += `HOURLY QUANTITIES:\n`;
+                Object.entries(hourlyQuantities).forEach(([hour, quantity]) => {
+                    report += `Hour ${hour}: ${quantity} vehicles\n`;
+                });
+                report += `\n`;
+            }
 
-            report += `\nBRAND BREAKDOWN:\n`;
-            Object.entries(brandData).forEach(([brand, data]) => {
-                report += `${brand}: ${data.discharged}/${data.total} (${Math.round((data.discharged/data.total)*100)}%)\n`;
-            });
+            if (Object.keys(brandData).length > 0) {
+                report += `BRAND BREAKDOWN:\n`;
+                Object.entries(brandData).forEach(([brand, data]) => {
+                    const progress = data.total > 0 ? Math.round((data.discharged/data.total)*100) : 0;
+                    report += `${brand}: ${data.discharged}/${data.total} (${progress}%) - Zone: ${data.zone}\n`;
+                });
+                report += `\n`;
+            }
+
+            if (deckData.length > 0) {
+                report += `DECK PROGRESS:\n`;
+                deckData.forEach(deck => {
+                    const progress = deck.total > 0 ? Math.round((deck.discharged/deck.total)*100) : 0;
+                    report += `Deck ${deck.deck}: ${deck.discharged}/${deck.total} (${progress}%) ${deck.complete ? '- COMPLETE' : ''}\n`;
+                });
+            }
+
+            report += `\nReport generated: ${new Date().toLocaleString()}\n`;
 
             // Download as text file
-            const blob = new Blob([report], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${currentShip.vesselName}_Report_${currentShip.operationDate}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+            try {
+                const blob = new Blob([report], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${reportData.vessel.replace(/[^a-zA-Z0-9]/g, '_')}_Report_${reportData.date}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                console.log('Report generated successfully');
+                alert('Report downloaded successfully!');
+            } catch (error) {
+                console.error('Error generating report:', error);
+                alert('Error generating report: ' + error.message);
+            }
         }
 
         // Widget Customization Functions
@@ -2238,11 +2289,15 @@
         function testAllWidgetFunctions() {
             console.log('=== TESTING ALL WIDGET FUNCTIONS ===');
             
+            let testsPassedCount = 0;
+            let totalTests = 8;
+
             // Test Real-time Progress Update
             console.log('1. Testing Real-time Progress Update...');
             try {
                 updateRealTimeProgress();
                 console.log('✓ Real-time progress update works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ Real-time progress update failed:', error);
             }
@@ -2252,6 +2307,7 @@
             try {
                 calculateETC();
                 console.log('✓ ETC calculation works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ ETC calculation failed:', error);
             }
@@ -2261,6 +2317,7 @@
             try {
                 updatePortProgress();
                 console.log('✓ Port progress simulator works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ Port progress simulator failed:', error);
             }
@@ -2268,11 +2325,17 @@
             // Test Hourly Quantity Tracker
             console.log('4. Testing Hourly Quantity Tracker...');
             try {
-                // Simulate adding hourly quantity
-                document.getElementById('hourSelect').value = '1';
-                document.getElementById('hourlyQuantity').value = '150';
-                addHourlyQuantity();
-                console.log('✓ Hourly quantity tracker works');
+                const hourSelect = document.getElementById('hourSelect');
+                const quantityInput = document.getElementById('hourlyQuantity');
+                if (hourSelect && quantityInput) {
+                    hourSelect.value = '1';
+                    quantityInput.value = '150';
+                    addHourlyQuantity();
+                    console.log('✓ Hourly quantity tracker works');
+                    testsPassedCount++;
+                } else {
+                    throw new Error('Hourly quantity elements not found');
+                }
             } catch (error) {
                 console.error('✗ Hourly quantity tracker failed:', error);
             }
@@ -2282,6 +2345,7 @@
             try {
                 populateDeckProgress();
                 console.log('✓ Deck progress works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ Deck progress failed:', error);
             }
@@ -2291,6 +2355,7 @@
             try {
                 populateInventoryTable();
                 console.log('✓ Inventory table works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ Inventory table failed:', error);
             }
@@ -2299,8 +2364,9 @@
             console.log('7. Testing Widget Customization...');
             try {
                 toggleWidget('hourly-productivity');
-                toggleWidget('hourly-productivity'); // Toggle back
+                setTimeout(() => toggleWidget('hourly-productivity'), 100); // Toggle back
                 console.log('✓ Widget customization works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ Widget customization failed:', error);
             }
@@ -2310,11 +2376,13 @@
             try {
                 initializeCharts();
                 console.log('✓ Charts initialization works');
+                testsPassedCount++;
             } catch (error) {
                 console.error('✗ Charts initialization failed:', error);
             }
 
-            console.log('=== WIDGET TESTING COMPLETE ===');
+            console.log(`=== WIDGET TESTING COMPLETE: ${testsPassedCount}/${totalTests} tests passed ===`);
+            alert(`Widget testing complete!\n${testsPassedCount}/${totalTests} tests passed.\nCheck console for detailed results.`);
         }
 
         function setupWidgetDragAndDrop() {
