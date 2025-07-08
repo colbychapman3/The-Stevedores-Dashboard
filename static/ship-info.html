@@ -103,6 +103,9 @@
                     <button onclick="generateReport()" class="bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
                         <i class="fas fa-file-pdf sm:mr-2"></i><span class="hidden sm:inline"> Report</span>
                     </button>
+                    <button onclick="testAllWidgetFunctions()" class="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
+                        <i class="fas fa-bug sm:mr-2"></i><span class="hidden sm:inline"> Test</span>
+                    </button>
                     <button onclick="updateProgress()" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg font-semibold transition duration-200 text-xs sm:text-sm">
                         <i class="fas fa-edit sm:mr-2"></i><span class="hidden sm:inline"> Update</span>
                     </button>
@@ -679,43 +682,72 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shipId = urlParams.get('ship');
-            if (shipId) {
-                currentShipId = shipId;
-                loadShipData(shipId);
-            } else {
-                // Load sample data for demo
-                loadSampleShipData();
+            console.log('Initializing Ship Info Dashboard...');
+            
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const shipId = urlParams.get('ship');
+                
+                if (shipId) {
+                    console.log('Loading ship data for ID:', shipId);
+                    currentShipId = shipId;
+                    loadShipData(shipId);
+                } else {
+                    console.log('No ship ID provided, loading sample data');
+                    loadSampleShipData();
+                }
+
+                // Initialize components
+                setupPhotoUpload();
+                initializeData();
+                loadWidgetSettings();
+
+                // Set current time in ETC widget
+                const currentTimeInput = document.getElementById('currentTime');
+                if (currentTimeInput) {
+                    const now = new Date();
+                    currentTimeInput.value = now.toTimeString().slice(0, 5);
+                }
+
+                // Initialize charts after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    initializeCharts();
+                    
+                    // Test widget functions after initialization
+                    console.log('Dashboard initialization complete. Use testAllWidgetFunctions() to test all widgets.');
+                }, 500);
+
+            } catch (error) {
+                console.error('Error during dashboard initialization:', error);
             }
-
-            setupPhotoUpload();
-            initializeData();
-            loadWidgetSettings();
-
-            // Initialize charts after a short delay to ensure DOM is ready
-            setTimeout(() => {
-                initializeCharts();
-            }, 100);
         });
 
         function initializeCharts() {
-            initializeHourlyProductivityChart();
-            initializeBrandDistributionChart();
+            console.log('Initializing charts...');
+            try {
+                initializeHourlyProductivityChart();
+                initializeBrandDistributionChart();
+                console.log('Charts initialized successfully');
+            } catch (error) {
+                console.error('Error initializing charts:', error);
+            }
         }
 
         function initializeHourlyProductivityChart() {
             const canvas = document.getElementById('hourlyProductivityChart');
-            if (!canvas) return;
+            if (!canvas) {
+                console.warn('Hourly productivity chart canvas not found');
+                return;
+            }
 
             const ctx = canvas.getContext('2d');
             
-            // Generate sample hourly data for the past 2 hours
+            // Generate sample hourly data for the past 8 hours
             const currentHour = new Date().getHours();
             const hourlyData = [];
             
-            // Add data for current hour and previous hour
-            for (let i = 1; i >= 0; i--) {
+            // Add data for past 8 hours including current hour
+            for (let i = 7; i >= 0; i--) {
                 const hour = currentHour - i;
                 const hourLabel = hour < 0 ? (24 + hour) : hour;
                 const timeLabel = `${hourLabel.toString().padStart(2, '0')}:00`;
@@ -724,8 +756,13 @@
                 let carsThisHour = 0;
                 if (currentShip && currentShip.totalVehicles) {
                     const expectedRate = currentShip.expectedRate || 150;
-                    // Add some realistic variance
-                    carsThisHour = Math.round(expectedRate + (Math.random() * 50 - 25));
+                    // Add some realistic variance - higher rates early in shift, tapering off
+                    const hourProgress = (8 - i) / 8;
+                    const baseRate = expectedRate * (1.2 - hourProgress * 0.4); // Start higher, taper
+                    carsThisHour = Math.max(0, Math.round(baseRate + (Math.random() * 40 - 20)));
+                } else {
+                    // Default sample data
+                    carsThisHour = Math.round(120 + (Math.random() * 60));
                 }
                 
                 hourlyData.push({
@@ -733,6 +770,9 @@
                     cars: carsThisHour
                 });
             }
+
+            // Store hourly data globally for other functions
+            window.chartHourlyData = hourlyData;
 
             new Chart(ctx, {
                 type: 'line',
@@ -743,13 +783,20 @@
                         data: hourlyData.map(d => d.cars),
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        fill: true
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -769,18 +816,33 @@
             });
 
             // Update best/worst hour displays
-            const bestHour = hourlyData.reduce((max, hour) => hour.cars > max.cars ? hour : max, hourlyData[0]);
-            const worstHour = hourlyData.reduce((min, hour) => hour.cars < min.cars ? hour : min, hourlyData[0]);
-            
-            document.getElementById('bestHour').textContent = `${bestHour.hour} (${bestHour.cars} cars)`;
-            document.getElementById('worstHour').textContent = `${worstHour.hour} (${worstHour.cars} cars)`;
+            if (hourlyData.length > 0) {
+                const bestHour = hourlyData.reduce((max, hour) => hour.cars > max.cars ? hour : max, hourlyData[0]);
+                const worstHour = hourlyData.reduce((min, hour) => hour.cars < min.cars ? hour : min, hourlyData[0]);
+                
+                const bestElement = document.getElementById('bestHour');
+                const worstElement = document.getElementById('worstHour');
+                
+                if (bestElement) bestElement.textContent = `${bestHour.hour} (${bestHour.cars} cars)`;
+                if (worstElement) worstElement.textContent = `${worstHour.hour} (${worstHour.cars} cars)`;
+            }
+
+            console.log('Hourly productivity chart initialized with data:', hourlyData);
         }
 
         function initializeBrandDistributionChart() {
             const canvas = document.getElementById('brandDistributionChart');
-            if (!canvas) return;
+            if (!canvas) {
+                console.warn('Brand distribution chart canvas not found');
+                return;
+            }
 
             const ctx = canvas.getContext('2d');
+            
+            // Ensure brand data exists
+            if (Object.keys(brandData).length === 0) {
+                generateRealBrandData();
+            }
             
             // Use the brand data
             const brands = Object.keys(brandData);
@@ -791,38 +853,69 @@
                 ctx.font = '14px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('No brand data available', canvas.width / 2, canvas.height / 2);
+                console.log('No brand data available for chart');
                 return;
             }
 
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: brands,
-                    datasets: [{
-                        data: totals,
-                        backgroundColor: [
-                            '#3b82f6',
-                            '#10b981',
-                            '#f59e0b',
-                            '#ef4444',
-                            '#8b5cf6'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                fontSize: 10
+            try {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: brands,
+                        datasets: [{
+                            data: totals,
+                            backgroundColor: [
+                                '#3b82f6',  // Blue
+                                '#10b981',  // Green
+                                '#f59e0b',  // Yellow
+                                '#ef4444',  // Red
+                                '#8b5cf6',  // Purple
+                                '#f97316',  // Orange
+                                '#06b6d4',  // Cyan
+                                '#84cc16'   // Lime
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 10
+                                    },
+                                    padding: 10
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
 
+                console.log('Brand distribution chart initialized with brands:', brands, 'totals:', totals);
+            } catch (error) {
+                console.error('Error creating brand distribution chart:', error);
+                ctx.fillStyle = '#ef4444';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Chart Error', canvas.width / 2, canvas.height / 2);
+            }
+
+            // Setup widget drag and drop after charts are initialized
             setupWidgetDragAndDrop();
         });
 
@@ -884,25 +977,131 @@
         }
 
         function calculateETC() {
-            const etcElement = document.getElementById('etcDisplay');
-            if (!etcElement) return;
+            // Get values from ETC widget inputs
+            const vehiclesRemainingInput = document.getElementById('vehiclesRemaining');
+            const currentRateInput = document.getElementById('currentRate');
+            const currentTimeInput = document.getElementById('currentTime');
+            const calculatedETCElement = document.getElementById('calculatedETC');
+            const calculatedProgressElement = document.getElementById('calculatedProgress');
 
-            const currentProgress = currentShip ? currentShip.progress : 0;
-            if (currentProgress > 0 && currentShip && currentShip.totalVehicles) {
-                const remainingPercentage = 100 - currentProgress;
-                const currentRate = calculateCurrentRate();
-                if (currentRate > 0) {
-                    const remainingVehicles = (currentShip.totalVehicles * remainingPercentage) / 100;
-                    const hoursRemaining = remainingVehicles / currentRate;
-                    const now = new Date();
-                    const etc = new Date(now.getTime() + (hoursRemaining * 60 * 60 * 1000));
-                    etcElement.textContent = etc.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                } else {
-                    etcElement.textContent = '--:--';
-                }
+            // Also update the main ETC display
+            const etcElement = document.getElementById('etcDisplay');
+
+            let vehiclesRemaining, currentRate, currentTime;
+
+            // Use input values if available, otherwise calculate from current ship data
+            if (vehiclesRemainingInput && vehiclesRemainingInput.value) {
+                vehiclesRemaining = parseInt(vehiclesRemainingInput.value) || 0;
+            } else if (currentShip) {
+                const currentProgress = currentShip.progress || 0;
+                vehiclesRemaining = Math.round(currentShip.totalVehicles * (100 - currentProgress) / 100);
+                if (vehiclesRemainingInput) vehiclesRemainingInput.value = vehiclesRemaining;
             } else {
-                etcElement.textContent = '--:--';
+                vehiclesRemaining = 0;
             }
+
+            if (currentRateInput && currentRateInput.value) {
+                currentRate = parseFloat(currentRateInput.value) || 0;
+            } else {
+                currentRate = calculateCurrentRate();
+                if (currentRateInput) currentRateInput.value = currentRate;
+            }
+
+            if (currentTimeInput && currentTimeInput.value) {
+                currentTime = currentTimeInput.value;
+            } else {
+                const now = new Date();
+                currentTime = now.toTimeString().slice(0, 5);
+                if (currentTimeInput) currentTimeInput.value = currentTime;
+            }
+
+            // Calculate ETC
+            if (vehiclesRemaining > 0 && currentRate > 0) {
+                const hoursRemaining = vehiclesRemaining / currentRate;
+                
+                // Parse current time
+                const [hours, minutes] = currentTime.split(':').map(Number);
+                const now = new Date();
+                now.setHours(hours, minutes, 0, 0);
+                
+                // Add remaining time
+                const etc = new Date(now.getTime() + (hoursRemaining * 60 * 60 * 1000));
+                const etcString = etc.toTimeString().slice(0, 5);
+                
+                if (calculatedETCElement) calculatedETCElement.textContent = etcString;
+                if (etcElement) etcElement.textContent = etcString;
+
+                // Calculate and display progress
+                if (currentShip && currentShip.totalVehicles) {
+                    const vehiclesCompleted = currentShip.totalVehicles - vehiclesRemaining;
+                    const progress = Math.round((vehiclesCompleted / currentShip.totalVehicles) * 100);
+                    if (calculatedProgressElement) calculatedProgressElement.textContent = `${progress}%`;
+                }
+
+                console.log('ETC calculated:', {
+                    vehiclesRemaining: vehiclesRemaining,
+                    currentRate: currentRate,
+                    hoursRemaining: hoursRemaining.toFixed(2),
+                    etc: etcString
+                });
+            } else {
+                if (calculatedETCElement) calculatedETCElement.textContent = '--:--';
+                if (etcElement) etcElement.textContent = '--:--';
+                if (calculatedProgressElement) calculatedProgressElement.textContent = '0%';
+            }
+        }
+
+        function updatePortProgress() {
+            const brvSlider = document.getElementById('brvProgress');
+            const zeeSlider = document.getElementById('zeeProgress');
+            const souSlider = document.getElementById('souProgress');
+            
+            const brvValue = document.getElementById('brvValue');
+            const zeeValue = document.getElementById('zeeValue');
+            const souValue = document.getElementById('souValue');
+            
+            const zeeBar = document.getElementById('zeeBar');
+            const souBar = document.getElementById('souBar');
+            const totalProgress = document.getElementById('totalProgress');
+
+            if (!brvSlider || !zeeSlider || !souSlider) {
+                console.warn('Port progress sliders not found');
+                return;
+            }
+
+            const brvCurrent = parseInt(brvSlider.value) || 0;
+            const zeeCurrent = parseInt(zeeSlider.value) || 0;
+            const souCurrent = parseInt(souSlider.value) || 0;
+
+            const brvMax = parseInt(brvSlider.max) || 904;
+            const zeeMax = parseInt(zeeSlider.max) || 300;
+            const souMax = parseInt(souSlider.max) || 200;
+
+            // Update value displays
+            if (brvValue) brvValue.textContent = `${brvCurrent}/${brvMax}`;
+            if (zeeValue) zeeValue.textContent = `${zeeCurrent}/${zeeMax}`;
+            if (souValue) souValue.textContent = `${souCurrent}/${souMax}`;
+
+            // Update progress bars
+            const zeePercent = zeeMax > 0 ? (zeeCurrent / zeeMax) * 100 : 0;
+            const souPercent = souMax > 0 ? (souCurrent / souMax) * 100 : 0;
+
+            if (zeeBar) zeeBar.style.width = `${zeePercent}%`;
+            if (souBar) souBar.style.width = `${souPercent}%`;
+
+            // Calculate total progress
+            const totalMax = brvMax + zeeMax + souMax;
+            const totalCurrent = brvCurrent + zeeCurrent + souCurrent;
+            const totalPercent = totalMax > 0 ? (totalCurrent / totalMax) * 100 : 0;
+
+            if (totalProgress) totalProgress.textContent = `${totalPercent.toFixed(1)}%`;
+
+            console.log('Port progress updated:', {
+                BRV: `${brvCurrent}/${brvMax}`,
+                ZEE: `${zeeCurrent}/${zeeMax} (${zeePercent.toFixed(1)}%)`,
+                SOU: `${souCurrent}/${souMax} (${souPercent.toFixed(1)}%)`,
+                Total: `${totalPercent.toFixed(1)}%`
+            });
         }
 
         function updateETC() {
@@ -1855,6 +2054,11 @@
             // Update performance metrics including turnaround times
             updatePerformanceMetrics();
 
+            // Auto-update the backend with new progress if we have a ship ID
+            if (currentShip && currentShip.id && overallProgress !== currentShip.progress) {
+                updateShipProgress(overallProgress);
+            }
+
             // Auto-redirect to master dashboard if status is set to complete
             if (operationStatus === 'complete') {
                 // Check if we have a valid ship ID from URL or currentShip
@@ -1869,6 +2073,15 @@
                     window.location.href = '/master';
                 }
             }
+
+            console.log('Real-time progress updated:', {
+                discharged: discharged,
+                totalVehicles: totalVehicles,
+                progress: overallProgress,
+                activeDrivers: activeDrivers,
+                status: operationStatus,
+                currentDeck: currentDeck
+            });
         }
 
         async function updateShipStatusAndRedirect(status, shipId) {
@@ -1985,20 +2198,123 @@
         }
 
         function toggleWidget(widgetId) {
+            const widgetElement = document.querySelector(`[data-widget-id="${widgetId}"]`);
+            if (!widgetElement) {
+                console.warn(`Widget with ID ${widgetId} not found`);
+                return;
+            }
+
             if (enabledWidgets.has(widgetId)) {
                 enabledWidgets.delete(widgetId);
-                document.querySelector(`[data-widget-id="${widgetId}"]`).classList.add('widget-disabled');
+                widgetElement.classList.add('widget-disabled');
+                console.log(`Widget ${widgetId} disabled`);
             } else {
                 enabledWidgets.add(widgetId);
-                document.querySelector(`[data-widget-id="${widgetId}"]`).classList.remove('widget-disabled');
+                widgetElement.classList.remove('widget-disabled');
+                console.log(`Widget ${widgetId} enabled`);
             }
+            
+            // Save settings after toggle
+            saveWidgetSettings();
         }
 
         function addWidget(widgetId) {
+            const widgetElement = document.querySelector(`[data-widget-id="${widgetId}"]`);
+            if (!widgetElement) {
+                console.warn(`Widget with ID ${widgetId} not found`);
+                return;
+            }
+
             if (!enabledWidgets.has(widgetId)) {
                 enabledWidgets.add(widgetId);
-                document.querySelector(`[data-widget-id="${widgetId}"]`).classList.remove('widget-disabled');
+                widgetElement.classList.remove('widget-disabled');
+                console.log(`Widget ${widgetId} added and enabled`);
+                
+                // Save settings after adding
+                saveWidgetSettings();
             }
+        }
+
+        function testAllWidgetFunctions() {
+            console.log('=== TESTING ALL WIDGET FUNCTIONS ===');
+            
+            // Test Real-time Progress Update
+            console.log('1. Testing Real-time Progress Update...');
+            try {
+                updateRealTimeProgress();
+                console.log('✓ Real-time progress update works');
+            } catch (error) {
+                console.error('✗ Real-time progress update failed:', error);
+            }
+
+            // Test ETC Calculation
+            console.log('2. Testing ETC Calculation...');
+            try {
+                calculateETC();
+                console.log('✓ ETC calculation works');
+            } catch (error) {
+                console.error('✗ ETC calculation failed:', error);
+            }
+
+            // Test Port Progress Simulator
+            console.log('3. Testing Port Progress Simulator...');
+            try {
+                updatePortProgress();
+                console.log('✓ Port progress simulator works');
+            } catch (error) {
+                console.error('✗ Port progress simulator failed:', error);
+            }
+
+            // Test Hourly Quantity Tracker
+            console.log('4. Testing Hourly Quantity Tracker...');
+            try {
+                // Simulate adding hourly quantity
+                document.getElementById('hourSelect').value = '1';
+                document.getElementById('hourlyQuantity').value = '150';
+                addHourlyQuantity();
+                console.log('✓ Hourly quantity tracker works');
+            } catch (error) {
+                console.error('✗ Hourly quantity tracker failed:', error);
+            }
+
+            // Test Deck Progress
+            console.log('5. Testing Deck Progress...');
+            try {
+                populateDeckProgress();
+                console.log('✓ Deck progress works');
+            } catch (error) {
+                console.error('✗ Deck progress failed:', error);
+            }
+
+            // Test Inventory Table
+            console.log('6. Testing Inventory Table...');
+            try {
+                populateInventoryTable();
+                console.log('✓ Inventory table works');
+            } catch (error) {
+                console.error('✗ Inventory table failed:', error);
+            }
+
+            // Test Widget Customization
+            console.log('7. Testing Widget Customization...');
+            try {
+                toggleWidget('hourly-productivity');
+                toggleWidget('hourly-productivity'); // Toggle back
+                console.log('✓ Widget customization works');
+            } catch (error) {
+                console.error('✗ Widget customization failed:', error);
+            }
+
+            // Test Charts
+            console.log('8. Testing Charts...');
+            try {
+                initializeCharts();
+                console.log('✓ Charts initialization works');
+            } catch (error) {
+                console.error('✗ Charts initialization failed:', error);
+            }
+
+            console.log('=== WIDGET TESTING COMPLETE ===');
         }
 
         function setupWidgetDragAndDrop() {
