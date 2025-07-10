@@ -231,6 +231,7 @@
         </div>
     </div>
 
+    <script src="/static/offline-storage.js"></script>
     <script>
         let hoursChart, vehicleTypesChart;
 
@@ -286,27 +287,58 @@
             });
         }
 
-        function updateAnalytics() {
+        async function updateAnalytics() {
             const period = document.getElementById('timePeriod').value;
 
-            // Load analytics data from backend
-            fetch(`/api/analytics?period=${period}`)
-                .then(response => response.json())
-                .then(data => {
-                    updateMetrics(data);
-                    updateCharts(data);
-                    updateZoneAnalytics(data);
-                    updateTeamPerformance(data);
-                })
-                .catch(error => {
-                    console.error('Error loading analytics:', error);
-                    // Use sample data for demonstration
-                    const sampleData = generateSampleAnalytics(period);
-                    updateMetrics(sampleData);
-                    updateCharts(sampleData);
-                    updateZoneAnalytics(sampleData);
-                    updateTeamPerformance(sampleData);
-                });
+            try {
+                // Use offline storage API call with fallback
+                const data = await window.offlineStorage.apiCall(`/api/analytics?period=${period}`);
+                updateMetrics(data);
+                updateCharts(data);
+                updateZoneAnalytics(data);
+                updateTeamPerformance(data);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                
+                // Try to get cached analytics data
+                let data = window.offlineStorage ? window.offlineStorage.getAnalytics() : null;
+                
+                // If no cached data, use sample data for demonstration
+                if (!data || Object.keys(data).length === 0) {
+                    data = generateSampleAnalytics(period);
+                    
+                    // Show offline indicator if we're using sample data
+                    if (!navigator.onLine) {
+                        showOfflineWarning('Using sample data - connect to internet for real analytics');
+                    }
+                }
+                
+                updateMetrics(data);
+                updateCharts(data);
+                updateZoneAnalytics(data);
+                updateTeamPerformance(data);
+            }
+        }
+
+        function showOfflineWarning(message) {
+            // Create or update offline warning
+            let warning = document.getElementById('offline-warning');
+            if (!warning) {
+                warning = document.createElement('div');
+                warning.id = 'offline-warning';
+                warning.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded';
+                warning.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm">${message}</p>
+                        </div>
+                    </div>
+                `;
+                document.querySelector('.max-w-7xl').insertBefore(warning, document.querySelector('.max-w-7xl').firstChild);
+            }
         }
 
         function generateSampleAnalytics(period) {

@@ -76,7 +76,7 @@
             </div>
 
             <!-- Document Upload Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 max-w-4xl mx-auto"></div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 max-w-4xl mx-auto">
                 <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-cloud-upload-alt text-blue-600 mr-3"></i>Upload Maritime Documents (Optional)
                 </h2>
@@ -662,16 +662,122 @@
         }
 
         function validateStep(step) {
-            // Basic validation - ensure required fields are filled
+            // Comprehensive validation for all steps
             if (step === 1) {
+                // Step 1: Vessel Information
                 const vesselName = document.getElementById('vesselName').value.trim();
                 const shippingLine = document.getElementById('shippingLine').value;
                 const vesselType = document.getElementById('vesselType').value;
+                const port = document.getElementById('port').value;
+                const operationDate = document.getElementById('operationDate').value;
+                
                 if (!vesselName || !shippingLine || !vesselType) {
                     alert('Please fill in the vessel name, shipping line, and vessel type.');
                     return false;
                 }
+                
+                if (!port) {
+                    alert('Please select a port.');
+                    return false;
+                }
+                
+                if (!operationDate) {
+                    alert('Please select an operation date.');
+                    return false;
+                }
+                
+                // Validate date is not in the past
+                const selectedDate = new Date(operationDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (selectedDate < today) {
+                    const confirm = window.confirm('The selected date is in the past. Are you sure you want to continue?');
+                    if (!confirm) return false;
+                }
+                
+            } else if (step === 2) {
+                // Step 2: Cargo Configuration
+                const shippingLine = document.getElementById('shippingLine').value;
+                
+                if (shippingLine === 'K-Line') {
+                    // Validate K-Line specific fields
+                    const brvAutomobiles = parseInt(document.getElementById('brvAutomobiles').value) || 0;
+                    const zeeAutomobiles = parseInt(document.getElementById('zeeAutomobiles').value) || 0;
+                    const souAutomobiles = parseInt(document.getElementById('souAutomobiles').value) || 0;
+                    const totalAutomobiles = parseInt(document.getElementById('totalAutomobiles').value) || 0;
+                    
+                    const calculatedTotal = brvAutomobiles + zeeAutomobiles + souAutomobiles;
+                    
+                    if (Math.abs(calculatedTotal - totalAutomobiles) > 5) {
+                        alert(`Total automobiles mismatch: ${calculatedTotal} (calculated) vs ${totalAutomobiles} (entered). Please verify the numbers.`);
+                        return false;
+                    }
+                } else {
+                    // Validate single terminal fields
+                    const totalAutomobiles = parseInt(document.getElementById('totalAutomobiles').value) || 0;
+                    const heavyEquipment = parseInt(document.getElementById('heavyEquipment').value) || 0;
+                    
+                    if (totalAutomobiles <= 0 && heavyEquipment <= 0) {
+                        alert('Please enter the number of automobiles and/or heavy equipment.');
+                        return false;
+                    }
+                }
+                
+            } else if (step === 3) {
+                // Step 3: Operational Parameters
+                const expectedRate = parseFloat(document.getElementById('expectedRate').value) || 0;
+                const totalDrivers = parseInt(document.getElementById('totalDrivers').value) || 0;
+                const shiftStart = document.getElementById('shiftStart').value;
+                const shiftEnd = document.getElementById('shiftEnd').value;
+                
+                if (expectedRate <= 0) {
+                    alert('Please enter a valid expected rate (cars per hour).');
+                    return false;
+                }
+                
+                if (totalDrivers <= 0) {
+                    alert('Please enter the number of drivers.');
+                    return false;
+                }
+                
+                if (!shiftStart || !shiftEnd) {
+                    alert('Please select shift start and end times.');
+                    return false;
+                }
+                
+                // Validate shift times
+                const startTime = new Date('2000-01-01T' + shiftStart);
+                const endTime = new Date('2000-01-01T' + shiftEnd);
+                
+                if (endTime <= startTime) {
+                    alert('Shift end time must be after shift start time.');
+                    return false;
+                }
+                
+                // Validate TICO vehicle counts
+                const numVans = parseInt(document.getElementById('numVans').value) || 0;
+                const numStationWagons = parseInt(document.getElementById('numStationWagons').value) || 0;
+                const totalCapacity = (numVans * 7) + (numStationWagons * 5);
+                
+                if (totalCapacity < totalDrivers) {
+                    const confirm = window.confirm(`Vehicle capacity (${totalCapacity}) is less than total drivers (${totalDrivers}). Continue anyway?`);
+                    if (!confirm) return false;
+                }
+                
+            } else if (step === 4) {
+                // Step 4: Final Review
+                // Additional validation before submission
+                const vesselName = document.getElementById('vesselName').value.trim();
+                const totalAutomobiles = parseInt(document.getElementById('totalAutomobiles').value) || 0;
+                const totalDrivers = parseInt(document.getElementById('totalDrivers').value) || 0;
+                
+                if (!vesselName || (totalAutomobiles <= 0 && totalDrivers <= 0)) {
+                    alert('Please complete all required fields before generating the dashboard.');
+                    return false;
+                }
             }
+            
             return true;
         }
 
@@ -680,20 +786,53 @@
             const file = event.target.files[0];
             if (!file) return;
 
+            // Validate file type and size
+            const allowedTypes = ['application/pdf', 'text/csv', 'text/plain'];
+            const maxSize = 16 * 1024 * 1024; // 16MB
+
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|csv|txt)$/i)) {
+                showUploadError('Invalid file type. Please upload PDF, CSV, or TXT files only.');
+                return;
+            }
+
+            if (file.size > maxSize) {
+                showUploadError('File size exceeds 16MB limit. Please select a smaller file.');
+                return;
+            }
+
             // Show upload status
             document.getElementById('wizardUploadStatus').classList.remove('hidden');
             document.getElementById('wizardUploadSuccess').classList.add('hidden');
             document.getElementById('wizardUploadError').classList.add('hidden');
 
+            // Check if offline
+            if (!navigator.onLine) {
+                showUploadError('You are currently offline. File upload requires an internet connection.');
+                return;
+            }
+
             // Create FormData and upload file
             const formData = new FormData();
             formData.append('file', file);
 
+            // Set timeout for upload
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
             fetch('/api/upload', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                signal: controller.signal
             })
-            .then(response => response.json())
+            .then(response => {
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`Upload failed with status ${response.status}`);
+                }
+                
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     return fetch('/api/extract', {
@@ -703,13 +842,20 @@
                         },
                         body: JSON.stringify({
                             file_path: data.file_path
-                        })
+                        }),
+                        signal: controller.signal
                     });
                 } else {
                     throw new Error(data.error || 'Upload failed');
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Extraction failed with status ${response.status}`);
+                }
+                
+                return response.json();
+            })
             .then(data => {
                 document.getElementById('wizardUploadStatus').classList.add('hidden');
                 if (data.success) {
@@ -721,16 +867,42 @@
 
                     // Store extracted data globally
                     extractedData = data.parsed_data;
+                    
+                    // Save to offline storage for future reference
+                    if (window.offlineStorage) {
+                        const documentData = {
+                            filename: file.name,
+                            extractedData: data.parsed_data,
+                            timestamp: new Date().toISOString()
+                        };
+                        localStorage.setItem('lastUploadedDocument', JSON.stringify(documentData));
+                    }
                 } else {
                     throw new Error(data.error || 'Extraction failed');
                 }
             })
             .catch(error => {
-                document.getElementById('wizardUploadStatus').classList.add('hidden');
-                document.getElementById('wizardUploadError').classList.remove('hidden');
-                document.getElementById('wizardUploadErrorText').textContent = 'Error processing document: ' + error.message;
-                console.error('Error:', error);
+                clearTimeout(timeoutId);
+                
+                let errorMessage = 'Error processing document: ';
+                
+                if (error.name === 'AbortError') {
+                    errorMessage += 'Upload timed out. Please try again with a smaller file.';
+                } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                    errorMessage += 'Network error. Please check your internet connection and try again.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showUploadError(errorMessage);
+                console.error('Upload Error:', error);
             });
+        }
+
+        function showUploadError(message) {
+            document.getElementById('wizardUploadStatus').classList.add('hidden');
+            document.getElementById('wizardUploadError').classList.remove('hidden');
+            document.getElementById('wizardUploadErrorText').textContent = message;
         }
 
         function populateFormFields(data) {
@@ -1523,6 +1695,7 @@ async function submitOperation() {
         </div>
     </div>
 
+    <script src="/static/offline-storage.js"></script>
     <script>
         function updateProgress() {
             // This function would update the progress indicators

@@ -127,6 +127,22 @@
             </div>
         </div>
 
+        <!-- Operations Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-line text-blue-600 mr-3"></i>Progress Overview
+                </h3>
+                <canvas id="progressChart" width="400" height="200"></canvas>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-chart-pie text-green-600 mr-3"></i>Vehicle Distribution
+                </h3>
+                <canvas id="vehicleChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
         <!-- Berth Overview Map -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -211,15 +227,20 @@
         </div>
     </main>
 
+    <script src="/static/offline-storage.js"></script>
     <script>
         // Global variables
         let ships = [];
         let refreshInterval;
 
+        // Chart variables
+        let progressChart, vehicleChart;
+
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
             updateCurrentTime();
             setInterval(updateCurrentTime, 1000);
+            initializeCharts();
             loadShips();
             refreshInterval = setInterval(loadShips, 30000); // Refresh every 30 seconds
         });
@@ -231,20 +252,13 @@
 
         async function loadShips() {
             try {
-                const response = await fetch('/api/ships');
-                if (response.ok) {
-                    ships = await response.json();
-                    updateDashboard();
-                    return Promise.resolve();
-                } else {
-                    console.error('Failed to load ships');
-                    ships = [];
-                    updateDashboard();
-                    return Promise.resolve();
-                }
+                ships = await window.offlineStorage.apiCall('/api/ships');
+                updateDashboard();
+                return Promise.resolve();
             } catch (error) {
                 console.error('Error loading ships:', error);
-                ships = [];
+                // Try to get cached data
+                ships = window.offlineStorage.getShips();
                 updateDashboard();
                 return Promise.resolve();
             }
@@ -254,6 +268,7 @@
             updateStats();
             updateBerthMap();
             renderShips();
+            updateCharts();
         }
 
         function updateStats() {
@@ -466,6 +481,94 @@
 
         function goToAnalytics() {
             window.location.href = '/analytics';
+        }
+
+        // Chart functions
+        function initializeCharts() {
+            // Progress Chart
+            const progressCtx = document.getElementById('progressChart').getContext('2d');
+            progressChart = new Chart(progressCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Pending'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            '#10B981',
+                            '#3B82F6',
+                            '#E5E7EB'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            // Vehicle Distribution Chart
+            const vehicleCtx = document.getElementById('vehicleChart').getContext('2d');
+            vehicleChart = new Chart(vehicleCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Automobiles', 'Heavy Equipment', 'Electric Vehicles'],
+                    datasets: [{
+                        label: 'Vehicle Count',
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#F59E0B',
+                            '#10B981'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (!progressChart || !vehicleChart) return;
+
+            const activeShips = ships.filter(ship => ship.status !== 'complete');
+            const completedShips = ships.filter(ship => ship.status === 'complete');
+
+            // Update Progress Chart
+            const totalOperations = ships.length;
+            const completed = completedShips.length;
+            const inProgress = activeShips.filter(ship => ship.progress > 0).length;
+            const pending = activeShips.filter(ship => ship.progress === 0).length;
+
+            progressChart.data.datasets[0].data = [completed, inProgress, pending];
+            progressChart.update();
+
+            // Update Vehicle Distribution Chart
+            const totalAutomobiles = activeShips.reduce((sum, ship) => sum + (ship.totalAutomobilesDischarge || ship.totalVehicles || 0), 0);
+            const totalHeavyEquipment = activeShips.reduce((sum, ship) => sum + (ship.heavyEquipmentDischarge || 0), 0);
+            const totalElectricVehicles = activeShips.reduce((sum, ship) => sum + (ship.totalElectricVehicles || 0), 0);
+
+            vehicleChart.data.datasets[0].data = [totalAutomobiles, totalHeavyEquipment, totalElectricVehicles];
+            vehicleChart.update();
         }
 
         function viewShipDetails(shipId) {
